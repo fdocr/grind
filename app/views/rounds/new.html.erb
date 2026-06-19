@@ -105,17 +105,17 @@
   <div class="fixed inset-x-4 bottom-4 z-50 hidden max-h-[70vh] overflow-y-auto" data-round-target="holesPanel">
     <%= render "ui/card", padding: :sm do %>
       <h3 class="font-semibold mb-4">Select hole</h3>
-      <div class="space-y-2" data-round-target="holesList"></div>
+      <div data-round-target="holesList"></div>
     <% end %>
   </div>
 
-  <div class="fixed inset-x-4 bottom-4 z-50 hidden max-h-[80vh] overflow-y-auto" data-round-target="scorecardPanel">
-    <%= render "ui/card", padding: :sm do %>
+  <div class="fixed inset-x-4 bottom-4 z-50 hidden max-h-[80vh] overflow-y-auto overflow-x-hidden" data-round-target="scorecardPanel">
+    <%= render "ui/card", padding: :sm, extra_class: "overflow-hidden" do %>
       <div class="flex items-center justify-between mb-4">
         <h3 class="font-semibold">Scorecard</h3>
         <button type="button" class="ui-btn-ghost ui-btn-sm" data-action="round#closePanels">Close</button>
       </div>
-      <div data-round-target="scorecardBody"></div>
+      <div class="min-w-0" data-round-target="scorecardBody"></div>
     <% end %>
   </div>
 </div>

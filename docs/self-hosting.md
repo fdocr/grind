@@ -40,7 +40,7 @@ Configure in Once → Settings → Environment:
 Copy your course YAML onto the server (or bake it into a custom image), then:
 
 ```bash
-bin/rails grind:courses:import[/path/to/courses.yml]
+bin/rails grind:courses:import FILE=/path/to/courses.yml
 ```
 
 Run inside the container with `once exec` or your preferred shell access.

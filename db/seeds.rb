@@ -7,7 +7,7 @@ if Rails.env.development?
       Grind::CourseImporter.import!(sample)
       puts "Imported sample courses from #{sample}"
     else
-      puts "No courses in database. Import with: bin/rails grind:courses:import[path/to/file.yml]"
+      puts "No courses in database. Import with: bin/rails grind:courses:import FILE=path/to/file.yml"
     end
   end
 end

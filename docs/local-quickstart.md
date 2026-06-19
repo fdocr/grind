@@ -17,7 +17,13 @@ cp .env.sample .env
 Optional: import sample golf courses
 
 ```bash
-bin/rails grind:courses:import[/path/to/sample_clean_crawl.yml]
+bin/rails grind:courses:import FILE=/path/to/sample_clean_crawl.yml
+```
+
+In zsh you can also quote the bracket form:
+
+```bash
+bin/rails 'grind:courses:import[/path/to/sample_clean_crawl.yml]'
 ```
 
 ## Run the app

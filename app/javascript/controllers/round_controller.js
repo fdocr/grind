@@ -132,6 +132,9 @@ export default class extends Controller {
     const table = document.createElement("table")
     table.className = "ui-scorecard-table"
 
+    const scroll = document.createElement("div")
+    scroll.className = "ui-scorecard-scroll"
+
     const header = document.createElement("tr")
     ;["Hole", ...holes.map((hole) => hole.number), "Total"].forEach((cell) => {
       const th = document.createElement("th")
@@ -165,7 +168,8 @@ export default class extends Controller {
     })
     table.appendChild(scoreRow)
 
-    wrapper.appendChild(table)
+    scroll.appendChild(table)
+    wrapper.appendChild(scroll)
     return wrapper
   }
 
@@ -173,20 +177,52 @@ export default class extends Controller {
     if (!this.hasHolesListTarget) return
 
     this.holesListTarget.innerHTML = ""
+
+    const grid = document.createElement("div")
+    grid.className = "grid grid-cols-2 gap-2"
+
+    const frontColumn = document.createElement("div")
+    frontColumn.className = "space-y-2"
+    const backColumn = document.createElement("div")
+    backColumn.className = "space-y-2"
+
     this.courseValue.holes.forEach((hole) => {
-      const button = document.createElement("button")
-      button.type = "button"
-      button.className = "ui-btn-secondary ui-btn-sm w-full justify-between"
-      const entry = this.holeEntry(hole.number)
-      const scoreLabel = entry.gross == null ? "Open" : `Score ${entry.gross}`
-      button.textContent = `Hole ${hole.number} · Par ${hole.par} · ${scoreLabel}`
-      button.addEventListener("click", () => {
-        this.state.currentHole = hole.number
-        this.closePanels()
-        this.render()
-      })
-      this.holesListTarget.appendChild(button)
+      const button = this.buildHoleButton(hole)
+      if (hole.number <= 9) {
+        frontColumn.appendChild(button)
+      } else {
+        backColumn.appendChild(button)
+      }
     })
+
+    grid.appendChild(frontColumn)
+    grid.appendChild(backColumn)
+    this.holesListTarget.appendChild(grid)
+  }
+
+  buildHoleButton(hole) {
+    const button = document.createElement("button")
+    button.type = "button"
+    button.className = "ui-btn-secondary ui-btn-sm w-full text-left !items-start !justify-start flex-col gap-0.5 h-auto py-2 px-2"
+    const entry = this.holeEntry(hole.number)
+    const scoreLabel = entry.gross == null ? "Open" : `Score ${entry.gross}`
+
+    const title = document.createElement("span")
+    title.className = "font-medium text-sm"
+    title.textContent = `Hole ${hole.number}`
+
+    const meta = document.createElement("span")
+    meta.className = "text-xs text-muted-foreground"
+    meta.textContent = `Par ${hole.par} · ${scoreLabel}`
+
+    button.appendChild(title)
+    button.appendChild(meta)
+    button.addEventListener("click", () => {
+      this.state.currentHole = hole.number
+      this.closePanels()
+      this.render()
+    })
+    return button
   }
 
   increment(event) {

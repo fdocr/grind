@@ -256,12 +256,16 @@
   .ui-banner-success { @apply rounded-lg border p-4 text-sm border-success-100 bg-success-50/80 text-success-700; }
   .ui-banner-danger  { @apply rounded-lg border p-4 text-sm border-danger-200 bg-danger-50/60 text-danger-900; }
 
+  .ui-scorecard-scroll {
+    @apply overflow-x-auto overscroll-x-contain;
+    -webkit-overflow-scrolling: touch;
+  }
   .ui-scorecard-table {
-    @apply w-full text-sm border-collapse;
+    @apply w-max min-w-full text-sm border-collapse;
   }
   .ui-scorecard-table th,
   .ui-scorecard-table td {
-    @apply border border-border px-2 py-2 text-center;
+    @apply border border-border px-2 py-2 text-center whitespace-nowrap;
   }
   .ui-scorecard-table th {
     @apply bg-muted font-medium text-muted-foreground;
