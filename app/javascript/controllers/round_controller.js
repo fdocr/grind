@@ -3,8 +3,10 @@ import { Controller } from "@hotwired/stimulus"
 export default class extends Controller {
   static targets = [
     "scoreToPar", "holeNumber", "insidePw9i", "oopTeeShots", "threePutts", "botchedUpDowns",
-    "scorePanel", "holesPanel", "scorecardPanel", "overlay",
-    "grossInput", "puttsInput", "finishButton", "finishForm", "startedAt",
+    "scorePanel", "holesPanel", "scorecardPanel", "resetPanel", "overlay",
+    "grossInput", "puttsInput", "grossPicker", "puttsPicker",
+    "scorePanelHole", "scorePanelPar", "scorePanelHcp", "holeMeta",
+    "finishButton", "finishForm", "startedAt",
     "scorecardBody", "holesList"
   ]
 
@@ -28,6 +30,10 @@ export default class extends Controller {
     const existing = localStorage.getItem(key)
     if (existing) return JSON.parse(existing)
 
+    return this.defaultState()
+  }
+
+  defaultState() {
     return {
       roundId: crypto.randomUUID(),
       startedAt: new Date().toISOString(),
@@ -87,14 +93,16 @@ export default class extends Controller {
   render() {
     this.scoreToParTarget.textContent = this.formatScoreToPar(this.scoreToPar())
     this.holeNumberTarget.textContent = `Hole ${this.state.currentHole}`
+
+    const hole = this.currentHoleData()
+    if (hole && this.hasHoleMetaTarget) {
+      this.holeMetaTarget.textContent = `Par ${hole.par} · Hcp ${hole.handicap}`
+    }
+
     this.insidePw9iTarget.textContent = this.formatInside(this.state.insidePw9i)
     this.oopTeeShotsTarget.textContent = this.state.oopTeeShots
     this.threePuttsTarget.textContent = this.state.threePutts
     this.botchedUpDownsTarget.textContent = this.state.botchedUpDowns
-
-    const entry = this.holeEntry(this.state.currentHole)
-    this.grossInputTarget.value = entry.gross ?? ""
-    this.puttsInputTarget.value = entry.putts ?? ""
 
     if (this.hasStartedAtTarget) {
       this.startedAtTarget.value = this.state.startedAt
@@ -142,6 +150,15 @@ export default class extends Controller {
       header.appendChild(th)
     })
     table.appendChild(header)
+
+    const parRow = document.createElement("tr")
+    const parTotal = holes.reduce((sum, hole) => sum + hole.par, 0)
+    ;["Par", ...holes.map((hole) => hole.par), parTotal].forEach((cell) => {
+      const td = document.createElement("td")
+      td.textContent = cell
+      parRow.appendChild(td)
+    })
+    table.appendChild(parRow)
 
     const hcpRow = document.createElement("tr")
     ;["Hcp", ...holes.map((hole) => hole.handicap), ""].forEach((cell) => {
@@ -246,7 +263,78 @@ export default class extends Controller {
   }
 
   openScorePanel() {
+    this.populatePostScorePanel()
     this.showPanel(this.scorePanelTarget)
+  }
+
+  populatePostScorePanel() {
+    const hole = this.currentHoleData()
+    if (!hole) return
+
+    const entry = this.holeEntry(this.state.currentHole)
+    const gross = entry.gross ?? hole.par
+    const putts = entry.putts ?? 2
+
+    if (this.hasScorePanelHoleTarget) this.scorePanelHoleTarget.textContent = `Hole ${hole.number}`
+    if (this.hasScorePanelParTarget) this.scorePanelParTarget.textContent = `Par ${hole.par}`
+    if (this.hasScorePanelHcpTarget) this.scorePanelHcpTarget.textContent = `Hcp ${hole.handicap}`
+
+    const grossMin = Math.max(1, hole.par - 2)
+    const grossMax = hole.par + 5
+    const grossValues = Array.from({ length: grossMax - grossMin + 1 }, (_, index) => grossMin + index)
+
+    this.buildPicker(this.grossPickerTarget, grossValues, gross)
+    this.buildPicker(this.puttsPickerTarget, Array.from({ length: 7 }, (_, index) => index), putts)
+
+    this.grossInputTarget.value = gross
+    this.puttsInputTarget.value = putts
+  }
+
+  buildPicker(container, values, selected) {
+    container.innerHTML = ""
+    values.forEach((value) => {
+      const button = document.createElement("button")
+      button.type = "button"
+      button.className = "ui-picker-option"
+      button.dataset.value = value
+      button.dataset.state = Number(value) === Number(selected) ? "active" : "inactive"
+      button.textContent = value
+      button.setAttribute("aria-pressed", button.dataset.state === "active" ? "true" : "false")
+      container.appendChild(button)
+    })
+
+    this.scrollPickerToSelected(container)
+  }
+
+  scrollPickerToSelected(container) {
+    const active = container.querySelector('[data-state="active"]')
+    if (active) {
+      active.scrollIntoView({ behavior: "instant", inline: "center", block: "nearest" })
+    }
+  }
+
+  pickGross(event) {
+    const button = event.target.closest("[data-value]")
+    if (!button || !this.hasGrossPickerTarget) return
+
+    this.selectPickerOption(this.grossPickerTarget, button)
+    this.grossInputTarget.value = button.dataset.value
+  }
+
+  pickPutts(event) {
+    const button = event.target.closest("[data-value]")
+    if (!button || !this.hasPuttsPickerTarget) return
+
+    this.selectPickerOption(this.puttsPickerTarget, button)
+    this.puttsInputTarget.value = button.dataset.value
+  }
+
+  selectPickerOption(container, selectedButton) {
+    container.querySelectorAll(".ui-picker-option").forEach((button) => {
+      const active = button === selectedButton
+      button.dataset.state = active ? "active" : "inactive"
+      button.setAttribute("aria-pressed", active ? "true" : "false")
+    })
   }
 
   openHolesPanel() {
@@ -258,9 +346,20 @@ export default class extends Controller {
     this.showPanel(this.scorecardPanelTarget)
   }
 
+  openResetPanel() {
+    this.showPanel(this.resetPanelTarget)
+  }
+
+  confirmReset() {
+    localStorage.removeItem(this.storageKey())
+    this.state = this.defaultState()
+    this.closePanels()
+    this.render()
+  }
+
   showPanel(panel) {
     this.overlayTarget.classList.remove("hidden")
-    ;[this.scorePanelTarget, this.holesPanelTarget, this.scorecardPanelTarget].forEach((element) => {
+    ;[this.scorePanelTarget, this.holesPanelTarget, this.scorecardPanelTarget, this.resetPanelTarget].forEach((element) => {
       element.classList.add("hidden")
     })
     panel.classList.remove("hidden")
@@ -268,16 +367,21 @@ export default class extends Controller {
 
   closePanels() {
     this.overlayTarget.classList.add("hidden")
-    ;[this.scorePanelTarget, this.holesPanelTarget, this.scorecardPanelTarget].forEach((element) => {
+    ;[this.scorePanelTarget, this.holesPanelTarget, this.scorecardPanelTarget, this.resetPanelTarget].forEach((element) => {
       element.classList.add("hidden")
     })
   }
 
   saveHoleScore() {
-    const gross = this.grossInputTarget.value === "" ? null : Number(this.grossInputTarget.value)
-    const putts = this.puttsInputTarget.value === "" ? null : Number(this.puttsInputTarget.value)
+    const gross = Number(this.grossInputTarget.value)
+    const putts = Number(this.puttsInputTarget.value)
 
     this.state.holes[this.state.currentHole] = { gross, putts }
+
+    if (this.state.currentHole < 18) {
+      this.state.currentHole += 1
+    }
+
     this.closePanels()
     this.render()
   }

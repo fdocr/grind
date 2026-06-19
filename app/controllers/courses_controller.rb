@@ -3,6 +3,16 @@
 class CoursesController < ApplicationController
   def index
     @query = params[:q].to_s.strip
-    @courses = Course.search(@query).order(:name).limit(50)
+
+    if @query.present?
+      matches = Course.search(@query)
+      @more_results = matches.count > Course::RESULT_LIMIT
+      @courses = matches.order(:name).limit(Course::RESULT_LIMIT)
+      @featured = false
+    else
+      @courses = Course.featured
+      @more_results = false
+      @featured = true
+    end
   end
 end

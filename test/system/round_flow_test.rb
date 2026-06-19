@@ -17,10 +17,8 @@ class RoundFlowTest < ApplicationSystemTestCase
 
     18.times do |index|
       click_button "Post Score"
-      fill_in "gross_score", with: "4"
-      fill_in "putts", with: "2"
       click_button "Save"
-      click_button "Next" unless index == 17
+      break if index == 17
     end
 
     2.times { find("[data-stat='threePutts'][data-action*='increment']").click }
@@ -36,5 +34,29 @@ class RoundFlowTest < ApplicationSystemTestCase
     send_button.click
 
     assert_text "Your round stats are on the way"
+  end
+
+  test "reset round clears saved progress after confirmation" do
+    visit round_course_path(@course)
+
+    click_button "Post Score"
+    click_button "Save"
+
+    assert_text "Hole 2"
+
+    find("[data-stat='threePutts'][data-action*='increment']").click
+    assert_equal "1", find("[data-round-target='threePutts']").text
+
+    click_button "Reset round"
+    assert_text "Reset round?"
+    click_button "Cancel"
+    assert_text "Hole 2"
+
+    click_button "Reset round"
+    find("[data-action='round#confirmReset']").click
+
+    assert_text "Hole 1"
+    assert_text "Even"
+    assert_equal "0", find("[data-round-target='threePutts']").text
   end
 end

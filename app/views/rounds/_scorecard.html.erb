@@ -5,6 +5,7 @@
   <div class="mb-4">
     <h3 class="text-sm font-semibold text-muted-foreground mb-2"><%= label %></h3>
     <% headers = [ "Hole", *nine_holes.map(&:number), "Total" ] %>
+    <% par_row = [ "Par", *nine_holes.map(&:par), nine_holes.sum(&:par) ] %>
     <% hcp_row = [ "Hcp", *nine_holes.map(&:handicap), "" ] %>
     <% score_cells = nine_holes.map do |hole|
          entry = round.hole_scores[hole.number.to_s] || round.hole_scores[hole.number]
@@ -14,6 +15,6 @@
          entry = round.hole_scores[hole.number.to_s] || round.hole_scores[hole.number]
          entry&.dig("gross").to_i
        end %>
-    <%= render "ui/table", headers: headers, rows: [ hcp_row, [ "Score", *score_cells, (total.zero? ? "·" : total) ] ] %>
+    <%= render "ui/table", headers: headers, rows: [ par_row, hcp_row, [ "Score", *score_cells, (total.zero? ? "·" : total) ] ] %>
   </div>
 <% end %>

@@ -270,4 +270,25 @@
   .ui-scorecard-table th {
     @apply bg-muted font-medium text-muted-foreground;
   }
+
+  .ui-picker-scroll {
+    @apply flex gap-2 overflow-x-auto overscroll-x-contain py-1;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .ui-picker-scroll::-webkit-scrollbar {
+    display: none;
+  }
+  .ui-picker-option {
+    @apply inline-flex shrink-0 items-center justify-center h-11 w-11 min-h-11 min-w-11 rounded-md border border-input
+           bg-background text-base font-semibold transition-colors cursor-pointer text-foreground
+           hover:bg-accent hover:text-accent-foreground
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
+  }
+  .ui-picker-option[data-state="active"] {
+    @apply bg-primary-600 text-white border-primary-600 hover:bg-primary-700 hover:text-white;
+  }
+  .ui-picker-row {
+    @apply space-y-2;
+  }
 }

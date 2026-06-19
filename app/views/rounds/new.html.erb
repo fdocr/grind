@@ -10,9 +10,12 @@
   <header class="space-y-1">
     <h1 class="text-xl font-bold text-foreground"><%= @course.name %></h1>
     <p class="text-sm text-muted-foreground"><%= Time.zone.today.strftime("%a %b %-d, %Y") %></p>
-    <div class="flex items-center justify-between pt-2">
-      <p class="text-lg font-semibold" data-round-target="holeNumber">Hole 1</p>
-      <div class="text-right">
+    <div class="flex items-start justify-between pt-2 gap-4">
+      <div>
+        <p class="text-lg font-semibold" data-round-target="holeNumber">Hole 1</p>
+        <p class="text-sm text-muted-foreground mt-1" data-round-target="holeMeta">Par 4 · Hcp 1</p>
+      </div>
+      <div class="text-right shrink-0">
         <p class="text-xs text-muted-foreground">Score</p>
         <p class="text-2xl font-bold text-primary-600" data-round-target="scoreToPar">Even</p>
       </div>
@@ -71,6 +74,12 @@
     Finish round
   </button>
 
+  <button type="button"
+          class="ui-btn-ghost ui-btn-md w-full text-destructive"
+          data-action="round#openResetPanel">
+    Reset round
+  </button>
+
   <%= form_with url: course_rounds_path(@course), method: :post, data: { round_target: "finishForm", turbo: false }, class: "hidden" do %>
     <input type="hidden" name="round[oop_tee_shots]" value="0">
     <input type="hidden" name="round[three_putts]" value="0">
@@ -84,17 +93,24 @@
 
   <div class="fixed inset-x-4 bottom-4 z-50 hidden" data-round-target="scorePanel">
     <%= render "ui/card", padding: :sm do %>
-      <h3 class="font-semibold mb-4">Post score</h3>
+      <h3 class="font-semibold mb-3">Post score</h3>
+      <div class="flex flex-wrap gap-2 mb-4">
+        <span class="ui-badge ui-badge-primary ui-badge-sm" data-round-target="scorePanelHole">Hole 1</span>
+        <span class="ui-badge ui-badge-neutral ui-badge-sm" data-round-target="scorePanelPar">Par 4</span>
+        <span class="ui-badge ui-badge-neutral ui-badge-sm" data-round-target="scorePanelHcp">Hcp 1</span>
+      </div>
       <div class="space-y-4">
-        <div>
-          <label class="ui-label" for="gross_score">Gross score</label>
-          <input id="gross_score" type="number" min="1" class="ui-input mt-2" data-round-target="grossInput" inputmode="numeric">
+        <div class="ui-picker-row">
+          <span class="ui-label">Score</span>
+          <div class="ui-picker-scroll" data-round-target="grossPicker" data-action="click->round#pickGross"></div>
+          <input type="hidden" data-round-target="grossInput">
         </div>
-        <div>
-          <label class="ui-label" for="putts">Putts</label>
-          <input id="putts" type="number" min="0" class="ui-input mt-2" data-round-target="puttsInput" inputmode="numeric">
+        <div class="ui-picker-row">
+          <span class="ui-label">Putts</span>
+          <div class="ui-picker-scroll" data-round-target="puttsPicker" data-action="click->round#pickPutts"></div>
+          <input type="hidden" data-round-target="puttsInput">
         </div>
-        <div class="flex gap-2">
+        <div class="flex gap-2 pt-1">
           <button type="button" class="ui-btn-secondary ui-btn-md flex-1" data-action="round#closePanels">Cancel</button>
           <button type="button" class="ui-btn-primary ui-btn-md flex-1" data-action="round#saveHoleScore">Save</button>
         </div>
@@ -116,6 +132,19 @@
         <button type="button" class="ui-btn-ghost ui-btn-sm" data-action="round#closePanels">Close</button>
       </div>
       <div class="min-w-0" data-round-target="scorecardBody"></div>
+    <% end %>
+  </div>
+
+  <div class="fixed inset-x-4 bottom-4 z-50 hidden" data-round-target="resetPanel">
+    <%= render "ui/card", padding: :sm do %>
+      <h3 class="font-semibold mb-2">Reset round?</h3>
+      <p class="text-sm text-muted-foreground mb-4">
+        This clears all scores and stats for this round. This cannot be undone.
+      </p>
+      <div class="flex gap-2">
+        <button type="button" class="ui-btn-secondary ui-btn-md flex-1" data-action="round#closePanels">Cancel</button>
+        <button type="button" class="ui-btn-danger ui-btn-md flex-1" data-action="round#confirmReset">Reset round</button>
+      </div>
     <% end %>
   </div>
 </div>
