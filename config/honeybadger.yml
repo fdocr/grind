@@ -1,0 +1,23 @@
+---
+api_key: '<%= ENV["HONEYBADGER_API_KEY"].presence || "NA" %>'
+report_data: <%= ENV["HONEYBADGER_API_KEY"].present? && Rails.env.production? %>
+
+env: "<%= Rails.env %>"
+root: "<%= Rails.root.to_s %>"
+
+development_environments:
+- test
+- development
+
+debug: false
+
+insights:
+  enabled: true
+
+puma:
+  insights:
+    metrics: true
+
+solid_queue:
+  insights:
+    metrics: true

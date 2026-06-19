@@ -1,0 +1,90 @@
+cariari_01:
+  course: one
+  number: 1
+  par: 4
+  handicap: 18
+cariari_02:
+  course: one
+  number: 2
+  par: 4
+  handicap: 16
+cariari_03:
+  course: one
+  number: 3
+  par: 3
+  handicap: 14
+cariari_04:
+  course: one
+  number: 4
+  par: 5
+  handicap: 4
+cariari_05:
+  course: one
+  number: 5
+  par: 4
+  handicap: 12
+cariari_06:
+  course: one
+  number: 6
+  par: 4
+  handicap: 8
+cariari_07:
+  course: one
+  number: 7
+  par: 5
+  handicap: 2
+cariari_08:
+  course: one
+  number: 8
+  par: 3
+  handicap: 10
+cariari_09:
+  course: one
+  number: 9
+  par: 4
+  handicap: 6
+cariari_10:
+  course: one
+  number: 10
+  par: 4
+  handicap: 17
+cariari_11:
+  course: one
+  number: 11
+  par: 4
+  handicap: 15
+cariari_12:
+  course: one
+  number: 12
+  par: 3
+  handicap: 13
+cariari_13:
+  course: one
+  number: 13
+  par: 5
+  handicap: 3
+cariari_14:
+  course: one
+  number: 14
+  par: 4
+  handicap: 11
+cariari_15:
+  course: one
+  number: 15
+  par: 4
+  handicap: 9
+cariari_16:
+  course: one
+  number: 16
+  par: 5
+  handicap: 1
+cariari_17:
+  course: one
+  number: 17
+  par: 3
+  handicap: 7
+cariari_18:
+  course: one
+  number: 18
+  par: 4
+  handicap: 5

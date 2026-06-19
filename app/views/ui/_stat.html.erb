@@ -1,0 +1,14 @@
+<%# locals: (value:, label:, tone: :primary) %>
+<%
+  value_class = case tone.to_sym
+  when :muted then "text-foreground"
+  when :success then "text-success-700"
+  when :warning then "text-warning-800"
+  when :danger then "text-danger-700"
+  else "text-primary-600"
+  end
+%>
+<div class="ui-stat">
+  <div class="ui-stat-value <%= value_class %>"><%= value %></div>
+  <div class="ui-stat-label"><%= label %></div>
+</div>

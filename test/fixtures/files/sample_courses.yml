@@ -1,0 +1,25 @@
+---
+- :name: Sample Links
+  :country: US
+  :address: ''
+  :scorecard:
+  - white:
+      :par: '4'
+      :handicap: '1'
+      :yardage: '400'
+  - white:
+      :par: '3'
+      :handicap: '18'
+      :yardage: '150'
+  :stateprovince: California
+  :city: Monterey
+  :zip: ''
+  :phone: ''
+  :website: ''
+  :metric: false
+  :latitude: '36.5'
+  :longitude: "-121.8"
+  :slopes:
+    white: '120'
+  :ratings:
+    white: '70.0'

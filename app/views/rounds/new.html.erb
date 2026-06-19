@@ -1,0 +1,121 @@
+<% content_for :title, @course.name %>
+<%
+  holes_json = @holes.map { |hole| { number: hole.number, par: hole.par, handicap: hole.handicap } }
+  course_json = { id: @course.id, name: @course.name, holes: holes_json }
+%>
+
+<div class="space-y-6"
+     data-controller="round"
+     data-round-course-value="<%= course_json.to_json %>">
+  <header class="space-y-1">
+    <h1 class="text-xl font-bold text-foreground"><%= @course.name %></h1>
+    <p class="text-sm text-muted-foreground"><%= Time.zone.today.strftime("%a %b %-d, %Y") %></p>
+    <div class="flex items-center justify-between pt-2">
+      <p class="text-lg font-semibold" data-round-target="holeNumber">Hole 1</p>
+      <div class="text-right">
+        <p class="text-xs text-muted-foreground">Score</p>
+        <p class="text-2xl font-bold text-primary-600" data-round-target="scoreToPar">Even</p>
+      </div>
+    </div>
+  </header>
+
+  <div class="grid grid-cols-1 gap-3">
+    <button type="button" class="ui-btn-primary ui-btn-md w-full" data-action="round#openScorePanel">Post Score</button>
+    <button type="button" class="ui-btn-secondary ui-btn-md w-full" data-action="round#openHolesPanel">Holes</button>
+    <button type="button" class="ui-btn-secondary ui-btn-md w-full" data-action="round#openScorecardPanel">Scorecard</button>
+  </div>
+
+  <section>
+    <h2 class="text-sm font-semibold text-muted-foreground mb-3">Round stats</h2>
+    <%= render "ui/card", padding: :sm do %>
+      <div class="space-y-4">
+        <% [
+          ["OOP Tee Shots", "oopTeeShots", "oopTeeShots"],
+          ["3 Putts", "threePutts", "threePutts"],
+          ["Botched Up/Down", "botchedUpDowns", "botchedUpDowns"],
+          ["Inside PW/9i", "insidePw9i", "insidePw9i"]
+        ].each do |label, target, stat| %>
+          <div class="flex items-center justify-between gap-3">
+            <span class="text-sm font-medium"><%= label %></span>
+            <div class="flex items-center gap-2">
+              <button type="button" class="ui-icon-btn" data-action="round#decrement" data-stat="<%= stat %>" aria-label="Decrease <%= label %>">
+                <%= icon "minus", class: "w-5 h-5" %>
+              </button>
+              <span class="w-10 text-center text-lg font-semibold" data-round-target="<%= target %>">0</span>
+              <button type="button" class="ui-icon-btn" data-action="round#increment" data-stat="<%= stat %>" aria-label="Increase <%= label %>">
+                <%= icon "plus", class: "w-5 h-5" %>
+              </button>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </section>
+
+  <div class="flex gap-3">
+    <button type="button" class="ui-btn-secondary ui-btn-md flex-1" data-action="round#previousHole">
+      <%= icon "chevron_left", class: "w-5 h-5" %>
+      Prev
+    </button>
+    <button type="button" class="ui-btn-secondary ui-btn-md flex-1" data-action="round#nextHole">
+      Next
+      <%= icon "chevron_right", class: "w-5 h-5" %>
+    </button>
+  </div>
+
+  <button type="button"
+          class="ui-btn-primary ui-btn-lg w-full"
+          data-round-target="finishButton"
+          data-action="round#finishRound"
+          disabled>
+    Finish round
+  </button>
+
+  <%= form_with url: course_rounds_path(@course), method: :post, data: { round_target: "finishForm", turbo: false }, class: "hidden" do %>
+    <input type="hidden" name="round[oop_tee_shots]" value="0">
+    <input type="hidden" name="round[three_putts]" value="0">
+    <input type="hidden" name="round[botched_up_downs]" value="0">
+    <input type="hidden" name="round[inside_pw_9i]" value="0">
+    <input type="hidden" name="round[started_at]" value="" data-round-target="startedAt">
+    <div data-round-hole-scores></div>
+  <% end %>
+
+  <div class="fixed inset-0 z-40 hidden bg-black/40" data-round-target="overlay" data-action="click->round#closePanels"></div>
+
+  <div class="fixed inset-x-4 bottom-4 z-50 hidden" data-round-target="scorePanel">
+    <%= render "ui/card", padding: :sm do %>
+      <h3 class="font-semibold mb-4">Post score</h3>
+      <div class="space-y-4">
+        <div>
+          <label class="ui-label" for="gross_score">Gross score</label>
+          <input id="gross_score" type="number" min="1" class="ui-input mt-2" data-round-target="grossInput" inputmode="numeric">
+        </div>
+        <div>
+          <label class="ui-label" for="putts">Putts</label>
+          <input id="putts" type="number" min="0" class="ui-input mt-2" data-round-target="puttsInput" inputmode="numeric">
+        </div>
+        <div class="flex gap-2">
+          <button type="button" class="ui-btn-secondary ui-btn-md flex-1" data-action="round#closePanels">Cancel</button>
+          <button type="button" class="ui-btn-primary ui-btn-md flex-1" data-action="round#saveHoleScore">Save</button>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="fixed inset-x-4 bottom-4 z-50 hidden max-h-[70vh] overflow-y-auto" data-round-target="holesPanel">
+    <%= render "ui/card", padding: :sm do %>
+      <h3 class="font-semibold mb-4">Select hole</h3>
+      <div class="space-y-2" data-round-target="holesList"></div>
+    <% end %>
+  </div>
+
+  <div class="fixed inset-x-4 bottom-4 z-50 hidden max-h-[80vh] overflow-y-auto" data-round-target="scorecardPanel">
+    <%= render "ui/card", padding: :sm do %>
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-semibold">Scorecard</h3>
+        <button type="button" class="ui-btn-ghost ui-btn-sm" data-action="round#closePanels">Close</button>
+      </div>
+      <div data-round-target="scorecardBody"></div>
+    <% end %>
+  </div>
+</div>

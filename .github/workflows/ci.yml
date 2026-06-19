@@ -76,7 +76,7 @@ jobs:
     #    options: --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5
     steps:
       - name: Install packages
-        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y libvips
+        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y build-essential libvips google-chrome-stable
 
       - name: Checkout code
         uses: actions/checkout@v6
@@ -85,6 +85,9 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           bundler-cache: true
+
+      - name: Build assets
+        run: bin/rails tailwindcss:build
 
       - name: Run tests
         env:
@@ -104,7 +107,7 @@ jobs:
     #    options: --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5
     steps:
       - name: Install packages
-        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y libvips
+        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y build-essential libvips google-chrome-stable
 
       - name: Checkout code
         uses: actions/checkout@v6
@@ -114,6 +117,9 @@ jobs:
         with:
           bundler-cache: true
 
+      - name: Build assets
+        run: bin/rails tailwindcss:build
+
       - name: Run System Tests
         env:
           RAILS_ENV: test
@@ -122,7 +128,7 @@ jobs:
         run: bin/rails db:test:prepare test:system
 
       - name: Keep screenshots from failed system tests
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: screenshots

@@ -1,29 +1,44 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <title><%= content_for(:title) || "Grind" %></title>
-    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title><%= content_for?(:title) ? yield(:title) : "Grind" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="Grind">
     <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#276f54">
+    <meta name="description" content="Track your round to improve your game.">
+
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
     <%= yield :head %>
 
-    <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
-    <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
+    <%= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
 
-    <link rel="icon" href="/icon.png" type="image/png">
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="icon" href="/icon.png" type="image/png">
     <link rel="apple-touch-icon" href="/icon.png">
 
-    <%# Includes all stylesheet files in app/assets/stylesheets %>
+    <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
 
-  <body>
-    <%= yield %>
+  <body class="min-h-screen">
+    <header class="border-b border-border bg-card">
+      <div class="max-w-lg mx-auto px-4 py-4 flex items-center justify-between">
+        <%= link_to root_path, class: "text-xl font-bold text-primary-700 tracking-tight" do %>
+          Grind
+        <% end %>
+      </div>
+    </header>
+
+    <main class="max-w-lg mx-auto px-4 py-6 pb-24">
+      <%= render "shared/connection_banner" %>
+      <div id="flash" class="mb-4">
+        <%= render "shared/flash" %>
+      </div>
+      <%= yield %>
+    </main>
   </body>
 </html>

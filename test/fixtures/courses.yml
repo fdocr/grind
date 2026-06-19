@@ -1,0 +1,27 @@
+one:
+  name: Cariari Country Club
+  country: CR
+  address: ""
+  city: Cariari
+  state_province: Heredia
+  zip: ""
+  phone: ""
+  website: ""
+  metric: false
+  latitude: 9.981234
+  longitude: -84.156789
+  tees: '{"white":{"rating":"72.0","slope":"130","yardages":[380,410,165,395,320,400,485,155,370,350,390,385,520,325,175,345,140,475]}}'
+
+two:
+  name: Pebble Beach
+  country: US
+  address: ""
+  city: Pebble Beach
+  state_province: California
+  zip: ""
+  phone: ""
+  website: ""
+  metric: false
+  latitude: 36.5681
+  longitude: -121.9507
+  tees: '{"blue":{"rating":"75.5","slope":"145","yardages":[380,516,404,331,195,523,109,431,502,446,390,202,397,580,403,217,211,543]}}'

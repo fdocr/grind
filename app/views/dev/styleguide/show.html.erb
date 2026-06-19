@@ -1,0 +1,116 @@
+<% content_for :title, "Styleguide" %>
+
+<div class="space-y-10">
+  <div>
+    <h1 class="text-2xl font-bold text-foreground">Grind styleguide</h1>
+    <p class="text-muted-foreground mt-1">Design system reference for development only.</p>
+  </div>
+
+  <section>
+    <h2 class="text-xl font-semibold mb-4">Colors</h2>
+    <%= render "ui/card" do %>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <% [["Primary", "bg-primary-600"], ["Secondary", "bg-secondary-500"], ["Success", "bg-success-600"], ["Danger", "bg-danger-600"]].each do |label, klass| %>
+          <div class="text-center">
+            <div class="h-12 rounded-lg <%= klass %>"></div>
+            <p class="text-xs mt-2 text-muted-foreground"><%= label %></p>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </section>
+
+  <section>
+    <h2 class="text-xl font-semibold mb-4">Typography</h2>
+    <%= render "ui/card" do %>
+      <div class="space-y-3">
+        <h1 class="text-2xl font-bold">Heading 1</h1>
+        <h2 class="text-xl font-semibold">Heading 2</h2>
+        <p class="text-base">Body text for course search and round tracking.</p>
+        <p class="text-sm text-muted-foreground">Muted helper text.</p>
+      </div>
+    <% end %>
+  </section>
+
+  <section>
+    <h2 class="text-xl font-semibold mb-4">Buttons</h2>
+    <%= render "ui/card" do %>
+      <div class="space-y-4">
+        <div class="flex flex-wrap gap-2">
+          <%= render "ui/button", text: "Primary", variant: :primary %>
+          <%= render "ui/button", text: "Secondary", variant: :secondary %>
+          <%= render "ui/button", text: "Ghost", variant: :ghost %>
+          <%= render "ui/button", text: "Danger", variant: :danger %>
+        </div>
+        <div class="flex flex-wrap gap-2 items-center">
+          <%= render "ui/button", text: "With icon", variant: :primary, icon: "flag" %>
+          <button type="button" class="ui-icon-btn" aria-label="Increment">
+            <%= icon "plus", class: "w-5 h-5" %>
+          </button>
+        </div>
+      </div>
+    <% end %>
+  </section>
+
+  <section>
+    <h2 class="text-xl font-semibold mb-4">Badges</h2>
+    <%= render "ui/card" do %>
+      <div class="flex flex-wrap gap-2">
+        <% %i[neutral primary success warning danger info].each do |tone| %>
+          <%= render "ui/badge", text: tone.to_s.titleize, tone: tone %>
+        <% end %>
+      </div>
+    <% end %>
+  </section>
+
+  <section>
+    <h2 class="text-xl font-semibold mb-4">Form controls</h2>
+    <%= render "ui/card" do %>
+      <%= form_with url: "#", class: "space-y-4" do |f| %>
+        <%= render "ui/input", form: f, field: :email, label: "Email", placeholder: "you@example.com" %>
+        <input type="text" class="ui-input" placeholder="Standalone input">
+      <% end %>
+    <% end %>
+  </section>
+
+  <section>
+    <h2 class="text-xl font-semibold mb-4">Banners</h2>
+    <div class="space-y-3">
+      <%= render "ui/banner", tone: :info, title: "Info", body: "Search for your golf course to start grinding." %>
+      <%= render "ui/banner", tone: :warning, title: "Offline", body: "You are offline. Your round is saved on this device." %>
+      <%= render "ui/banner", tone: :success, title: "Round complete", body: "All 18 holes posted." %>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="text-xl font-semibold mb-4">Stats</h2>
+    <%= render "ui/card" do %>
+      <%= render "ui/stat_grid", columns: 2 do %>
+        <%= render "ui/stat", value: "+2", label: "Score to par" %>
+        <%= render "ui/stat", value: "3", label: "3 Putts" %>
+      <% end %>
+    <% end %>
+  </section>
+
+  <section>
+    <h2 class="text-xl font-semibold mb-4">Empty state</h2>
+    <%= render "ui/card" do %>
+      <%= render "ui/empty_state",
+            title: "No courses found",
+            body: "Try a different search term.",
+            icon: "search" %>
+    <% end %>
+  </section>
+
+  <section>
+    <h2 class="text-xl font-semibold mb-4">Scorecard table</h2>
+    <%= render "ui/card", padding: :sm do %>
+      <%= render "ui/table",
+            headers: %w[Hole 1 2 3 OUT],
+            rows: [
+              ["Hcp", "18", "16", "4", ""],
+              ["Score", "4", "5", "4", "13"]
+            ] %>
+    <% end %>
+  </section>
+</div>

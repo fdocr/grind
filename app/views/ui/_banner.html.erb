@@ -1,0 +1,30 @@
+<%# locals: (tone: :info, title: nil, body: nil, icon: nil) %>
+<%
+  tone_class = "ui-banner-#{tone}"
+  resolved_icon = icon || case tone.to_sym
+  when :success then "check"
+  when :warning then "info"
+  when :danger then "close"
+  else "info"
+  end
+%>
+<div class="<%= tone_class %>">
+  <div class="flex items-start gap-3">
+    <% if resolved_icon %>
+      <span class="flex-shrink-0 mt-0.5">
+        <%= render "shared/svg/#{resolved_icon}", class: "w-5 h-5" %>
+      </span>
+    <% end %>
+    <div>
+      <% if title.present? %>
+        <p class="font-medium"><%= title %></p>
+      <% end %>
+      <% if body.present? %>
+        <p class="<%= "mt-1" if title.present? %>"><%= body %></p>
+      <% end %>
+      <% if block_given? %>
+        <div class="mt-2"><%= yield %></div>
+      <% end %>
+    </div>
+  </div>
+</div>

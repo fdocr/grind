@@ -1,0 +1,29 @@
+<% if courses.any? %>
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
+    <% courses.each do |course| %>
+      <%= link_to round_course_path(course), class: "block", data: { turbo_frame: "_top" } do %>
+        <%= render "ui/card", padding: :sm, extra_class: "hover:border-primary-300 transition-colors" do %>
+          <h3 class="font-semibold text-foreground"><%= course.name %></h3>
+          <p class="text-sm text-muted-foreground mt-1"><%= course.location_label %></p>
+          <p class="text-xs text-muted-foreground mt-2">Par <%= course.total_par %></p>
+        <% end %>
+      <% end %>
+    <% end %>
+  </div>
+<% elsif query.present? %>
+  <div class="mt-4">
+    <%= render "ui/empty_state",
+          title: "No courses found",
+          body: "Try a different search term.",
+          icon: "search",
+          compact: true %>
+  </div>
+<% else %>
+  <div class="mt-4">
+    <%= render "ui/empty_state",
+          title: "Search for a course",
+          body: "Enter a course name, city, or country to get started.",
+          icon: "flag",
+          compact: true %>
+  </div>
+<% end %>

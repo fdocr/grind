@@ -1,0 +1,21 @@
+<%# locals: (headers:, rows: []) %>
+<div class="overflow-x-auto">
+  <table class="ui-scorecard-table">
+    <thead>
+      <tr>
+        <% headers.each do |header| %>
+          <th><%= header %></th>
+        <% end %>
+      </tr>
+    </thead>
+    <tbody>
+      <% rows.each do |row| %>
+        <tr>
+          <% row.each do |cell| %>
+            <td><%= cell %></td>
+          <% end %>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

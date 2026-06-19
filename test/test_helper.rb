@@ -4,12 +4,17 @@ require "rails/test_help"
 
 module ActiveSupport
   class TestCase
-    # Run tests in parallel with specified workers
     parallelize(workers: :number_of_processors)
 
-    # Setup all fixtures in test/fixtures/*.yml for all tests in alphabetical order.
     fixtures :all
 
-    # Add more helper methods to be used by all tests here...
+    def build_eighteen_holes!(course)
+      (1..18).each do |number|
+        course.holes.find_or_create_by!(number: number) do |hole|
+          hole.par = number.even? ? 4 : (number % 3 == 0 ? 3 : 5)
+          hole.handicap = number
+        end
+      end
+    end
   end
 end

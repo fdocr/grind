@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <style>
+      body { font-family: system-ui, sans-serif; color: #0f172a; line-height: 1.5; }
+      h1 { font-size: 20px; margin: 0 0 8px; }
+      table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }
+      th, td { border: 1px solid #e2e8f0; padding: 8px; text-align: center; }
+      th { background: #f1f5f9; }
+      .muted { color: #64748b; }
+    </style>
+  </head>
+  <body>
+    <h1>Your round at <%= @course.name %></h1>
+    <p class="muted"><%= @course.location_label %></p>
+
+    <p><strong>Score to par:</strong> <%= format_score_to_par(@round.score_to_par) %></p>
+    <p><strong>Total score:</strong> <%= @round.total_score %></p>
+    <p><strong>Total putts:</strong> <%= @round.total_putts %></p>
+
+    <p>
+      <strong>OOP Tee Shots:</strong> <%= @round.oop_tee_shots %><br>
+      <strong>3 Putts:</strong> <%= @round.three_putts %><br>
+      <strong>Botched Up/Down:</strong> <%= @round.botched_up_downs %><br>
+      <strong>Inside PW/9i:</strong> <%= format_inside_pw_9i(@round.inside_pw_9i) %>
+    </p>
+
+    <%= render "rounds/scorecard", round: @round, holes: @holes %>
+
+    <p class="muted">Tracked with Grind</p>
+  </body>
+</html>

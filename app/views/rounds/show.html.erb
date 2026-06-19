@@ -1,0 +1,43 @@
+<% content_for :title, @round.course.name %>
+
+<div class="space-y-6">
+  <header class="space-y-1">
+    <h1 class="text-xl font-bold text-foreground"><%= @round.course.name %></h1>
+    <p class="text-sm text-muted-foreground">Round complete</p>
+    <div class="pt-2">
+      <p class="text-xs text-muted-foreground">Score to par</p>
+      <p class="text-3xl font-bold text-primary-600"><%= format_score_to_par(@round.score_to_par) %></p>
+    </div>
+  </header>
+
+  <%= render "ui/stat_grid", columns: 2 do %>
+    <%= render "ui/stat", value: @round.total_score, label: "Total score" %>
+    <%= render "ui/stat", value: @round.total_putts, label: "Total putts" %>
+    <%= render "ui/stat", value: @round.oop_tee_shots, label: "OOP Tee Shots" %>
+    <%= render "ui/stat", value: @round.three_putts, label: "3 Putts" %>
+    <%= render "ui/stat", value: @round.botched_up_downs, label: "Botched Up/Down" %>
+    <%= render "ui/stat", value: format_inside_pw_9i(@round.inside_pw_9i), label: "Inside PW/9i" %>
+  <% end %>
+
+  <section>
+    <h2 class="text-lg font-semibold mb-3">Scorecard</h2>
+    <%= render "scorecard", round: @round, holes: @holes %>
+  </section>
+
+  <section>
+    <h2 class="text-lg font-semibold mb-3">Email your stats</h2>
+    <%= render "ui/card", padding: :sm do %>
+      <%= form_with url: round_delivery_path(@round.token), scope: :delivery, class: "space-y-4" do |f| %>
+        <%= render "ui/input", form: f, field: :email, label: "Email", type: :email, placeholder: "you@example.com", required: true, autocomplete: "email" %>
+        <% if ENV["CLOUDFLARE_TURNSTILE_SITE_KEY"].present? %>
+          <div class="cf-turnstile" data-sitekey="<%= ENV["CLOUDFLARE_TURNSTILE_SITE_KEY"] %>"></div>
+          <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+        <% end %>
+        <button type="submit" class="ui-btn-primary ui-btn-md w-full">
+          <%= icon "envelope", class: "w-4 h-4" %>
+          <span>Send stats</span>
+        </button>
+      <% end %>
+    <% end %>
+  </section>
+</div>

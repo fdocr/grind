@@ -1,0 +1,45 @@
+# frozen_string_literal: true
+
+class Round < ApplicationRecord
+  has_secure_token
+
+  belongs_to :course
+  has_many :deliveries, dependent: :destroy
+
+  validates :oop_tee_shots, :three_putts, :botched_up_downs,
+            numericality: { greater_than_or_equal_to: 0 }
+  validates :inside_pw_9i, numericality: true
+  validate :hole_scores_complete, if: :finished_at?
+
+  scope :finished, -> { where.not(finished_at: nil) }
+
+  def finished?
+    finished_at.present?
+  end
+
+  def total_score
+    hole_scores.values.sum { |entry| entry["gross"].to_i }
+  end
+
+  def total_putts
+    hole_scores.values.sum { |entry| entry["putts"].to_i }
+  end
+
+  def score_to_par
+    hole_scores.sum do |number, entry|
+      par = course.holes.find_by!(number: number.to_i).par
+      entry["gross"].to_i - par
+    end
+  end
+
+  private
+
+  def hole_scores_complete
+    (1..18).each do |number|
+      entry = hole_scores[number.to_s] || hole_scores[number]
+      if entry.blank? || entry["gross"].blank?
+        errors.add(:hole_scores, "must include a gross score for hole #{number}")
+      end
+    end
+  end
+end

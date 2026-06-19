@@ -28,11 +28,13 @@ gem "solid_cache"
 gem "solid_queue"
 gem "solid_cable"
 
+gem "mission_control-jobs", "~> 1.0", ">= 1.0.2"
+gem "dotenv-rails", "~> 3.1"
+gem "honeybadger", "~> 6.9"
+gem "tailwindcss-rails", "~> 4.4"
+
 # Reduces boot times through caching; required in config/boot.rb
 gem "bootsnap", require: false
-
-# Deploy this application anywhere as a Docker container [https://kamal-deploy.org]
-gem "kamal", require: false
 
 # Add HTTP asset caching/compression and X-Sendfile acceleration to Puma [https://github.com/basecamp/thruster/]
 gem "thruster", require: false

@@ -1,0 +1,4 @@
+<%# locals: (align: :end) %>
+<div class="flex gap-3 <%= align == :end ? "justify-end" : "justify-start" %>">
+  <%= yield %>
+</div>

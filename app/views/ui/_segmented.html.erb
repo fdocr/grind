@@ -1,0 +1,11 @@
+<%# locals: (options:, active: nil, size: :default) %>
+<div class="ui-segmented <%= "ui-segmented-lg" if size == :lg %>">
+  <% options.each do |label, value| %>
+    <button type="button"
+            class="ui-segmented-option"
+            data-state="<%= active.to_s == value.to_s ? "active" : "inactive" %>"
+            data-value="<%= value %>">
+      <%= label %>
+    </button>
+  <% end %>
+</div>
