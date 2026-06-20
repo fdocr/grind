@@ -23,6 +23,16 @@ class MissionControlAuthTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "jobs dashboard is unavailable without credentials outside development" do
+    with_env(
+      "MISSION_CONTROL_USERNAME" => nil,
+      "MISSION_CONTROL_PASSWORD" => nil
+    ) do
+      get "/jobs"
+      assert_response :service_unavailable
+    end
+  end
+
   private
 
   def with_env(vars)

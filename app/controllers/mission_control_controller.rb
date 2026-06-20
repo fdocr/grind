@@ -6,13 +6,26 @@ class MissionControlController < ActionController::Base
   private
 
   def authenticate_mission_control!
-    username = ENV["MISSION_CONTROL_USERNAME"]
-    password = ENV["MISSION_CONTROL_PASSWORD"]
-    return if username.blank? || password.blank?
+    username, password = mission_control_credentials
 
-    authenticate_or_request_with_http_basic do |given_username, given_password|
+    unless username && password
+      head :service_unavailable
+      return
+    end
+
+    authenticate_or_request_with_http_basic("Grind Jobs") do |given_username, given_password|
       ActiveSupport::SecurityUtils.secure_compare(given_username, username) &&
         ActiveSupport::SecurityUtils.secure_compare(given_password, password)
     end
+  end
+
+  def mission_control_credentials
+    username = ENV["MISSION_CONTROL_USERNAME"].presence
+    password = ENV["MISSION_CONTROL_PASSWORD"].presence
+    return [ username, password ] if username && password
+
+    return %w[development development] if Rails.env.development?
+
+    [ nil, nil ]
   end
 end
