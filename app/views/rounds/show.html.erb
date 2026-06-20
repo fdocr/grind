@@ -30,7 +30,12 @@
       <%= form_with url: round_delivery_path(@round.token), scope: :delivery, class: "space-y-4", data: { turbo: false } do |f| %>
         <%= render "ui/input", form: f, field: :email, label: "Email", type: :email, placeholder: "you@example.com", required: true, autocomplete: "email" %>
         <% if ENV["CLOUDFLARE_TURNSTILE_SITE_KEY"].present? %>
-          <div class="cf-turnstile" data-sitekey="<%= ENV["CLOUDFLARE_TURNSTILE_SITE_KEY"] %>"></div>
+          <div class="ui-turnstile w-full">
+            <div class="cf-turnstile w-full"
+                 data-sitekey="<%= ENV["CLOUDFLARE_TURNSTILE_SITE_KEY"] %>"
+                 data-size="flexible"
+                 data-theme="auto"></div>
+          </div>
           <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
         <% end %>
         <button type="submit" class="ui-btn-primary ui-btn-md w-full">

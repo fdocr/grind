@@ -3,8 +3,8 @@
 
 <% [ [ "Front nine", front ], [ "Back nine", back ] ].each do |label, nine_holes| %>
   <% next if nine_holes.empty? %>
-  <h2 style="font-size: 16px; margin: 24px 0 8px;"><%= label %></h2>
-  <table>
+  <h2 class="scorecard-heading"><%= label %></h2>
+  <table class="scorecard">
     <thead>
       <tr>
         <th>Hole</th>

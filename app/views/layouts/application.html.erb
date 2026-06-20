@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <title><%= content_for?(:title) ? yield(:title) : "Grind" %></title>
-    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#276f54">
@@ -33,7 +33,7 @@
     <% end %>
   </head>
 
-  <body class="min-h-screen">
+  <body class="min-h-screen touch-manipulation">
     <header class="border-b border-border bg-card">
       <div class="max-w-lg mx-auto px-4 py-4 flex items-center justify-between">
         <%= link_to root_path, class: "text-xl font-bold text-primary-700 tracking-tight" do %>

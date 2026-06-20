@@ -1,17 +1,7 @@
-<h1 style="font-size: 20px; margin: 0 0 8px;">Your round at <%= @course.name %></h1>
-<p style="color: #64748b; margin: 0 0 16px;"><%= @course.location_label %></p>
-
-<p><strong>Score to par:</strong> <%= format_score_to_par(@round.score_to_par) %></p>
-<p><strong>Total score:</strong> <%= @round.total_score %></p>
-<p><strong>Total putts:</strong> <%= @round.total_putts %></p>
-
-<p>
-  <strong>OOP Tee Shots:</strong> <%= @round.oop_tee_shots %><br>
-  <strong>3 Putts:</strong> <%= @round.three_putts %><br>
-  <strong>Botched Up/Down:</strong> <%= @round.botched_up_downs %><br>
-  <strong>Inside PW/9i:</strong> <%= format_inside_pw_9i(@round.inside_pw_9i) %>
-</p>
+<%= render "summary", round: @round, course: @course %>
 
 <%= render "scorecard", round: @round, holes: @holes %>
 
-<p style="color: #64748b; margin-top: 24px;">Tracked with Grind</p>
+<p class="email-footer">
+  Tracked with <a href="https://ugo.cr/7kG34" class="email-footer-link">grind.fdo.cr</a>
+</p>

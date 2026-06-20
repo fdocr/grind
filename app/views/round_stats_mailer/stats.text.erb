@@ -1,12 +1,13 @@
 Your round at <%= @course.name %>
+<%= @course.location_label %>
 
 Score to par: <%= format_score_to_par(@round.score_to_par) %>
+
 Total score: <%= @round.total_score %>
 Total putts: <%= @round.total_putts %>
-
 OOP Tee Shots: <%= @round.oop_tee_shots %>
 3 Putts: <%= @round.three_putts %>
 Botched Up/Down: <%= @round.botched_up_downs %>
 Inside PW/9i: <%= format_inside_pw_9i(@round.inside_pw_9i) %>
 
-Tracked with Grind
+Tracked with grind.fdo.cr — https://ugo.cr/7kG34

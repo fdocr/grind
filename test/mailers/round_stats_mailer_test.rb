@@ -13,6 +13,7 @@ class RoundStatsMailerTest < ActionMailer::TestCase
     assert_equal [ "player@example.com" ], email.to
     assert_includes body, @delivery.course.name
     assert_includes body, "Score to par"
-    assert_includes body, "Tracked with Grind"
+    assert_includes body, "grind.fdo.cr"
+    assert_includes body, 'href="https://ugo.cr/7kG34"'
   end
 end

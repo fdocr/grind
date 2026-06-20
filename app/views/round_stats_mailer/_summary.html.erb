@@ -1,0 +1,51 @@
+<%# locals: (round:, course:) %>
+<% stat_rows = [
+  [ "Total score", round.total_score ],
+  [ "Total putts", round.total_putts ],
+  [ "OOP Tee Shots", round.oop_tee_shots ],
+  [ "3 Putts", round.three_putts ],
+  [ "Botched Up/Down", round.botched_up_downs ],
+  [ "Inside PW/9i", format_inside_pw_9i(round.inside_pw_9i) ]
+] %>
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" class="email-container">
+  <tr>
+    <td class="email-header">
+      <h1 class="email-title">Your round at <%= course.name %></h1>
+      <p class="email-subtitle"><%= course.location_label %></p>
+    </td>
+  </tr>
+
+  <tr>
+    <td class="email-hero-stat">
+      <p class="email-hero-label">Score to par</p>
+      <p class="email-hero-value"><%= format_score_to_par(round.score_to_par) %></p>
+    </td>
+  </tr>
+
+  <tr>
+    <td class="email-stat-grid">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+        <% stat_rows.each_slice(2) do |pair| %>
+          <tr>
+            <% pair.each do |label, value| %>
+              <td width="50%" valign="top" class="email-stat-cell">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" class="email-stat-card">
+                  <tr>
+                    <td class="email-stat-card-body">
+                      <p class="email-stat-value"><%= value %></p>
+                      <p class="email-stat-label"><%= label %></p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            <% end %>
+            <% if pair.size == 1 %>
+              <td width="50%" class="email-stat-cell email-stat-cell--spacer"></td>
+            <% end %>
+          </tr>
+        <% end %>
+      </table>
+    </td>
+  </tr>
+</table>
