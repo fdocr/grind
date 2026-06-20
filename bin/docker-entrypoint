@@ -1,10 +1,14 @@
 #!/bin/bash -e
 
+# Enable jemalloc for reduced memory usage and latency.
 if [ -z "${LD_PRELOAD+x}" ]; then
     LD_PRELOAD=$(find /usr/lib -name libjemalloc.so.2 -print -quit)
     export LD_PRELOAD
 fi
 
+# If running the rails server then create or migrate existing database.
+# Avoid db:prepare because it runs db:seed on a fresh database — production
+# instances should start empty and import course data separately.
 if [ "${@: -2:1}" == "./bin/rails" ] && [ "${@: -1:1}" == "server" ]; then
   ./bin/rails db:create 2>/dev/null || true
   ./bin/rails db:migrate

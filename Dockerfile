@@ -63,6 +63,7 @@ FROM base
 COPY --from=build "${BUNDLE_PATH}" "${BUNDLE_PATH}"
 COPY --from=build /rails /rails
 
+# Once backup hooks (zero-downtime SQLite snapshots)
 COPY hooks/ /hooks/
 RUN chmod +x /hooks/*
 

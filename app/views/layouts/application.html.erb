@@ -22,6 +22,15 @@
     <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
+
+    <!-- Privacy-friendly analytics by Plausible -->
+    <% if ENV["PLAUSIBLE_URL"].present? %>
+      <script async src="<%= ENV["PLAUSIBLE_URL"] %>"></script>
+      <script>
+        window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+        plausible.init()
+      </script>
+    <% end %>
   </head>
 
   <body class="min-h-screen">
