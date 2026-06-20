@@ -20,7 +20,7 @@ curl https://get.once.com | sh
 When prompted:
 
 1. Choose **Enter a Docker image path**
-2. Enter `ghcr.io/<your-github-user>/grind`
+2. Enter `ghcr.io/fdocr/grind`
 3. Enter your hostname (for example `grind.example.com`)
 
 Once pulls the image, provisions Let's Encrypt SSL, mounts `/rails/storage` for persistent SQLite data, and keeps the container updated from the `latest` tag.
