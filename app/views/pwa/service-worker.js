@@ -1,33 +1,64 @@
-const CACHE_NAME = "grind-v1"
-const SHELL_URLS = ["/", "/manifest.json", "/icon.png", "/icon.svg"]
+const CACHE_NAME = "grind-v2"
+const OFFLINE_URLS = ["/icon.png", "/icon.svg", "/manifest.json"]
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(SHELL_URLS))
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(OFFLINE_URLS))
   )
   self.skipWaiting()
 })
 
 self.addEventListener("activate", (event) => {
-  event.waitUntil(self.clients.claim())
+  event.waitUntil(
+    caches.keys().then((keys) =>
+      Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key)))
+    ).then(() => self.clients.claim())
+  )
 })
 
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return
 
-  event.respondWith(
-    caches.match(event.request).then((cached) => {
-      if (cached) return cached
+  const url = new URL(event.request.url)
+  if (url.origin !== self.location.origin) return
 
-      return fetch(event.request).then((response) => {
-        if (!response || response.status !== 200 || response.type !== "basic") {
-          return response
-        }
+  if (url.pathname.startsWith("/assets/")) {
+    event.respondWith(cacheFirst(event.request))
+    return
+  }
 
-        const copy = response.clone()
-        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy))
-        return response
-      }).catch(() => cached)
-    })
-  )
+  if (OFFLINE_URLS.includes(url.pathname) || url.pathname === "/manifest.json") {
+    event.respondWith(cacheFirst(event.request))
+    return
+  }
+
+  if (event.request.mode === "navigate" || event.request.headers.get("Accept")?.includes("text/html")) {
+    event.respondWith(networkFirst(event.request))
+  }
 })
+
+function cacheFirst(request) {
+  return caches.match(request).then((cached) => {
+    if (cached) return cached
+
+    return fetch(request).then((response) => {
+      if (response.ok) {
+        const copy = response.clone()
+        caches.open(CACHE_NAME).then((cache) => cache.put(request, copy))
+      }
+      return response
+    })
+  })
+}
+
+function networkFirst(request) {
+  return fetch(request)
+    .then((response) => {
+      if (response.ok) {
+        const copy = response.clone()
+        caches.open(CACHE_NAME).then((cache) => cache.put(request, copy))
+      }
+      return response
+    })
+    .catch(() => caches.match(request))
+}

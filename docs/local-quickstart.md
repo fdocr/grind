@@ -46,3 +46,7 @@ CI runs Brakeman, Bundler Audit, Importmap audit, RuboCop, unit tests, and syste
 ## Environment variables
 
 See `.env.sample` for SMTP, Honeybadger, Cloudflare Turnstile, Mission Control basic auth, and concurrency settings.
+
+## Email previews
+
+Round stats emails open automatically in the browser via `letter_opener` when a delivery is sent in development. Make sure the Solid Queue worker is running (it starts inside `bin/dev` via the Puma plugin).

@@ -1,4 +1,4 @@
-<%# locals: (tone: :info, title: nil, body: nil, icon: nil) %>
+<%# locals: (tone: :info, title: nil, message: nil, icon: nil) %>
 <%
   tone_class = "ui-banner-#{tone}"
   resolved_icon = icon || case tone.to_sym
@@ -19,11 +19,8 @@
       <% if title.present? %>
         <p class="font-medium"><%= title %></p>
       <% end %>
-      <% if body.present? %>
-        <p class="<%= "mt-1" if title.present? %>"><%= body %></p>
-      <% end %>
-      <% if block_given? %>
-        <div class="mt-2"><%= yield %></div>
+      <% if message.present? %>
+        <p class="<%= "mt-1" if title.present? %>"><%= message %></p>
       <% end %>
     </div>
   </div>

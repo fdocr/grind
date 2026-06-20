@@ -1,4 +1,4 @@
-<%# locals: (title:, body: nil, icon: "info", action: nil, compact: false) %>
+<%# locals: (title:, message: nil, icon: "info", action: nil, compact: false) %>
 <div class="text-center <%= compact ? "py-8" : "py-12" %>">
   <% if icon.present? %>
     <div class="text-muted-foreground/60 mb-3 inline-flex">
@@ -6,8 +6,8 @@
     </div>
   <% end %>
   <h3 class="text-base font-medium text-foreground mb-1"><%= title %></h3>
-  <% if body.present? %>
-    <p class="text-sm text-muted-foreground"><%= body %></p>
+  <% if message.present? %>
+    <p class="text-sm text-muted-foreground"><%= message %></p>
   <% end %>
   <% if action.present? %>
     <div class="mt-4"><%= action %></div>

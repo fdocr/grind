@@ -1,6 +1,6 @@
 <% if notice.present? %>
-  <%= render "ui/banner", tone: :success, body: notice %>
+  <%= render "ui/banner", tone: :success, message: notice %>
 <% end %>
 <% if alert.present? %>
-  <%= render "ui/banner", tone: :danger, body: alert %>
+  <%= render "ui/banner", tone: :danger, message: alert %>
 <% end %>

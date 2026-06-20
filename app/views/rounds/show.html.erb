@@ -27,7 +27,7 @@
   <section>
     <h2 class="text-lg font-semibold mb-3">Email your stats</h2>
     <%= render "ui/card", padding: :sm do %>
-      <%= form_with url: round_delivery_path(@round.token), scope: :delivery, class: "space-y-4" do |f| %>
+      <%= form_with url: round_delivery_path(@round.token), scope: :delivery, class: "space-y-4", data: { turbo: false } do |f| %>
         <%= render "ui/input", form: f, field: :email, label: "Email", type: :email, placeholder: "you@example.com", required: true, autocomplete: "email" %>
         <% if ENV["CLOUDFLARE_TURNSTILE_SITE_KEY"].present? %>
           <div class="cf-turnstile" data-sitekey="<%= ENV["CLOUDFLARE_TURNSTILE_SITE_KEY"] %>"></div>

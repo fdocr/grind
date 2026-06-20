@@ -1,0 +1,48 @@
+<% front = holes.select { |hole| hole.number <= 9 } %>
+<% back = holes.select { |hole| hole.number > 9 } %>
+
+<% [ [ "Front nine", front ], [ "Back nine", back ] ].each do |label, nine_holes| %>
+  <% next if nine_holes.empty? %>
+  <h2 style="font-size: 16px; margin: 24px 0 8px;"><%= label %></h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Hole</th>
+        <% nine_holes.each do |hole| %>
+          <th><%= hole.number %></th>
+        <% end %>
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th>Par</th>
+        <% nine_holes.each do |hole| %>
+          <td><%= hole.par %></td>
+        <% end %>
+        <td><%= nine_holes.sum(&:par) %></td>
+      </tr>
+      <tr>
+        <th>Hcp</th>
+        <% nine_holes.each do |hole| %>
+          <td><%= hole.handicap %></td>
+        <% end %>
+        <td></td>
+      </tr>
+      <tr>
+        <th>Score</th>
+        <% nine_holes.each do |hole| %>
+          <% entry = round.hole_scores[hole.number.to_s] || round.hole_scores[hole.number] %>
+          <td><%= entry&.dig("gross") || "·" %></td>
+        <% end %>
+        <td>
+          <% total = nine_holes.sum do |hole|
+               entry = round.hole_scores[hole.number.to_s] || round.hole_scores[hole.number]
+               entry&.dig("gross").to_i
+             end %>
+          <%= total.zero? ? "·" : total %>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+<% end %>

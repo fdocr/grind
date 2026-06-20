@@ -76,9 +76,9 @@
   <section>
     <h2 class="text-xl font-semibold mb-4">Banners</h2>
     <div class="space-y-3">
-      <%= render "ui/banner", tone: :info, title: "Info", body: "Search for your golf course to start grinding." %>
-      <%= render "ui/banner", tone: :warning, title: "Offline", body: "You are offline. Your round is saved on this device." %>
-      <%= render "ui/banner", tone: :success, title: "Round complete", body: "All 18 holes posted." %>
+      <%= render "ui/banner", tone: :info, title: "Info", message: "Search for your golf course to start grinding." %>
+      <%= render "ui/banner", tone: :warning, title: "Offline", message: "You are offline. Your round is saved on this device." %>
+      <%= render "ui/banner", tone: :success, title: "Round complete", message: "All 18 holes posted." %>
     </div>
   </section>
 
@@ -97,7 +97,7 @@
     <%= render "ui/card" do %>
       <%= render "ui/empty_state",
             title: "No courses found",
-            body: "Try a different search term.",
+            message: "Try a different search term.",
             icon: "search" %>
     <% end %>
   </section>
