@@ -63,6 +63,11 @@ export default class extends Controller {
     return this.state.holes[number] || { gross: null, putts: null }
   }
 
+  lastHoleNumber() {
+    if (!this.courseValue.holes.length) return 1
+    return Math.max(...this.courseValue.holes.map((hole) => hole.number))
+  }
+
   scoreToPar() {
     return this.courseValue.holes.reduce((total, hole) => {
       const entry = this.holeEntry(hole.number)
@@ -125,7 +130,9 @@ export default class extends Controller {
 
     this.scorecardBodyTarget.innerHTML = ""
     this.scorecardBodyTarget.appendChild(this.buildNineTable("Front", front))
-    this.scorecardBodyTarget.appendChild(this.buildNineTable("Back", back))
+    if (back.length > 0) {
+      this.scorecardBodyTarget.appendChild(this.buildNineTable("Back", back))
+    }
   }
 
   buildNineTable(label, holes) {
@@ -195,25 +202,30 @@ export default class extends Controller {
 
     this.holesListTarget.innerHTML = ""
 
+    const frontHoles = this.courseValue.holes.filter((hole) => hole.number <= 9)
+    const backHoles = this.courseValue.holes.filter((hole) => hole.number > 9)
+
     const grid = document.createElement("div")
-    grid.className = "grid grid-cols-2 gap-2"
+    grid.className = backHoles.length > 0 ? "grid grid-cols-2 gap-2" : "grid grid-cols-1 gap-2"
 
     const frontColumn = document.createElement("div")
     frontColumn.className = "space-y-2"
-    const backColumn = document.createElement("div")
-    backColumn.className = "space-y-2"
 
-    this.courseValue.holes.forEach((hole) => {
-      const button = this.buildHoleButton(hole)
-      if (hole.number <= 9) {
-        frontColumn.appendChild(button)
-      } else {
-        backColumn.appendChild(button)
-      }
+    frontHoles.forEach((hole) => {
+      frontColumn.appendChild(this.buildHoleButton(hole))
     })
 
     grid.appendChild(frontColumn)
-    grid.appendChild(backColumn)
+
+    if (backHoles.length > 0) {
+      const backColumn = document.createElement("div")
+      backColumn.className = "space-y-2"
+      backHoles.forEach((hole) => {
+        backColumn.appendChild(this.buildHoleButton(hole))
+      })
+      grid.appendChild(backColumn)
+    }
+
     this.holesListTarget.appendChild(grid)
   }
 
@@ -376,7 +388,7 @@ export default class extends Controller {
 
     this.state.holes[this.state.currentHole] = { gross, putts }
 
-    if (this.state.currentHole < 18) {
+    if (this.state.currentHole < this.lastHoleNumber()) {
       this.state.currentHole += 1
     }
 
@@ -392,7 +404,7 @@ export default class extends Controller {
   }
 
   nextHole() {
-    if (this.state.currentHole < 18) {
+    if (this.state.currentHole < this.lastHoleNumber()) {
       this.state.currentHole += 1
       this.render()
     }

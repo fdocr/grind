@@ -27,4 +27,30 @@ class RoundTest < ActiveSupport::TestCase
     assert_not round.valid?
     assert_includes round.errors[:hole_scores].join, "hole 2"
   end
+
+  test "valid finished round for nine hole course" do
+    build_nine_holes!(@course)
+
+    round = Round.new(
+      course: @course,
+      hole_scores: (1..9).index_with { |number| { "gross" => 4, "putts" => 2 } },
+      finished_at: Time.current
+    )
+
+    assert round.valid?
+  end
+
+  test "nine hole course rejects missing back nine scores" do
+    build_nine_holes!(@course)
+
+    round = Round.new(
+      course: @course,
+      hole_scores: (1..8).index_with { |number| { "gross" => 4, "putts" => 2 } },
+      finished_at: Time.current
+    )
+
+    assert_not round.valid?
+    assert_includes round.errors[:hole_scores].join, "hole 9"
+    assert_not_includes round.errors[:hole_scores].join, "hole 10"
+  end
 end

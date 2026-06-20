@@ -43,6 +43,10 @@ class Course < ApplicationRecord
     holes.sum(:par)
   end
 
+  def last_hole_number
+    holes.maximum(:number) || 0
+  end
+
   def location_label
     [ city, state_province, country ].compact_blank.join(", ")
   end

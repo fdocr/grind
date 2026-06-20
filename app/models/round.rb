@@ -35,10 +35,10 @@ class Round < ApplicationRecord
   private
 
   def hole_scores_complete
-    (1..18).each do |number|
-      entry = hole_scores[number.to_s] || hole_scores[number]
+    course.holes.order(:number).each do |hole|
+      entry = hole_scores[hole.number.to_s] || hole_scores[hole.number]
       if entry.blank? || entry["gross"].blank?
-        errors.add(:hole_scores, "must include a gross score for hole #{number}")
+        errors.add(:hole_scores, "must include a gross score for hole #{hole.number}")
       end
     end
   end

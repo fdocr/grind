@@ -2,6 +2,7 @@
 <% back = holes.select { |hole| hole.number > 9 } %>
 
 <% [ [ "Front nine", front ], [ "Back nine", back ] ].each do |label, nine_holes| %>
+  <% next if nine_holes.empty? %>
   <div class="mb-4">
     <h3 class="text-sm font-semibold text-muted-foreground mb-2"><%= label %></h3>
     <% headers = [ "Hole", *nine_holes.map(&:number), "Total" ] %>

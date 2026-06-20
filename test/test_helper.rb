@@ -16,5 +16,15 @@ module ActiveSupport
         end
       end
     end
+
+    def build_nine_holes!(course)
+      course.holes.where(number: 10..18).delete_all
+      (1..9).each do |number|
+        course.holes.find_or_create_by!(number: number) do |hole|
+          hole.par = number.even? ? 4 : (number % 3 == 0 ? 3 : 5)
+          hole.handicap = number
+        end
+      end
+    end
   end
 end
