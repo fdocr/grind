@@ -102,16 +102,29 @@ Defaults suit a small VPS. Tune on larger machines (see [Concurrency](#concurren
 
 ## 3. Import golf courses
 
-The image ships without course data. Copy your course YAML onto the server, then import inside the container:
+The image ships without course data. Copy your course YAML onto the server first (for example with `scp`), then copy it **into the container** before importing.
+
+Host paths such as `/root/courses.yml` are not visible inside the container. Use `docker cp` to place the file on the container filesystem:
 
 ```bash
-once exec bin/rails grind:courses:import FILE=/path/to/courses.yml
+docker cp /root/courses.yml <container_id>:/tmp/courses.yml
+docker exec -it <container_id> bin/rails grind:courses:import FILE=/tmp/courses.yml
 ```
 
-Or with Docker directly:
+Find the container ID with `docker ps`.
+
+With Once:
 
 ```bash
-docker exec -it <container_id> bin/rails grind:courses:import FILE=/path/to/courses.yml
+docker cp /root/courses.yml <container_id>:/tmp/courses.yml
+once exec bin/rails grind:courses:import FILE=/tmp/courses.yml
+```
+
+You can also copy to the persistent volume if you want to keep the file alongside your databases:
+
+```bash
+docker cp /root/courses.yml <container_id>:/rails/storage/courses.yml
+docker exec -it <container_id> bin/rails grind:courses:import FILE=/rails/storage/courses.yml
 ```
 
 ## Automatic updates
