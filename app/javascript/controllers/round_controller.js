@@ -279,9 +279,7 @@ export default class extends Controller {
     if (this.hasScorePanelParTarget) this.scorePanelParTarget.textContent = `Par ${hole.par}`
     if (this.hasScorePanelHcpTarget) this.scorePanelHcpTarget.textContent = `Hcp ${hole.handicap}`
 
-    const grossMin = Math.max(1, hole.par - 2)
-    const grossMax = hole.par + 5
-    const grossValues = Array.from({ length: grossMax - grossMin + 1 }, (_, index) => grossMin + index)
+    const grossValues = Array.from({ length: 12 }, (_, index) => index + 1)
 
     this.buildPicker(this.grossPickerTarget, grossValues, gross)
     this.buildPicker(this.puttsPickerTarget, Array.from({ length: 7 }, (_, index) => index), putts)
