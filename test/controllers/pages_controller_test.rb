@@ -18,5 +18,17 @@ class PagesControllerTest < ActionDispatch::IntegrationTest
     assert_select "a[href='/about']"
     assert_select "a[href='https://github.com/fdocr/grind']"
     assert_no_match(/<h1[^>]*>Grind<\/h1>/, response.body)
+    assert_select "meta[property='og:title'][content='Grind']"
+    assert_select "meta[name='twitter:card'][content='summary_large_image']"
+    assert_select "link[rel='canonical'][href='http://example.com/']"
+    assert_select "script[type='application/ld+json']"
+  end
+
+  test "about page includes seo metadata" do
+    get about_path
+    assert_response :success
+    assert_select "title", text: "About · Grind"
+    assert_select "meta[property='og:title'][content='About · Grind']"
+    assert_select "link[rel='canonical'][href='http://example.com/about']"
   end
 end

@@ -17,6 +17,7 @@ class CoursesController < ApplicationController
   end
 
   def show
+    prevent_indexing
     @course = Course.find(params[:id])
     @holes = @course.holes.order(:number)
     @tee_names = @course.tee_names

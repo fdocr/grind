@@ -10,6 +10,9 @@ Rails.application.routes.draw do
     get "styleguide", to: "styleguide#show"
   end
 
+  get "robots.txt", to: "seo#robots"
+  get "sitemap.xml", to: "seo#sitemap", defaults: { format: :xml }, as: :sitemap
+
   root "courses#index"
 
   get "about", to: "pages#about"

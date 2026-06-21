@@ -5,6 +5,7 @@ class RoundsController < ApplicationController
   before_action :set_round, only: :show
 
   def new
+    prevent_indexing
     @holes = @course.holes.order(:number)
     @tee = @course.tee?(params[:tee]) ? params[:tee].to_s : @course.default_tee
   end
@@ -29,6 +30,7 @@ class RoundsController < ApplicationController
   end
 
   def show
+    prevent_indexing
     @holes = @round.course.holes.order(:number)
   end
 

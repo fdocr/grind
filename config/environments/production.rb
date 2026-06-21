@@ -63,6 +63,10 @@ Rails.application.configure do
     host: ENV.fetch("APP_HOST", "grind.fdo.cr"),
     protocol: "https"
   }
+  config.action_controller.default_url_options = {
+    host: ENV.fetch("APP_HOST", "grind.fdo.cr"),
+    protocol: "https"
+  }
 
   # Specify outgoing SMTP server. Remember to add smtp/* credentials via bin/rails credentials:edit.
   # config.action_mailer.smtp_settings = {

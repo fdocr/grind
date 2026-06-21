@@ -1,4 +1,5 @@
-<% content_for :title, @round.course.name %>
+<% content_for :seo_title, @round.course.name %>
+<% content_for :seo_description, "Round complete at #{@round.course.name}." %>
 
 <div class="space-y-6">
   <header class="space-y-1">

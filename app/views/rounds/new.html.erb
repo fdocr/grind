@@ -1,4 +1,5 @@
-<% content_for :title, @course.name %>
+<% content_for :seo_title, @course.name %>
+<% content_for :seo_description, "Track your round at #{@course.name} with Grind." %>
 <%
   holes_json = @holes.map { |hole| { number: hole.number, par: hole.par, handicap: hole.handicap, yardage: @course.tee_yardage(@tee, hole.number) } }
   course_json = { id: @course.id, name: @course.name, unit: @course.metric? ? "m" : "yds", holes: holes_json }

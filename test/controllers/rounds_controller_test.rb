@@ -12,6 +12,7 @@ class RoundsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_match @course.name, response.body
     assert_match "data-round-course-value", response.body
+    assert_select "meta[name='robots'][content='noindex, nofollow']"
   end
 
   test "new tracker uses the requested tee" do

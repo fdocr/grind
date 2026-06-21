@@ -5,6 +5,7 @@ module Dev
     layout "application"
 
     before_action :ensure_development!
+    before_action :prevent_indexing
 
     def show
     end

@@ -2,6 +2,7 @@
 
 class MissionControlController < ActionController::Base
   before_action :authenticate_mission_control!
+  after_action :set_robots_header
 
   private
 
@@ -27,5 +28,9 @@ class MissionControlController < ActionController::Base
     return %w[development development] if Rails.env.development?
 
     [ nil, nil ]
+  end
+
+  def set_robots_header
+    response.headers["X-Robots-Tag"] = "noindex, nofollow"
   end
 end

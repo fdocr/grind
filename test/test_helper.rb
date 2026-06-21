@@ -28,3 +28,7 @@ module ActiveSupport
     end
   end
 end
+
+class ActionDispatch::IntegrationTest
+  setup { host! "example.com" }
+end

@@ -1,0 +1,37 @@
+<% if seo_indexable? %>
+  <script type="application/ld+json">
+    <%= {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "name": SeoHelper::SITE_NAME,
+          "url": seo_site_url,
+          "description": seo_description
+        },
+        {
+          "@type": "WebApplication",
+          "name": SeoHelper::SITE_NAME,
+          "url": seo_site_url,
+          "applicationCategory": "SportsApplication",
+          "operatingSystem": "Web",
+          "browserRequirements": "Requires a modern browser",
+          "description": seo_description,
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+          },
+          "isAccessibleForFree": true,
+          "image": seo_image_url
+        },
+        {
+          "@type": "Organization",
+          "name": SeoHelper::SITE_NAME,
+          "url": seo_site_url,
+          "sameAs": [ SeoHelper::GITHUB_URL ]
+        }
+      ]
+    }.to_json.html_safe %>
+  </script>
+<% end %>
