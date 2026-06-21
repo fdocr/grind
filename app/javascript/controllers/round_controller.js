@@ -16,6 +16,8 @@ export default class extends Controller {
 
   connect() {
     this.state = this.loadState()
+    this.state.courseId = this.courseValue.id
+    this.state.courseName = this.courseValue.name
     this.render()
     this.boundOnline = this.handleOnline.bind(this)
     window.addEventListener("online", this.boundOnline)
@@ -36,6 +38,8 @@ export default class extends Controller {
   defaultState() {
     return {
       roundId: crypto.randomUUID(),
+      courseId: this.courseValue.id,
+      courseName: this.courseValue.name,
       startedAt: new Date().toISOString(),
       currentHole: 1,
       oopTeeShots: 0,
@@ -461,8 +465,13 @@ export default class extends Controller {
       container.appendChild(putts)
     })
 
+    form.requestSubmit()
+  }
+
+  submitEnd(event) {
+    if (!event.detail.success) return
+
     localStorage.removeItem(this.storageKey())
     this.state.pendingFinish = false
-    form.requestSubmit()
   }
 }

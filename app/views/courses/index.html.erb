@@ -6,6 +6,11 @@
     <p class="text-muted-foreground">Track your round to improve your game.</p>
   </div>
 
+  <section data-controller="ongoing-rounds" class="hidden space-y-3">
+    <h2 class="text-lg font-semibold">Ongoing rounds</h2>
+    <div class="space-y-3" data-ongoing-rounds-target="list"></div>
+  </section>
+
   <section>
     <h2 class="text-lg font-semibold mb-3">Find your golf course</h2>
     <%= turbo_frame_tag "course_results" do %>

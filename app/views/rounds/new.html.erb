@@ -80,7 +80,7 @@
     Reset round
   </button>
 
-  <%= form_with url: course_rounds_path(@course), method: :post, data: { round_target: "finishForm", turbo: false }, class: "hidden" do %>
+  <%= form_with url: course_rounds_path(@course), method: :post, data: { round_target: "finishForm", action: "turbo:submit-end->round#submitEnd" }, class: "hidden" do %>
     <input type="hidden" name="round[oop_tee_shots]" value="0">
     <input type="hidden" name="round[three_putts]" value="0">
     <input type="hidden" name="round[botched_up_downs]" value="0">

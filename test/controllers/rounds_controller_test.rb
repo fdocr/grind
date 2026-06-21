@@ -39,6 +39,39 @@ class RoundsControllerTest < ActionDispatch::IntegrationTest
     assert_match format_score_to_par(round.score_to_par), response.body
   end
 
+  test "create renders friendly banner without losing data when save raises" do
+    hole_scores = (1..18).each_with_object({}) do |number, scores|
+      scores[number.to_s] = { gross: 4, putts: 2 }
+    end
+
+    Round.class_eval { alias_method :__orig_save, :save }
+    Round.define_method(:save) { |*| raise StandardError, "boom" }
+
+    begin
+      assert_no_difference "Round.count" do
+        post course_rounds_path(@course), params: {
+          round: {
+            oop_tee_shots: 0,
+            three_putts: 0,
+            botched_up_downs: 0,
+            inside_pw_9i: 0,
+            started_at: 1.hour.ago.iso8601,
+            hole_scores: hole_scores
+          }
+        }
+      end
+    ensure
+      Round.class_eval do
+        alias_method :save, :__orig_save
+        remove_method :__orig_save
+      end
+    end
+
+    assert_response :unprocessable_entity
+    assert_match "Something went wrong", response.body
+    assert_match "data-round-course-value", response.body
+  end
+
   test "create finished nine hole round" do
     build_nine_holes!(@course)
 

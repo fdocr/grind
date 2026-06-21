@@ -17,8 +17,14 @@ class RoundsController < ApplicationController
       redirect_to round_path(@round.token)
     else
       @holes = @course.holes.order(:number)
+      flash.now[:alert] = "We couldn't finish your round. Your scores are still saved on this device — please try again."
       render :new, status: :unprocessable_entity
     end
+  rescue StandardError => e
+    Honeybadger.notify(e) if defined?(Honeybadger)
+    @holes = @course.holes.order(:number)
+    flash.now[:alert] = "Something went wrong on our end. Your round is still saved on this device — please try finishing it again."
+    render :new, status: :unprocessable_entity
   end
 
   def show
