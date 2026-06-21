@@ -49,3 +49,14 @@
 # Ignore Docker-related files
 /.dockerignore
 /Dockerfile*
+
+# Ignore files not needed in the production image (reduces COPY layer churn).
+/test/
+/docs/
+/.cursor/
+/PLAN.md
+/README.md
+/LICENSE.md
+/coverage/
+/.rubocop*.yml
+/.ruby-version
