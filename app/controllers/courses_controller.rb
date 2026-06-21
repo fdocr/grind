@@ -15,4 +15,11 @@ class CoursesController < ApplicationController
       @featured = true
     end
   end
+
+  def show
+    @course = Course.find(params[:id])
+    @holes = @course.holes.order(:number)
+    @tee_names = @course.tee_names
+    @active_tee = @course.tee?(params[:tee]) ? params[:tee].to_s : @course.default_tee
+  end
 end

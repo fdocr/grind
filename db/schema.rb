@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_19_225007) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_21_144000) do
   create_table "courses", force: :cascade do |t|
     t.string "address"
     t.string "city"
@@ -63,6 +63,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_19_225007) do
     t.integer "inside_pw_9i", default: 0, null: false
     t.integer "oop_tee_shots", default: 0, null: false
     t.datetime "started_at"
+    t.string "tee"
     t.integer "three_putts", default: 0, null: false
     t.string "token", null: false
     t.datetime "updated_at", null: false

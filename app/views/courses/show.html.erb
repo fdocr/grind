@@ -1,0 +1,96 @@
+<% unit = @course.metric? ? "m" : "yds" %>
+<% front = @holes.select { |hole| hole.number <= 9 } %>
+<% back = @holes.select { |hole| hole.number > 9 } %>
+
+<%= turbo_frame_tag "course_modal" do %>
+  <div data-controller="modal tee-select"
+       data-tee-select-tees-value="<%= @course.tees.to_json %>"
+       data-tee-select-active-value="<%= @active_tee %>">
+    <div class="fixed inset-0 z-40 bg-black/40" data-action="click->modal#close"></div>
+
+    <div class="fixed inset-x-4 bottom-4 z-50 max-h-[85vh] overflow-y-auto">
+      <%= render "ui/card", padding: :sm, extra_class: "overflow-hidden" do %>
+        <div class="flex items-start justify-between gap-3 mb-4">
+          <div class="min-w-0">
+            <h3 class="font-semibold text-foreground truncate"><%= @course.name %></h3>
+            <p class="text-sm text-muted-foreground"><%= @course.location_label %></p>
+          </div>
+          <button type="button" class="ui-btn-ghost ui-btn-sm shrink-0" data-action="modal#close">Close</button>
+        </div>
+
+        <% if @active_tee.present? %>
+          <div class="space-y-3 mb-4">
+            <% if @tee_names.size > 1 %>
+              <div>
+                <p class="ui-label mb-2">Select tee</p>
+                <div class="ui-segmented" role="group">
+                  <% @tee_names.each do |name| %>
+                    <button type="button"
+                            class="ui-segmented-option"
+                            data-tee-select-target="option"
+                            data-value="<%= name %>"
+                            data-state="<%= name == @active_tee ? "active" : "inactive" %>"
+                            data-action="tee-select#select">
+                      <%= name.titleize %>
+                    </button>
+                  <% end %>
+                </div>
+              </div>
+            <% else %>
+              <span class="ui-badge ui-badge-primary"><%= @active_tee.titleize %> tee</span>
+            <% end %>
+
+            <div class="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
+              <span>Rating <span class="font-medium text-foreground" data-tee-select-target="rating">—</span></span>
+              <span>Slope <span class="font-medium text-foreground" data-tee-select-target="slope">—</span></span>
+              <span>Par <span class="font-medium text-foreground"><%= @course.total_par %></span></span>
+            </div>
+          </div>
+        <% end %>
+
+        <div class="min-w-0 space-y-4">
+          <% [ [ "Front nine", front, 0 ], [ "Back nine", back, 9 ] ].each do |label, nine, offset| %>
+            <% next if nine.empty? %>
+            <div>
+              <h4 class="text-sm font-semibold mb-2 text-muted-foreground"><%= label %></h4>
+              <div class="ui-scorecard-scroll">
+                <table class="ui-scorecard-table">
+                  <tr>
+                    <th>Hole</th>
+                    <% nine.each do |hole| %><th><%= hole.number %></th><% end %>
+                    <th>Total</th>
+                  </tr>
+                  <tr>
+                    <td>Par</td>
+                    <% nine.each do |hole| %><td><%= hole.par %></td><% end %>
+                    <td><%= nine.sum(&:par) %></td>
+                  </tr>
+                  <tr>
+                    <td>Hcp</td>
+                    <% nine.each do |hole| %><td><%= hole.handicap %></td><% end %>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <td><%= unit.titleize %></td>
+                    <% nine.each do |hole| %>
+                      <td data-tee-select-target="yardage" data-hole="<%= hole.number %>">—</td>
+                    <% end %>
+                    <td data-tee-select-target="<%= offset.zero? ? "totalOut" : "totalIn" %>">—</td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+          <% end %>
+        </div>
+
+        <div class="flex gap-2 mt-6 pt-4 border-t border-border">
+          <button type="button" class="ui-btn-secondary ui-btn-md flex-1" data-action="modal#close">Cancel</button>
+          <%= link_to "Start round",
+                round_course_path(@course, tee: @active_tee),
+                class: "ui-btn-primary ui-btn-md flex-1",
+                data: { turbo_frame: "_top", tee_select_target: "startLink" } %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+<% end %>

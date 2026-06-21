@@ -1,0 +1,73 @@
+<% content_for :title, "About" %>
+
+<div class="space-y-6">
+  <header class="space-y-2">
+    <h1 class="text-2xl font-bold text-foreground">About Grind</h1>
+    <p class="text-muted-foreground">
+      Grind is a simple, mobile-first golf tracker. You keep your score hole by hole, and alongside it you log a small set of stats chosen to show amateurs where their shots actually go — not the tour-level numbers that rarely reflect a weekend round.
+    </p>
+  </header>
+
+  <section class="space-y-3">
+    <h2 class="text-lg font-semibold">Inspiration</h2>
+    <%= render "ui/card", padding: :sm do %>
+      <p class="text-sm text-muted-foreground">
+        These stats come from Matty Boom Boom, a.k.a. <%= link_to "Golf Sidekick", "http://youtube.com/@GolfSidekick", class: "ui-btn-link", target: "_blank", rel: "noopener" %>. I can't recommend enough his take on game improvement (pure MONEY) and Grind was built to put it into practice. Good luck out there gangbangers!
+      </p>
+    <% end %>
+  </section>
+
+  <section class="space-y-3">
+    <h2 class="text-lg font-semibold">The basics</h2>
+    <%= render "ui/card", padding: :sm do %>
+      <dl class="space-y-4">
+        <div>
+          <dt class="font-semibold text-foreground">Score to par</dt>
+          <dd class="text-sm text-muted-foreground mt-1">Your total strokes relative to the course's par, updated live as you post each hole. Shown as <span class="font-medium text-foreground">Even</span>, <span class="font-medium text-foreground">+N</span> over, or <span class="font-medium text-foreground">−N</span> under.</dd>
+        </div>
+        <div>
+          <dt class="font-semibold text-foreground">Total score</dt>
+          <dd class="text-sm text-muted-foreground mt-1">The gross number of strokes you took across the round.</dd>
+        </div>
+        <div>
+          <dt class="font-semibold text-foreground">Total putts</dt>
+          <dd class="text-sm text-muted-foreground mt-1">Every putt added up. A quick gut-check on how much of your score is being decided on the greens.</dd>
+        </div>
+      </dl>
+    <% end %>
+  </section>
+
+  <section class="space-y-3">
+    <h2 class="text-lg font-semibold">The stats that matter</h2>
+    <p class="text-muted-foreground text-sm">
+      These are the counters you tap up and down during a round. Each one is meant to surface a common way amateurs leak strokes, so after a few rounds you can see the pattern and know what to practice.
+    </p>
+    <%= render "ui/card", padding: :sm do %>
+      <dl class="space-y-4">
+        <div>
+          <dt class="font-semibold text-foreground">OOP Tee Shots <span class="text-muted-foreground font-normal">(Out Of Position)</span></dt>
+          <dd class="text-sm text-muted-foreground mt-1">Count a tee shot here whenever it leaves you out of position — out of bounds, in a hazard, buried in the rough, or blocked out — so your next shot is a recovery instead of the shot you wanted to hit. High numbers point to driving as the source of big scores.</dd>
+        </div>
+        <div>
+          <dt class="font-semibold text-foreground">3 Putts</dt>
+          <dd class="text-sm text-muted-foreground mt-1">Holes where you needed three or more putts to hole out. A few of these per round usually means lag putting and distance control, not your stroke, are costing you.</dd>
+        </div>
+        <div>
+          <dt class="font-semibold text-foreground">Botched Up/Down</dt>
+          <dd class="text-sm text-muted-foreground mt-1">The amateur's version of scrambling: when you miss the green and fail to get up and down (chip/pitch/bunker plus one putt). Count one each time you needed three or more shots from around the green. It shows how much your short game is rescuing — or sinking — your round.</dd>
+        </div>
+        <div>
+          <dt class="font-semibold text-foreground">Inside PW/9i</dt>
+          <dd class="text-sm text-muted-foreground mt-1">Once your ball is inside pitching-wedge / 9-iron range, play the rest of the hole as its own par 3 and score against that. Hole out in 3 from there and it's even; do it in 2 and you're one under (<span class="font-medium text-foreground">−1</span>); take 4 and you're one over (<span class="font-medium text-foreground">+1</span>), 5 is <span class="font-medium text-foreground">+2</span>, and so on. Added up across the round, it shows how well you convert from your prime scoring distance — the shots that should be turning good positions into pars and birdies. Shown as <span class="font-medium text-foreground">Even</span>, <span class="font-medium text-foreground">−N</span> (under) or <span class="font-medium text-foreground">+N</span> (over), just like score to par.</dd>
+        </div>
+      </dl>
+    <% end %>
+  </section>
+
+  <section class="space-y-3">
+    <p class="text-muted-foreground text-sm">
+      Grind is <%= link_to "open source", "https://github.com/fdocr/grind", class: "ui-btn-link", target: "_blank", rel: "noopener" %> and free to use — self-host it or contribute on GitHub.
+    </p>
+    <%= link_to "Start tracking a round", root_path, class: "ui-btn-primary ui-btn-md" %>
+  </section>
+</div>

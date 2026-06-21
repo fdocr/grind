@@ -12,6 +12,9 @@ class RoundFlowTest < ApplicationSystemTestCase
     click_button "Search"
     click_link @course.name
 
+    assert_text "White tee", wait: 5
+    click_on "Start round"
+
     assert_text @course.name
     assert_text "Round stats"
 

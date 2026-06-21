@@ -1,14 +1,40 @@
 <% content_for :title, "Grind" %>
 
 <div class="space-y-6">
-  <div class="text-center space-y-2">
-    <h1 class="text-2xl font-bold text-foreground">Grind</h1>
-    <p class="text-muted-foreground">Track your round to improve your game.</p>
+  <div class="space-y-3">
+    <p class="text-muted-foreground">
+      Amateurs don't get the same value from stats that the pros do — greens in regulation, fairways hit, scrambling and the rest are built around a game most of us don't play. Grind keeps your score while tracking a few simple stats that show how and where you're actually dropping shots on the course.
+    </p>
+    <p class="text-muted-foreground">
+      It's a deliberately simple tool: track a round on your phone, finish, and get a clear picture of where the strokes went. <%= link_to "Learn more about these stats", about_path, class: "ui-btn-link" %>.
+    </p>
+    <p class="text-muted-foreground">
+      Grind is <%= link_to "open source", "https://github.com/fdocr/grind", class: "ui-btn-link", target: "_blank", rel: "noopener" %> and free to use.
+    </p>
   </div>
 
   <section data-controller="ongoing-rounds" class="hidden space-y-3">
     <h2 class="text-lg font-semibold">Ongoing rounds</h2>
     <div class="space-y-3" data-ongoing-rounds-target="list"></div>
+
+    <template data-ongoing-rounds-target="continueIcon"><%= icon "play", class: "w-5 h-5" %></template>
+    <template data-ongoing-rounds-target="clearIcon"><%= icon "trash", class: "w-5 h-5" %></template>
+
+    <div class="hidden" data-ongoing-rounds-target="confirm">
+      <div class="fixed inset-0 z-40 bg-black/40" data-action="ongoing-rounds#cancelClear"></div>
+      <div class="fixed inset-x-4 bottom-4 z-50">
+        <%= render "ui/card", padding: :sm do %>
+          <h3 class="font-semibold mb-2">Clear ongoing round?</h3>
+          <p class="text-sm text-muted-foreground mb-4">
+            This removes your saved scores for <span class="font-medium text-foreground" data-ongoing-rounds-target="confirmName"></span>. This cannot be undone.
+          </p>
+          <div class="flex gap-2">
+            <button type="button" class="ui-btn-secondary ui-btn-md flex-1" data-action="ongoing-rounds#cancelClear">Cancel</button>
+            <button type="button" class="ui-btn-danger ui-btn-md flex-1" data-action="ongoing-rounds#confirmClear">Clear round</button>
+          </div>
+        <% end %>
+      </div>
+    </div>
   </section>
 
   <section>
@@ -18,4 +44,6 @@
       <%= render "results", courses: @courses, query: @query, featured: @featured, more_results: @more_results %>
     <% end %>
   </section>
+
+  <%= turbo_frame_tag "course_modal" %>
 </div>

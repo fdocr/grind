@@ -1,5 +1,5 @@
 Your round at <%= @course.name %>
-<%= @course.location_label %>
+<%= @course.location_label %><% if @round.tee_label %> · <%= @round.tee_label %> tee<% end %>
 
 Score to par: <%= format_score_to_par(@round.score_to_par) %>
 

@@ -12,7 +12,9 @@
   <tr>
     <td class="email-header">
       <h1 class="email-title">Your round at <%= course.name %></h1>
-      <p class="email-subtitle"><%= course.location_label %></p>
+      <p class="email-subtitle">
+        <%= course.location_label %><% if round.tee_label %> &middot; <%= round.tee_label %> tee<% end %>
+      </p>
     </td>
   </tr>
 

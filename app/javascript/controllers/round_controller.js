@@ -5,19 +5,21 @@ export default class extends Controller {
     "scoreToPar", "holeNumber", "insidePw9i", "oopTeeShots", "threePutts", "botchedUpDowns",
     "scorePanel", "holesPanel", "scorecardPanel", "resetPanel", "overlay",
     "grossInput", "puttsInput", "grossPicker", "puttsPicker",
-    "scorePanelHole", "scorePanelPar", "scorePanelHcp", "holeMeta",
+    "scorePanelHole", "scorePanelPar", "scorePanelHcp", "scorePanelYards", "holeMeta",
     "finishButton", "finishForm", "startedAt",
     "scorecardBody", "holesList"
   ]
 
   static values = {
-    course: Object
+    course: Object,
+    tee: String
   }
 
   connect() {
     this.state = this.loadState()
     this.state.courseId = this.courseValue.id
     this.state.courseName = this.courseValue.name
+    this.state.tee = this.teeValue
     this.render()
     this.boundOnline = this.handleOnline.bind(this)
     window.addEventListener("online", this.boundOnline)
@@ -35,11 +37,16 @@ export default class extends Controller {
     return this.defaultState()
   }
 
+  unit() {
+    return this.courseValue.unit || "yds"
+  }
+
   defaultState() {
     return {
       roundId: crypto.randomUUID(),
       courseId: this.courseValue.id,
       courseName: this.courseValue.name,
+      tee: this.teeValue,
       startedAt: new Date().toISOString(),
       currentHole: 1,
       oopTeeShots: 0,
@@ -105,7 +112,8 @@ export default class extends Controller {
 
     const hole = this.currentHoleData()
     if (hole && this.hasHoleMetaTarget) {
-      this.holeMetaTarget.textContent = `Par ${hole.par} · Hcp ${hole.handicap}`
+      const yards = hole.yardage ? ` · ${hole.yardage} ${this.unit()}` : ""
+      this.holeMetaTarget.textContent = `Par ${hole.par} · Hcp ${hole.handicap}${yards}`
     }
 
     this.insidePw9iTarget.textContent = this.formatInside(this.state.insidePw9i)
@@ -179,6 +187,17 @@ export default class extends Controller {
     })
     table.appendChild(hcpRow)
 
+    if (holes.some((hole) => hole.yardage)) {
+      const yardsRow = document.createElement("tr")
+      const yardsTotal = holes.reduce((sum, hole) => sum + (hole.yardage || 0), 0)
+      ;[this.unit().charAt(0).toUpperCase() + this.unit().slice(1), ...holes.map((hole) => hole.yardage || "·"), yardsTotal || "·"].forEach((cell) => {
+        const td = document.createElement("td")
+        td.textContent = cell
+        yardsRow.appendChild(td)
+      })
+      table.appendChild(yardsRow)
+    }
+
     const scoreRow = document.createElement("tr")
     const scores = holes.map((hole) => {
       const entry = this.holeEntry(hole.number)
@@ -246,7 +265,8 @@ export default class extends Controller {
 
     const meta = document.createElement("span")
     meta.className = "text-xs text-muted-foreground"
-    meta.textContent = `Par ${hole.par} · ${scoreLabel}`
+    const yards = hole.yardage ? ` · ${hole.yardage} ${this.unit()}` : ""
+    meta.textContent = `Par ${hole.par} · ${scoreLabel}${yards}`
 
     button.appendChild(title)
     button.appendChild(meta)
@@ -294,6 +314,10 @@ export default class extends Controller {
     if (this.hasScorePanelHoleTarget) this.scorePanelHoleTarget.textContent = `Hole ${hole.number}`
     if (this.hasScorePanelParTarget) this.scorePanelParTarget.textContent = `Par ${hole.par}`
     if (this.hasScorePanelHcpTarget) this.scorePanelHcpTarget.textContent = `Hcp ${hole.handicap}`
+    if (this.hasScorePanelYardsTarget) {
+      this.scorePanelYardsTarget.textContent = hole.yardage ? `${hole.yardage} ${this.unit()}` : "—"
+      this.scorePanelYardsTarget.classList.toggle("hidden", !hole.yardage)
+    }
 
     const grossValues = Array.from({ length: 12 }, (_, index) => index + 1)
 

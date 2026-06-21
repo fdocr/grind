@@ -50,4 +50,43 @@ class Course < ApplicationRecord
   def location_label
     [ city, state_province, country ].compact_blank.join(", ")
   end
+
+  # Tee names in import order (longest course first when yardage is known).
+  def tee_names
+    tees.keys.sort_by { |name| -tee_total_yardage(name) }
+  end
+
+  def default_tee
+    tee_names.first
+  end
+
+  def tee?(name)
+    name.present? && tees.key?(name.to_s)
+  end
+
+  def tee_data(name)
+    tees[name.to_s] || {}
+  end
+
+  def tee_yardages(name)
+    Array(tee_data(name)["yardages"]).map(&:to_i)
+  end
+
+  # Yardage for a specific hole number (1-indexed); nil when unknown.
+  def tee_yardage(name, hole_number)
+    yards = tee_yardages(name)[hole_number.to_i - 1].to_i
+    yards.positive? ? yards : nil
+  end
+
+  def tee_total_yardage(name)
+    tee_yardages(name).sum
+  end
+
+  def tee_rating(name)
+    tee_data(name)["rating"].to_s.presence
+  end
+
+  def tee_slope(name)
+    tee_data(name)["slope"].to_s.presence
+  end
 end

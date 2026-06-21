@@ -16,6 +16,14 @@
          entry = round.hole_scores[hole.number.to_s] || round.hole_scores[hole.number]
          entry&.dig("gross").to_i
        end %>
-    <%= render "ui/table", headers: headers, rows: [ par_row, hcp_row, [ "Score", *score_cells, (total.zero? ? "·" : total) ] ] %>
+    <% rows = [ par_row, hcp_row ] %>
+    <% if round.tee.present? %>
+      <% unit_label = round.course.metric? ? "M" : "Yds" %>
+      <% yard_cells = nine_holes.map { |hole| round.tee_yardage(hole.number) || "·" } %>
+      <% yard_total = nine_holes.sum { |hole| round.tee_yardage(hole.number).to_i } %>
+      <% rows << [ unit_label, *yard_cells, (yard_total.zero? ? "·" : yard_total) ] %>
+    <% end %>
+    <% rows << [ "Score", *score_cells, (total.zero? ? "·" : total) ] %>
+    <%= render "ui/table", headers: headers, rows: rows %>
   </div>
 <% end %>

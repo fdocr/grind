@@ -17,6 +17,23 @@ class Round < ApplicationRecord
     finished_at.present?
   end
 
+  def tee_label
+    tee.to_s.titleize.presence
+  end
+
+  def tee_yardage(hole_number)
+    return nil if tee.blank?
+
+    course.tee_yardage(tee, hole_number)
+  end
+
+  def tee_total_yardage
+    return nil if tee.blank?
+
+    total = course.tee_total_yardage(tee)
+    total.positive? ? total : nil
+  end
+
   def total_score
     hole_scores.values.sum { |entry| entry["gross"].to_i }
   end

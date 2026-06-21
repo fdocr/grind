@@ -12,7 +12,9 @@ Rails.application.routes.draw do
 
   root "courses#index"
 
-  resources :courses, only: :index do
+  get "about", to: "pages#about"
+
+  resources :courses, only: %i[index show] do
     member do
       get :round, to: "rounds#new"
     end

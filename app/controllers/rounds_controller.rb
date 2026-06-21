@@ -6,6 +6,7 @@ class RoundsController < ApplicationController
 
   def new
     @holes = @course.holes.order(:number)
+    @tee = @course.tee?(params[:tee]) ? params[:tee].to_s : @course.default_tee
   end
 
   def create
@@ -48,6 +49,7 @@ class RoundsController < ApplicationController
       :botched_up_downs,
       :inside_pw_9i,
       :started_at,
+      :tee,
       hole_scores: {}
     )
   end

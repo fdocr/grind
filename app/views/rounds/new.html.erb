@@ -1,15 +1,21 @@
 <% content_for :title, @course.name %>
 <%
-  holes_json = @holes.map { |hole| { number: hole.number, par: hole.par, handicap: hole.handicap } }
-  course_json = { id: @course.id, name: @course.name, holes: holes_json }
+  holes_json = @holes.map { |hole| { number: hole.number, par: hole.par, handicap: hole.handicap, yardage: @course.tee_yardage(@tee, hole.number) } }
+  course_json = { id: @course.id, name: @course.name, unit: @course.metric? ? "m" : "yds", holes: holes_json }
 %>
 
 <div class="space-y-6"
      data-controller="round"
+     data-round-tee-value="<%= @tee %>"
      data-round-course-value="<%= course_json.to_json %>">
   <header class="space-y-1">
     <h1 class="text-xl font-bold text-foreground"><%= @course.name %></h1>
-    <p class="text-sm text-muted-foreground"><%= Time.zone.today.strftime("%a %b %-d, %Y") %></p>
+    <div class="flex items-center gap-2 flex-wrap">
+      <p class="text-sm text-muted-foreground"><%= Time.zone.today.strftime("%a %b %-d, %Y") %></p>
+      <% if @tee.present? %>
+        <span class="ui-badge ui-badge-primary ui-badge-sm"><%= @tee.titleize %> tee</span>
+      <% end %>
+    </div>
     <div class="flex items-start justify-between pt-2 gap-4">
       <div>
         <p class="text-lg font-semibold" data-round-target="holeNumber">Hole 1</p>
@@ -86,6 +92,7 @@
     <input type="hidden" name="round[botched_up_downs]" value="0">
     <input type="hidden" name="round[inside_pw_9i]" value="0">
     <input type="hidden" name="round[started_at]" value="" data-round-target="startedAt">
+    <input type="hidden" name="round[tee]" value="<%= @tee %>">
     <div data-round-hole-scores></div>
   <% end %>
 
@@ -98,6 +105,7 @@
         <span class="ui-badge ui-badge-primary ui-badge-sm" data-round-target="scorePanelHole">Hole 1</span>
         <span class="ui-badge ui-badge-neutral ui-badge-sm" data-round-target="scorePanelPar">Par 4</span>
         <span class="ui-badge ui-badge-neutral ui-badge-sm" data-round-target="scorePanelHcp">Hcp 1</span>
+        <span class="ui-badge ui-badge-neutral ui-badge-sm hidden" data-round-target="scorePanelYards">—</span>
       </div>
       <div class="space-y-4">
         <div class="ui-picker-row">

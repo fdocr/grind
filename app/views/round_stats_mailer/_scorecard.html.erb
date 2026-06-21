@@ -29,6 +29,16 @@
         <% end %>
         <td></td>
       </tr>
+      <% if round.tee.present? %>
+        <tr>
+          <th><%= round.course.metric? ? "M" : "Yds" %></th>
+          <% nine_holes.each do |hole| %>
+            <td><%= round.tee_yardage(hole.number) || "·" %></td>
+          <% end %>
+          <% yard_total = nine_holes.sum { |hole| round.tee_yardage(hole.number).to_i } %>
+          <td><%= yard_total.zero? ? "·" : yard_total %></td>
+        </tr>
+      <% end %>
       <tr>
         <th>Score</th>
         <% nine_holes.each do |hole| %>

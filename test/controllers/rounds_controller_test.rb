@@ -14,6 +14,34 @@ class RoundsControllerTest < ActionDispatch::IntegrationTest
     assert_match "data-round-course-value", response.body
   end
 
+  test "new tracker uses the requested tee" do
+    get round_course_path(@course, tee: "white")
+    assert_response :success
+    assert_match "data-round-tee-value=\"white\"", response.body
+    assert_match "White tee", response.body
+  end
+
+  test "new tracker falls back to the default tee for an unknown tee" do
+    get round_course_path(@course, tee: "purple")
+    assert_response :success
+    assert_match "data-round-tee-value=\"white\"", response.body
+  end
+
+  test "create stores the selected tee" do
+    hole_scores = (1..18).each_with_object({}) do |number, scores|
+      scores[number.to_s] = { gross: 4, putts: 2 }
+    end
+
+    post course_rounds_path(@course), params: {
+      round: {
+        oop_tee_shots: 0, three_putts: 0, botched_up_downs: 0, inside_pw_9i: 0,
+        started_at: 1.hour.ago.iso8601, tee: "white", hole_scores: hole_scores
+      }
+    }
+
+    assert_equal "white", Round.last.tee
+  end
+
   test "create finished round and show scorecard" do
     hole_scores = (1..18).each_with_object({}) do |number, scores|
       scores[number.to_s] = { gross: 4, putts: 2 }

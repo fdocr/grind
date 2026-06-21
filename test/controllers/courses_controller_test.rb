@@ -27,8 +27,42 @@ class CoursesControllerTest < ActionDispatch::IntegrationTest
 
     get courses_path, params: { q: "Searchable" }
     assert_response :success
-    assert_select "a[href*='round']", count: 10
+    assert_select "a[data-turbo-frame='course_modal']", count: 10
     assert_match "Refine your search", response.body
+  end
+
+  test "show renders the tee picker and scorecard popover" do
+    course = courses(:one)
+    build_eighteen_holes!(course)
+
+    get course_path(course)
+    assert_response :success
+    assert_select "turbo-frame#course_modal"
+    assert_match "data-tee-select-active-value=\"white\"", response.body
+    assert_match "White tee", response.body
+    assert_select "a[href*='round'][data-turbo-frame='_top']"
+  end
+
+  test "show renders a segmented control for multi-tee courses" do
+    course = Course.create!(
+      name: "Two Tee Club", country: "US", city: "Teeville", state_province: "California",
+      tees: { "blue" => { "rating" => "72.1", "slope" => "130", "yardages" => Array.new(18, 400) },
+              "white" => { "rating" => "70.0", "slope" => "125", "yardages" => Array.new(18, 360) } }
+    )
+    build_eighteen_holes!(course)
+
+    get course_path(course)
+    assert_response :success
+    assert_select ".ui-segmented .ui-segmented-option", count: 2
+  end
+
+  test "show falls back to default tee for an unknown tee param" do
+    course = courses(:one)
+    build_eighteen_holes!(course)
+
+    get course_path(course, tee: "purple")
+    assert_response :success
+    assert_match "White tee", response.body
   end
 
   test "blank search shows recently played label when rounds exist" do

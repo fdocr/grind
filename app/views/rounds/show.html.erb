@@ -3,7 +3,12 @@
 <div class="space-y-6">
   <header class="space-y-1">
     <h1 class="text-xl font-bold text-foreground"><%= @round.course.name %></h1>
-    <p class="text-sm text-muted-foreground">Round complete</p>
+    <div class="flex items-center gap-2 flex-wrap">
+      <p class="text-sm text-muted-foreground">Round complete</p>
+      <% if @round.tee_label %>
+        <span class="ui-badge ui-badge-primary ui-badge-sm"><%= @round.tee_label %> tee</span>
+      <% end %>
+    </div>
     <div class="pt-2">
       <p class="text-xs text-muted-foreground">Score to par</p>
       <p class="text-3xl font-bold text-primary-600"><%= format_score_to_par(@round.score_to_par) %></p>
