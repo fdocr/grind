@@ -3,6 +3,13 @@ cariari_01:
   number: 1
   par: 4
   handicap: 18
+  green_geometry:
+    centroid: [9.98150, -84.15650]
+    polygon:
+      - [9.98155, -84.15655]
+      - [9.98155, -84.15645]
+      - [9.98145, -84.15645]
+      - [9.98145, -84.15655]
 cariari_02:
   course: one
   number: 2

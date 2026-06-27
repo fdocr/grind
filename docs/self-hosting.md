@@ -127,6 +127,36 @@ docker cp /root/courses.yml <container_id>:/rails/storage/courses.yml
 docker exec -it <container_id> bin/rails grind:courses:import FILE=/rails/storage/courses.yml
 ```
 
+## Green distances (OpenStreetMap)
+
+During a round, the tracker can show live GPS distances to the front, center, and back of each green. Those distances are computed in the browser from green geometry that Grind pre-syncs from [OpenStreetMap](https://www.openstreetmap.org) via the [Overpass API](https://wiki.openstreetmap.org/wiki/Overpass_API). Because the geometry is embedded in the round page, distances keep working offline once the page has loaded.
+
+Sync runs as background jobs (one per course), so the Solid Queue worker must be running (it runs inside Puma by default). Each course needs a `latitude` and `longitude` for matching.
+
+Sync every course (staggered to stay within Overpass fair use):
+
+```bash
+once exec bin/rails runner "OsmFullSyncJob.perform_later"
+```
+
+Sync a single course:
+
+```bash
+once exec bin/rails runner "OsmCourseSyncJob.perform_later(Course.find(ID))"
+```
+
+Configuration:
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `OVERPASS_API_URL` | `https://overpass-api.de/api/interpreter` | Overpass endpoint used only by the sync jobs, never at request time. Point at another or self hosted instance if you prefer |
+
+Notes:
+
+- Coverage and quality vary by course. Holes without mapped greens simply show an empty state in the Distances panel; nothing breaks.
+- Re-run a sync occasionally to pick up OpenStreetMap edits. To automate it, add a monthly entry to `config/recurring.yml` (for example `class: OsmFullSyncJob`, `schedule: every month`).
+- Map data is from OpenStreetMap contributors (ODbL); attribution is shown in the Distances panel.
+
 ## Automatic updates
 
 Once checks for new `latest` images and applies updates with zero downtime. Push a `v*` tag to your fork to publish a new image via the GitHub release workflow.

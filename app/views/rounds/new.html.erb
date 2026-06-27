@@ -1,7 +1,7 @@
 <% content_for :seo_title, @course.name %>
 <% content_for :seo_description, "Track your round at #{@course.name} with Grind." %>
 <%
-  holes_json = @holes.map { |hole| { number: hole.number, par: hole.par, handicap: hole.handicap, yardage: @course.tee_yardage(@tee, hole.number) } }
+  holes_json = @holes.map { |hole| { number: hole.number, par: hole.par, handicap: hole.handicap, yardage: @course.tee_yardage(@tee, hole.number), green: hole.green_geometry.presence } }
   course_json = { id: @course.id, name: @course.name, unit: @course.metric? ? "m" : "yds", holes: holes_json }
 %>
 
@@ -31,6 +31,7 @@
 
   <div class="grid grid-cols-1 gap-3">
     <button type="button" class="ui-btn-primary ui-btn-md w-full" data-action="round#openScorePanel">Post Score</button>
+    <button type="button" class="ui-btn-secondary ui-btn-md w-full" data-action="round#openDistancesPanel">Distances</button>
     <button type="button" class="ui-btn-secondary ui-btn-md w-full" data-action="round#openHolesPanel">Holes</button>
     <button type="button" class="ui-btn-secondary ui-btn-md w-full" data-action="round#openScorecardPanel">Scorecard</button>
   </div>
@@ -124,6 +125,55 @@
           <button type="button" class="ui-btn-primary ui-btn-md flex-1" data-action="round#saveHoleScore">Save</button>
         </div>
       </div>
+    <% end %>
+  </div>
+
+  <div class="fixed inset-x-4 bottom-4 z-50 hidden" data-round-target="distancesPanel"
+       data-controller="distances"
+       data-distances-unit-value="<%= @course.metric? ? "m" : "yds" %>">
+    <%= render "ui/card", padding: :sm do %>
+      <div class="flex items-center justify-between mb-4 gap-3">
+        <h3 class="font-semibold" data-distances-target="title">Distances</h3>
+        <div class="flex items-center gap-2">
+          <div class="ui-segmented" role="group" aria-label="Distance unit">
+            <button type="button" class="ui-segmented-option" data-distances-target="unitOption" data-value="yds" data-action="distances#setUnit">yds</button>
+            <button type="button" class="ui-segmented-option" data-distances-target="unitOption" data-value="m" data-action="distances#setUnit">m</button>
+          </div>
+          <button type="button" class="ui-btn-ghost ui-btn-sm" data-action="round#closePanels">Close</button>
+        </div>
+      </div>
+
+      <div class="hidden" data-distances-target="content">
+        <div class="grid grid-cols-3 gap-2 text-center">
+          <div>
+            <p class="text-xs text-muted-foreground mb-1">Front</p>
+            <p class="text-2xl font-bold" data-distances-target="front">—</p>
+          </div>
+          <div>
+            <p class="text-xs text-muted-foreground mb-1">Center</p>
+            <p class="text-2xl font-bold text-primary-600" data-distances-target="center">—</p>
+          </div>
+          <div>
+            <p class="text-xs text-muted-foreground mb-1">Back</p>
+            <p class="text-2xl font-bold" data-distances-target="back">—</p>
+          </div>
+        </div>
+        <p class="text-xs text-muted-foreground mt-3 text-center" data-distances-target="accuracy"></p>
+      </div>
+
+      <div class="hidden py-2 text-center space-y-3" data-distances-target="status">
+        <p class="text-sm text-muted-foreground" data-distances-target="statusMessage">Finding your location…</p>
+        <button type="button" class="ui-btn-secondary ui-btn-sm" data-action="distances#retry">Try again</button>
+      </div>
+
+      <div class="hidden" data-distances-target="empty">
+        <%= render "ui/empty_state",
+              title: "No map data for this hole yet",
+              message: "We don't have OpenStreetMap green data for this hole.",
+              icon: "location" %>
+      </div>
+
+      <p class="text-[11px] text-muted-foreground mt-4 text-center">Map data © OpenStreetMap contributors</p>
     <% end %>
   </div>
 

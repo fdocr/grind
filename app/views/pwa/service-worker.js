@@ -1,4 +1,4 @@
-const CACHE_NAME = "grind-v2"
+const CACHE_NAME = "grind-v3"
 const OFFLINE_URLS = ["/icon.png", "/icon.svg", "/manifest.json"]
 
 self.addEventListener("install", (event) => {
