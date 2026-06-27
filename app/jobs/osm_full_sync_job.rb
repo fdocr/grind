@@ -5,7 +5,7 @@
 class OsmFullSyncJob < ApplicationJob
   queue_as :overpass
 
-  STAGGER = 3.seconds
+  STAGGER = 5.seconds
 
   def perform
     Course.where.not(latitude: nil).where.not(longitude: nil).find_each.with_index do |course, index|
