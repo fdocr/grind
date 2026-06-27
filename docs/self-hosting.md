@@ -133,7 +133,7 @@ During a round, the tracker can show live GPS distances to the front, center, an
 
 Sync runs as background jobs (one per course), so the Solid Queue worker must be running (it runs inside Puma by default). Each course needs a `latitude` and `longitude` for matching.
 
-Sync every course (staggered to stay within Overpass fair use):
+Sync stale courses (anything never synced or older than 30 days):
 
 ```bash
 once exec bin/rails runner "OsmFullSyncJob.perform_later"
@@ -142,7 +142,7 @@ once exec bin/rails runner "OsmFullSyncJob.perform_later"
 Sync a single course:
 
 ```bash
-once exec bin/rails runner "OsmCourseSyncJob.perform_later(Course.find(ID))"
+once exec bin/rails runner "OsmCourseSyncJob.perform_later(Course.find(ID).id)"
 ```
 
 Configuration:
@@ -150,6 +150,18 @@ Configuration:
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `OVERPASS_API_URL` | `https://overpass-api.de/api/interpreter` | Overpass endpoint used only by the sync jobs, never at request time. Point at another or self hosted instance if you prefer |
+
+### Staying within Overpass fair use
+
+The public Overpass instance is a shared service with a fair use policy (see the [Overpass usage policy](https://dev.overpass-api.de/overpass-doc/en/preface/commons.html): roughly 10,000 requests and 1 GB per day, enforced by per IP slots and a load based cool down, returning HTTP 429/504 when exceeded). Grind's jobs are built to respect it:
+
+- One Overpass request at a time (`limits_concurrency`), never in parallel.
+- `OsmFullSyncJob` staggers enqueues by 20 seconds each.
+- Before every query, `OsmCourseSyncJob` checks `/api/status`; if no slot is free it reschedules itself past the reported wait instead of hammering the server.
+- 429/504 responses are retried with backoff.
+- Results are cached in the database, and a full run only enqueues courses that are unsynced or stale, so re running it is resumable and cheap.
+
+For a large catalog (thousands of courses), a full run intentionally spreads across multiple days. If you need bulk imports regularly, the Overpass project recommends running your own instance from a [Geofabrik extract](https://download.geofabrik.de/) and pointing `OVERPASS_API_URL` at it, rather than relying on the public servers as an app backend.
 
 Notes:
 

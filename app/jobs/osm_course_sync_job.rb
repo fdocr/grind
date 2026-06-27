@@ -1,26 +1,46 @@
 # frozen_string_literal: true
 
 # Syncs one course's green geometry from OpenStreetMap via the Overpass API.
-# Runs one at a time (limits_concurrency) to stay within Overpass fair use.
+# Runs one at a time (limits_concurrency) and checks the Overpass rate limit
+# before querying, to stay within fair use:
+# https://dev.overpass-api.de/overpass-doc/en/preface/commons.html
 class OsmCourseSyncJob < ApplicationJob
   queue_as :overpass
   limits_concurrency key: "overpass", to: 1
-  retry_on Grind::Osm::Overpass::Error, wait: :polynomially_longer, attempts: 5
   discard_on ActiveRecord::RecordNotFound
+  retry_on Grind::Osm::Overpass::Error, wait: :polynomially_longer, attempts: 5
+  retry_on Grind::Osm::Overpass::RateLimitedError, wait: 1.minute, attempts: 10
+
+  # Extra seconds added when rescheduling past a busy Overpass slot.
+  SLOT_BUFFER = 2
 
   def perform(course_id)
     course = Course.find(course_id)
     return unless course.coordinates?
+    return if reschedule_until_slot_free(course_id)
 
     overpass = Grind::Osm::Overpass.fetch(latitude: course.latitude, longitude: course.longitude)
     geometry = Grind::Osm::CourseGeometry.new(overpass, course).build
     apply(course, geometry)
   rescue Grind::Osm::Overpass::Error
-    course.update_columns(osm_status: "error", osm_synced_at: Time.current)
+    # Leave osm_synced_at untouched so the next full sync retries this course.
+    course.update_column(:osm_status, "error")
     raise
   end
 
   private
+
+  # Returns true when the job rescheduled itself because no Overpass slot was
+  # free, so the caller stops without querying. Non blocking: the worker is
+  # released immediately instead of sleeping.
+  def reschedule_until_slot_free(course_id)
+    status = Grind::Osm::Overpass.status
+    return false if status.nil? || status.slot_available?
+
+    wait = status.wait_seconds + SLOT_BUFFER
+    self.class.set(wait: wait.seconds).perform_later(course_id)
+    true
+  end
 
   def apply(course, geometry)
     Course.transaction do

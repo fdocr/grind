@@ -10,8 +10,10 @@ class OsmCourseSyncJobTest < ActiveSupport::TestCase
   end
 
   test "stores green geometry and marks the course ok" do
-    stub_method(Grind::Osm::Overpass, :fetch, overpass_with_green) do
-      OsmCourseSyncJob.perform_now(@course.id)
+    with_slot do
+      stub_method(Grind::Osm::Overpass, :fetch, overpass_with_green) do
+        OsmCourseSyncJob.perform_now(@course.id)
+      end
     end
 
     @course.reload
@@ -24,8 +26,10 @@ class OsmCourseSyncJobTest < ActiveSupport::TestCase
   end
 
   test "clears stale geometry and marks no_data when nothing is found" do
-    stub_method(Grind::Osm::Overpass, :fetch, { "elements" => [] }) do
-      OsmCourseSyncJob.perform_now(@course.id)
+    with_slot do
+      stub_method(Grind::Osm::Overpass, :fetch, { "elements" => [] }) do
+        OsmCourseSyncJob.perform_now(@course.id)
+      end
     end
 
     @course.reload
@@ -33,14 +37,30 @@ class OsmCourseSyncJobTest < ActiveSupport::TestCase
     assert_nil holes(:cariari_01).reload.green_geometry
   end
 
-  test "marks the course as errored when Overpass fails" do
+  test "marks the course as errored without stamping synced_at when Overpass fails" do
     failing = ->(**) { raise Grind::Osm::Overpass::Error, "boom" }
 
-    stub_method(Grind::Osm::Overpass, :fetch, failing) do
-      OsmCourseSyncJob.perform_now(@course.id)
+    with_slot do
+      stub_method(Grind::Osm::Overpass, :fetch, failing) do
+        OsmCourseSyncJob.perform_now(@course.id)
+      end
     end
 
-    assert_equal "error", @course.reload.osm_status
+    @course.reload
+    assert_equal "error", @course.osm_status
+    assert_nil @course.osm_synced_at
+  end
+
+  test "reschedules itself without querying when no Overpass slot is free" do
+    busy = Grind::Osm::Overpass::Status.new(slots_available: 0, wait_seconds: 12)
+
+    assert_enqueued_with(job: OsmCourseSyncJob, args: [ @course.id ]) do
+      stub_method(Grind::Osm::Overpass, :status, busy) do
+        OsmCourseSyncJob.perform_now(@course.id)
+      end
+    end
+
+    assert_nil @course.reload.osm_status
   end
 
   test "does nothing when the course has no coordinates" do
@@ -63,6 +83,11 @@ class OsmCourseSyncJobTest < ActiveSupport::TestCase
   end
 
   private
+
+  def with_slot(&block)
+    free = Grind::Osm::Overpass::Status.new(slots_available: 2, wait_seconds: 0)
+    stub_method(Grind::Osm::Overpass, :status, free, &block)
+  end
 
   def overpass_with_green
     { "elements" => [
