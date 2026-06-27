@@ -3,7 +3,7 @@ import { Controller } from "@hotwired/stimulus"
 export default class extends Controller {
   static targets = [
     "scoreToPar", "holeNumber", "insidePw9i", "oopTeeShots", "threePutts", "botchedUpDowns",
-    "scorePanel", "holesPanel", "scorecardPanel", "resetPanel", "overlay",
+    "scorePanel", "holesPanel", "scorecardPanel", "resetPanel", "distancesPanel", "overlay",
     "grossInput", "puttsInput", "grossPicker", "puttsPicker",
     "scorePanelHole", "scorePanelPar", "scorePanelHcp", "scorePanelYards", "holeMeta",
     "finishButton", "finishForm", "startedAt",
@@ -375,6 +375,20 @@ export default class extends Controller {
     })
   }
 
+  openDistancesPanel() {
+    const controller = this.distancesController()
+    if (controller) {
+      const hole = this.currentHoleData()
+      controller.start({ green: hole && hole.green, hole: this.state.currentHole })
+    }
+    this.showPanel(this.distancesPanelTarget)
+  }
+
+  distancesController() {
+    if (!this.hasDistancesPanelTarget) return null
+    return this.application.getControllerForElementAndIdentifier(this.distancesPanelTarget, "distances")
+  }
+
   openHolesPanel() {
     this.showPanel(this.holesPanelTarget)
   }
@@ -395,19 +409,28 @@ export default class extends Controller {
     this.render()
   }
 
+  panelTargets() {
+    return [
+      this.scorePanelTarget,
+      this.holesPanelTarget,
+      this.scorecardPanelTarget,
+      this.resetPanelTarget,
+      this.distancesPanelTarget
+    ]
+  }
+
   showPanel(panel) {
     this.overlayTarget.classList.remove("hidden")
-    ;[this.scorePanelTarget, this.holesPanelTarget, this.scorecardPanelTarget, this.resetPanelTarget].forEach((element) => {
-      element.classList.add("hidden")
-    })
+    this.panelTargets().forEach((element) => element.classList.add("hidden"))
     panel.classList.remove("hidden")
   }
 
   closePanels() {
     this.overlayTarget.classList.add("hidden")
-    ;[this.scorePanelTarget, this.holesPanelTarget, this.scorecardPanelTarget, this.resetPanelTarget].forEach((element) => {
-      element.classList.add("hidden")
-    })
+    this.panelTargets().forEach((element) => element.classList.add("hidden"))
+
+    const distances = this.distancesController()
+    if (distances) distances.stop()
   }
 
   saveHoleScore() {

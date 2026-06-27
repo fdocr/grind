@@ -26,6 +26,18 @@ module ActiveSupport
         end
       end
     end
+
+    # Temporarily replaces a class or instance method. When result responds to
+    # call it is invoked with the original arguments, otherwise it is returned.
+    def stub_method(object, name, result)
+      original = object.method(name)
+      object.define_singleton_method(name) do |*args, **kwargs|
+        result.respond_to?(:call) ? result.call(*args, **kwargs) : result
+      end
+      yield
+    ensure
+      object.define_singleton_method(name, original)
+    end
   end
 end
 

@@ -51,6 +51,14 @@ class Course < ApplicationRecord
     [ city, state_province, country ].compact_blank.join(", ")
   end
 
+  def coordinates?
+    latitude.present? && longitude.present?
+  end
+
+  def osm_synced?
+    osm_synced_at.present?
+  end
+
   # Tee names in import order (longest course first when yardage is known).
   def tee_names
     tees.keys.sort_by { |name| -tee_total_yardage(name) }

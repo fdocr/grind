@@ -127,6 +127,48 @@ docker cp /root/courses.yml <container_id>:/rails/storage/courses.yml
 docker exec -it <container_id> bin/rails grind:courses:import FILE=/rails/storage/courses.yml
 ```
 
+## Green distances (OpenStreetMap)
+
+During a round, the tracker can show live GPS distances to the front, center, and back of each green. Those distances are computed in the browser from green geometry that Grind pre-syncs from [OpenStreetMap](https://www.openstreetmap.org) via the [Overpass API](https://wiki.openstreetmap.org/wiki/Overpass_API). Because the geometry is embedded in the round page, distances keep working offline once the page has loaded.
+
+Sync runs as background jobs (one per course), so the Solid Queue worker must be running (it runs inside Puma by default). Each course needs a `latitude` and `longitude` for matching.
+
+Sync stale courses (anything never synced or older than 30 days):
+
+```bash
+once exec bin/rails runner "OsmFullSyncJob.perform_later"
+```
+
+Sync a single course:
+
+```bash
+once exec bin/rails runner "OsmCourseSyncJob.perform_later(Course.find(ID).id)"
+```
+
+Configuration:
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `OVERPASS_API_URL` | `https://overpass-api.de/api/interpreter` | Overpass endpoint used only by the sync jobs, never at request time. Point at another or self hosted instance if you prefer |
+
+### Staying within Overpass fair use
+
+The public Overpass instance is a shared service with a fair use policy (see the [Overpass usage policy](https://dev.overpass-api.de/overpass-doc/en/preface/commons.html): roughly 10,000 requests and 1 GB per day, enforced by per IP slots and a load based cool down, returning HTTP 429/504 when exceeded). Grind's jobs are built to respect it:
+
+- One Overpass request at a time (`limits_concurrency`), never in parallel.
+- `OsmFullSyncJob` staggers enqueues by 20 seconds each.
+- Before every query, `OsmCourseSyncJob` checks `/api/status`; if no slot is free it reschedules itself past the reported wait instead of hammering the server.
+- 429/504 responses are retried with backoff.
+- Results are cached in the database, and a full run only enqueues courses that are unsynced or stale, so re running it is resumable and cheap.
+
+For a large catalog (thousands of courses), a full run intentionally spreads across multiple days. If you need bulk imports regularly, the Overpass project recommends running your own instance from a [Geofabrik extract](https://download.geofabrik.de/) and pointing `OVERPASS_API_URL` at it, rather than relying on the public servers as an app backend.
+
+Notes:
+
+- Coverage and quality vary by course. Holes without mapped greens simply show an empty state in the Distances panel; nothing breaks.
+- Re-run a sync occasionally to pick up OpenStreetMap edits. To automate it, add a monthly entry to `config/recurring.yml` (for example `class: OsmFullSyncJob`, `schedule: every month`).
+- Map data is from OpenStreetMap contributors (ODbL); attribution is shown in the Distances panel.
+
 ## Automatic updates
 
 Once checks for new `latest` images and applies updates with zero downtime. Push a `v*` tag to your fork to publish a new image via the GitHub release workflow.

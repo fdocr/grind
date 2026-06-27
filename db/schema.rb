@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_21_144000) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_26_120100) do
   create_table "courses", force: :cascade do |t|
     t.string "address"
     t.string "city"
@@ -20,6 +20,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_21_144000) do
     t.decimal "longitude", precision: 10, scale: 6
     t.boolean "metric", default: false, null: false
     t.string "name", null: false
+    t.string "osm_id"
+    t.string "osm_status"
+    t.datetime "osm_synced_at"
     t.string "phone"
     t.string "state_province"
     t.json "tees", default: {}, null: false
@@ -46,6 +49,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_21_144000) do
   create_table "holes", force: :cascade do |t|
     t.integer "course_id", null: false
     t.datetime "created_at", null: false
+    t.json "green_geometry"
     t.integer "handicap", null: false
     t.integer "number", null: false
     t.integer "par", null: false
