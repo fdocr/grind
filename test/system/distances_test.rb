@@ -15,10 +15,25 @@ class DistancesTest < ApplicationSystemTestCase
 
     click_button "Distances"
 
-    assert_selector "[data-distances-target='center']", text: /\d+\s*yds/
+    assert_selector "[data-distances-target='unitOption'][data-value='yds'][data-state='active']"
+    assert_selector "[data-distances-target='center']", text: /\d/
+    yards = find("[data-distances-target='center']").text.to_i
 
     find("[data-distances-target='unitOption'][data-value='m']").click
-    assert_selector "[data-distances-target='center']", text: /\d+\s*m/
+    assert_selector "[data-distances-target='unitOption'][data-value='m'][data-state='active']"
+    meters = find("[data-distances-target='center']").text.to_i
+    assert_operator meters, :<, yards
+  end
+
+  test "shows a too far message when away from the green" do
+    visit round_course_path(@course)
+    assert_text "Round stats"
+
+    stub_geolocation(latitude: 9.5, longitude: -84.0, accuracy: 5)
+
+    click_button "Distances"
+
+    assert_text "You're too far from the hole"
   end
 
   test "shows an empty state for a hole without map data" do

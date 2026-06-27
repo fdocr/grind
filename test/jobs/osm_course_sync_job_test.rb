@@ -11,7 +11,7 @@ class OsmCourseSyncJobTest < ActiveSupport::TestCase
 
   test "stores green geometry and marks the course ok" do
     stub_method(Grind::Osm::Overpass, :fetch, overpass_with_green) do
-      OsmCourseSyncJob.perform_now(@course)
+      OsmCourseSyncJob.perform_now(@course.id)
     end
 
     @course.reload
@@ -25,7 +25,7 @@ class OsmCourseSyncJobTest < ActiveSupport::TestCase
 
   test "clears stale geometry and marks no_data when nothing is found" do
     stub_method(Grind::Osm::Overpass, :fetch, { "elements" => [] }) do
-      OsmCourseSyncJob.perform_now(@course)
+      OsmCourseSyncJob.perform_now(@course.id)
     end
 
     @course.reload
@@ -37,7 +37,7 @@ class OsmCourseSyncJobTest < ActiveSupport::TestCase
     failing = ->(**) { raise Grind::Osm::Overpass::Error, "boom" }
 
     stub_method(Grind::Osm::Overpass, :fetch, failing) do
-      OsmCourseSyncJob.perform_now(@course)
+      OsmCourseSyncJob.perform_now(@course.id)
     end
 
     assert_equal "error", @course.reload.osm_status
@@ -49,11 +49,17 @@ class OsmCourseSyncJobTest < ActiveSupport::TestCase
 
     called = false
     stub_method(Grind::Osm::Overpass, :fetch, ->(**) { called = true }) do
-      OsmCourseSyncJob.perform_now(course)
+      OsmCourseSyncJob.perform_now(course.id)
     end
 
     assert_not called
     assert_nil course.reload.osm_status
+  end
+
+  test "discards the job when the course no longer exists" do
+    assert_nothing_raised do
+      OsmCourseSyncJob.perform_now(-1)
+    end
   end
 
   private

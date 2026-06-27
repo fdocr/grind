@@ -2,12 +2,13 @@ import { Controller } from "@hotwired/stimulus"
 import { haversineMeters, nearestEdgeMeters, farthestVertexMeters, metersToYards } from "lib/geo"
 
 const STORAGE_KEY = "grind:distanceUnit"
+const TOO_FAR_METERS = 800
 
 // Live GPS distances to the front, center and back of the current hole's green.
 // Green geometry is passed in from the round controller (embedded in the page),
 // so this works offline. The math lives in lib/geo.js to stay testable.
 export default class extends Controller {
-  static targets = ["title", "front", "center", "back", "accuracy", "status", "statusMessage", "empty", "content", "unitOption"]
+  static targets = ["title", "front", "center", "centerUnit", "back", "accuracy", "status", "statusMessage", "empty", "tooFar", "content", "unitOption"]
   static values = { unit: String }
 
   connect() {
@@ -93,10 +94,17 @@ export default class extends Controller {
   render() {
     if (!this.green || !this.position) return
 
+    const centerMeters = haversineMeters(this.position, this.green.centroid)
+    if (centerMeters > TOO_FAR_METERS) {
+      this.showState("tooFar")
+      return
+    }
+
     this.showState("content")
-    this.frontTarget.textContent = this.format(nearestEdgeMeters(this.position, this.green.polygon))
-    this.centerTarget.textContent = this.format(haversineMeters(this.position, this.green.centroid))
-    this.backTarget.textContent = this.format(farthestVertexMeters(this.position, this.green.polygon))
+    this.centerTarget.textContent = this.value(centerMeters)
+    if (this.hasCenterUnitTarget) this.centerUnitTarget.textContent = this.unitLabel
+    this.frontTarget.textContent = this.value(nearestEdgeMeters(this.position, this.green.polygon))
+    this.backTarget.textContent = this.value(farthestVertexMeters(this.position, this.green.polygon))
 
     if (this.hasAccuracyTarget) {
       this.accuracyTarget.textContent = this.accuracy
@@ -105,9 +113,9 @@ export default class extends Controller {
     }
   }
 
-  format(meters) {
+  value(meters) {
     if (meters === null || Number.isNaN(meters)) return "—"
-    return `${this.convert(meters)} ${this.unitLabel}`
+    return `${this.convert(meters)}`
   }
 
   convert(meters) {
@@ -138,6 +146,7 @@ export default class extends Controller {
     if (this.hasContentTarget) this.toggle(this.contentTarget, which === "content")
     if (this.hasStatusTarget) this.toggle(this.statusTarget, which === "status")
     if (this.hasEmptyTarget) this.toggle(this.emptyTarget, which === "empty")
+    if (this.hasTooFarTarget) this.toggle(this.tooFarTarget, which === "tooFar")
   }
 
   toggle(element, show) {

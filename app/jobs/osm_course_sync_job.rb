@@ -6,8 +6,10 @@ class OsmCourseSyncJob < ApplicationJob
   queue_as :overpass
   limits_concurrency key: "overpass", to: 1
   retry_on Grind::Osm::Overpass::Error, wait: :polynomially_longer, attempts: 5
+  discard_on ActiveRecord::RecordNotFound
 
-  def perform(course)
+  def perform(course_id)
+    course = Course.find(course_id)
     return unless course.coordinates?
 
     overpass = Grind::Osm::Overpass.fetch(latitude: course.latitude, longitude: course.longitude)
