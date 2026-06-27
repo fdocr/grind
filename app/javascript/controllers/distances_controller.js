@@ -8,7 +8,7 @@ const TOO_FAR_METERS = 800
 // Green geometry is passed in from the round controller (embedded in the page),
 // so this works offline. The math lives in lib/geo.js to stay testable.
 export default class extends Controller {
-  static targets = ["title", "front", "center", "centerUnit", "back", "accuracy", "status", "statusMessage", "empty", "tooFar", "content", "unitOption"]
+  static targets = ["title", "front", "center", "back", "accuracy", "status", "statusMessage", "empty", "tooFar", "content", "unitOption"]
   static values = { unit: String }
 
   connect() {
@@ -102,7 +102,6 @@ export default class extends Controller {
 
     this.showState("content")
     this.centerTarget.textContent = this.value(centerMeters)
-    if (this.hasCenterUnitTarget) this.centerUnitTarget.textContent = this.unitLabel
     this.frontTarget.textContent = this.value(nearestEdgeMeters(this.position, this.green.polygon))
     this.backTarget.textContent = this.value(farthestVertexMeters(this.position, this.green.polygon))
 
