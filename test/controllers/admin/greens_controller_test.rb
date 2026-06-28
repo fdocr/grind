@@ -52,9 +52,10 @@ class Admin::GreensControllerTest < ActionDispatch::IntegrationTest
       }
     }.to_json
 
-    patch admin_course_greens_path(@course), params: { calibration: calibration }
+    patch admin_course_greens_path(@course), params: { calibration: calibration, active_hole: 1 }
 
-    assert_redirected_to admin_course_path(@course)
+    assert_redirected_to edit_admin_course_greens_path(@course, hole: 1)
+    assert_equal "Hole 1 green saved.", flash[:notice]
     @hole.reload
     assert @hole.green_manual?
     assert @hole.green?
@@ -65,9 +66,10 @@ class Admin::GreensControllerTest < ActionDispatch::IntegrationTest
     @hole.update!(green_geometry: { "centroid" => [ 1, 2 ], "polygon" => [ [ 1, 2 ], [ 1, 3 ], [ 2, 3 ] ] }, green_source: "manual")
     sign_in_as(users(:admin))
 
-    patch admin_course_greens_path(@course), params: { calibration: { "1" => { "clear" => true } }.to_json }
+    patch admin_course_greens_path(@course), params: { calibration: { "1" => { "clear" => true } }.to_json, active_hole: 1 }
 
-    assert_redirected_to admin_course_path(@course)
+    assert_redirected_to edit_admin_course_greens_path(@course, hole: 1)
+    assert_equal "Hole 1 green cleared.", flash[:notice]
     assert_nil @hole.reload.green_geometry
     assert_nil @hole.green_source
   end

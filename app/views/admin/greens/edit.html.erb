@@ -8,7 +8,8 @@
      data-green-editor-holes-value="<%= @holes_json.to_json %>"
      data-green-editor-center-value="<%= @map_center.to_json %>"
      data-green-editor-tile-url-value="<%= @tile_url %>"
-     data-green-editor-tile-attribution-value="<%= @tile_attribution %>">
+     data-green-editor-tile-attribution-value="<%= @tile_attribution %>"
+     data-green-editor-active-hole-value="<%= @active_hole %>">
   <header class="space-y-1">
     <p class="text-sm text-muted-foreground">
       <%= link_to "← #{@course.name}", admin_course_path(@course), class: "ui-btn-link" %>
@@ -55,6 +56,7 @@
 
   <%= form_with url: admin_course_greens_path(@course), method: :patch, class: "space-y-4", data: { turbo: false, green_editor_target: "form", action: "submit->green-editor#submit" } do %>
     <input type="hidden" name="calibration" value="" data-green-editor-target="calibration">
-    <button type="submit" class="ui-btn-primary ui-btn-md w-full">Save calibration</button>
+    <input type="hidden" name="active_hole" value="<%= @active_hole %>" data-green-editor-target="activeHole">
+    <button type="submit" class="ui-btn-primary ui-btn-md w-full">Save green</button>
   <% end %>
 </div>

@@ -2,7 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 import { GreenMap } from "lib/leaflet_green_map"
 
 export default class extends Controller {
-  static targets = [ "map", "holeButton", "progress", "calibration", "form" ]
+  static targets = [ "map", "holeButton", "progress", "calibration", "form", "activeHole" ]
   static values = {
     holes: Array,
     center: Array,
@@ -23,7 +23,7 @@ export default class extends Controller {
       }
     })
 
-    this.activeHoleValue = this.holesValue[0]?.number || 1
+    this.activeHoleValue = this.activeHoleValue || this.holesValue[0]?.number || 1
 
     this.map = new GreenMap(this.mapTarget, {
       center: this.centerValue,
@@ -63,22 +63,23 @@ export default class extends Controller {
 
   submit() {
     this.saveCurrentHole()
+    const number = this.activeHoleValue
+    const data = this.state[number]
     const payload = {}
 
-    Object.entries(this.state).forEach(([number, data]) => {
-      if (data.clear) {
-        payload[number] = { clear: true }
-      } else if (data.polygon.length >= 3) {
-        payload[number] = {
-          polygon: data.polygon,
-          bbox: data.bbox,
-          zoom: data.zoom,
-          provider: data.provider
-        }
+    if (data.clear) {
+      payload[number] = { clear: true }
+    } else if (data.polygon.length >= 3) {
+      payload[number] = {
+        polygon: data.polygon,
+        bbox: data.bbox,
+        zoom: data.zoom,
+        provider: data.provider
       }
-    })
+    }
 
     this.calibrationTarget.value = JSON.stringify(payload)
+    if (this.hasActiveHoleTarget) this.activeHoleTarget.value = number
   }
 
   addVertex(latlng) {

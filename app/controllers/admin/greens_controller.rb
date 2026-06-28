@@ -15,6 +15,7 @@ module Admin
       @holes_json = @holes.map { |hole| hole_payload(hole) }
       @tile_url = satellite_tile_url
       @tile_attribution = satellite_tile_attribution
+      @active_hole = active_hole_param
     end
 
     def update
@@ -23,7 +24,7 @@ module Admin
 
       Course.transaction do
         calibration.each do |hole_number, data|
-          hole = @course.holes.find_by(number: hole_number)
+          hole = @course.holes.find_by(number: hole_number.to_i)
           next unless hole
 
           if data["clear"]
@@ -56,20 +57,43 @@ module Admin
       end
 
       if errors.any?
+        prepare_edit_assigns
+        @active_hole = active_hole_param
+        flash.now[:alert] = errors.join("; ")
+        render :edit, status: :unprocessable_entity
+      else
+        @course.update_columns(osm_status: @course.holes.reload.any?(&:green?) ? "ok" : @course.osm_status)
+        redirect_to edit_admin_course_greens_path(@course, hole: active_hole_param),
+                    notice: save_notice(calibration, active_hole_param)
+      end
+    end
+
+    private
+
+      def prepare_edit_assigns
         @holes = @course.holes.order(:number)
         @map_center = map_center_for(@course)
         @holes_json = @holes.map { |hole| hole_payload(hole) }
         @tile_url = satellite_tile_url
         @tile_attribution = satellite_tile_attribution
-        flash.now[:alert] = errors.join("; ")
-        render :edit, status: :unprocessable_entity
-      else
-        @course.update_columns(osm_status: @course.holes.reload.any?(&:green?) ? "ok" : @course.osm_status)
-        redirect_to admin_course_path(@course), notice: "Green calibration saved."
       end
-    end
 
-    private
+      def active_hole_param
+        number = params[:hole].presence || params[:active_hole].presence
+        number = number.to_i
+        return number if number.between?(1, 18)
+
+        @course.holes.minimum(:number) || 1
+      end
+
+      def save_notice(calibration, active_hole)
+        entry = calibration[active_hole.to_s] || calibration[active_hole]
+        if entry&.dig("clear")
+          "Hole #{active_hole} green cleared."
+        else
+          "Hole #{active_hole} green saved."
+        end
+      end
 
       def set_course
         @course = Course.find(params[:course_id])
