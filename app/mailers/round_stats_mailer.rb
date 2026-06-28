@@ -6,6 +6,7 @@ class RoundStatsMailer < ApplicationMailer
     @round = delivery.round
     @course = delivery.course
     @holes = @course.holes.order(:number)
+    @show_register_cta = delivery.user_id.nil?
 
     mail(
       to: delivery.email,

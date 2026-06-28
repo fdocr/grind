@@ -31,24 +31,21 @@
   </section>
 
   <section>
-    <h2 class="text-lg font-semibold mb-3">Email your stats</h2>
-    <%= render "ui/card", padding: :sm do %>
-      <%= form_with url: round_delivery_path(@round.token), scope: :delivery, class: "space-y-4", data: { turbo: false } do |f| %>
-        <%= render "ui/input", form: f, field: :email, label: "Email", type: :email, placeholder: "you@example.com", required: true, autocomplete: "email" %>
-        <% if ENV["CLOUDFLARE_TURNSTILE_SITE_KEY"].present? %>
-          <div class="ui-turnstile w-full">
-            <div class="cf-turnstile w-full"
-                 data-sitekey="<%= ENV["CLOUDFLARE_TURNSTILE_SITE_KEY"] %>"
-                 data-size="flexible"
-                 data-theme="auto"></div>
-          </div>
-          <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    <% if current_user.nil? %>
+      <h2 class="text-lg font-semibold mb-3">Email your stats</h2>
+      <%= render "ui/card", padding: :sm do %>
+        <%= form_with url: round_delivery_path(@round.token), scope: :delivery, class: "space-y-4", data: { turbo: false } do |f| %>
+          <%= render "ui/input", form: f, field: :email, label: "Email", type: :email, placeholder: "you@example.com", required: true, autocomplete: "email" %>
+          <%= render "shared/turnstile" %>
+          <button type="submit" class="ui-btn-primary ui-btn-md w-full">
+            <%= icon "envelope", class: "w-4 h-4" %>
+            <span>Send stats</span>
+          </button>
         <% end %>
-        <button type="submit" class="ui-btn-primary ui-btn-md w-full">
-          <%= icon "envelope", class: "w-4 h-4" %>
-          <span>Send stats</span>
-        </button>
       <% end %>
+    <% elsif @round.user_id == current_user.id %>
+      <%= render "ui/banner", tone: :info,
+            message: "You should receive a recap of your round in your inbox soon." %>
     <% end %>
   </section>
 </div>

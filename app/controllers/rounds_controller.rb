@@ -12,10 +12,12 @@ class RoundsController < ApplicationController
 
   def create
     @round = @course.rounds.build(round_params)
+    @round.user = current_user
     @round.finished_at = Time.current
     @round.started_at = parse_started_at
 
     if @round.save
+      deliver_recap_to_owner(@round)
       redirect_to round_path(@round.token)
     else
       @holes = @course.holes.order(:number)
@@ -60,5 +62,17 @@ class RoundsController < ApplicationController
     Time.zone.parse(params.dig(:round, :started_at).to_s) || Time.current
   rescue ArgumentError
     Time.current
+  end
+
+  def deliver_recap_to_owner(round)
+    return unless round.user
+
+    delivery = round.deliveries.create!(
+      course: round.course,
+      user: round.user,
+      email: round.user.email,
+      score_to_par: round.score_to_par
+    )
+    SendRoundStatsJob.perform_later(delivery.id)
   end
 end
