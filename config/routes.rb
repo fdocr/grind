@@ -8,6 +8,11 @@ Rails.application.routes.draw do
 
   namespace :admin do
     resources :users, only: %i[index show update]
+    resources :courses do
+      member do
+        post :sync_osm
+      end
+    end
   end
 
   get "up" => "rails/health#show", as: :rails_health_check

@@ -23,9 +23,10 @@ class NavTest < ActionDispatch::IntegrationTest
     assert_select "[data-testid=nav-menu-panel] a", text: "Sign in", count: 0
   end
 
-  test "admin menu includes admin link" do
+  test "admin menu includes users and courses links" do
     sign_in_as(users(:admin))
     get root_path
-    assert_select "[data-testid=nav-menu-panel] a", text: "Admin"
+    assert_select "[data-testid=nav-menu-panel] a", text: "Users"
+    assert_select "[data-testid=nav-menu-panel] a", text: "Courses"
   end
 end

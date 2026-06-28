@@ -1,0 +1,55 @@
+<% content_for :seo_title, "Courses" %>
+
+<div class="space-y-6">
+  <header class="flex items-start justify-between gap-3">
+    <div class="space-y-1 min-w-0">
+      <h1 class="text-xl font-bold text-foreground">Courses</h1>
+      <p class="text-sm text-muted-foreground">Manage course details, scorecards, and map data.</p>
+    </div>
+    <%= link_to "New course", new_admin_course_path, class: "ui-btn-primary ui-btn-md shrink-0" %>
+  </header>
+
+  <%= render "ui/card", padding: :sm do %>
+    <%= render "ui/search_field",
+          url: admin_courses_path,
+          value: @query,
+          placeholder: "Search by name, city, or country",
+          submit_text: "Search" %>
+  <% end %>
+
+  <% if @courses.any? %>
+    <div class="space-y-3">
+      <% @courses.each do |course| %>
+        <%= link_to admin_course_path(course), class: "block" do %>
+          <%= render "ui/card", padding: :sm do %>
+            <div class="flex items-start justify-between gap-3">
+              <div class="min-w-0">
+                <p class="font-medium text-foreground truncate"><%= course.name %></p>
+                <p class="text-sm text-muted-foreground mt-0.5"><%= course.location_label %></p>
+              </div>
+              <div class="flex flex-col items-end gap-1 shrink-0">
+                <span class="text-xs text-muted-foreground">Par <%= course.total_par %></span>
+                <%= render "ui/badge", text: course.osm_status_label, tone: osm_status_tone(course) %>
+              </div>
+            </div>
+          <% end %>
+        <% end %>
+      <% end %>
+    </div>
+  <% elsif @query.present? %>
+    <%= render "ui/card" do %>
+      <%= render "ui/empty_state",
+            title: "No courses found",
+            message: "Try a different search term.",
+            icon: "search",
+            compact: true %>
+    <% end %>
+  <% else %>
+    <%= render "ui/card" do %>
+      <%= render "ui/empty_state",
+            title: "No courses yet",
+            message: "Import courses or add one manually.",
+            compact: true %>
+    <% end %>
+  <% end %>
+</div>

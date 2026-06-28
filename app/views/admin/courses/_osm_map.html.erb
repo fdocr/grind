@@ -1,0 +1,54 @@
+<%# locals: (course:) %>
+<section>
+  <div class="flex items-center justify-between gap-3 mb-3">
+    <h2 class="text-lg font-semibold">OpenStreetMap</h2>
+    <%= render "ui/badge", text: course.osm_status_label, tone: osm_status_tone(course) %>
+  </div>
+
+  <%= render "ui/card", padding: :sm do %>
+    <div class="space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-3 text-sm">
+        <p class="text-muted-foreground">
+          <span class="font-medium text-foreground"><%= course.green_holes_count %></span> of 18 holes have green geometry.
+        </p>
+        <% if course.osm_synced_at.present? %>
+          <p class="text-muted-foreground">Last synced <%= time_ago_in_words(course.osm_synced_at) %> ago</p>
+        <% end %>
+      </div>
+
+      <% if course.coordinates? %>
+        <div class="overflow-hidden rounded-lg border border-border">
+          <iframe title="OpenStreetMap map of <%= course.name %>"
+                  src="<%= osm_embed_url(course) %>"
+                  class="w-full h-64 border-0"
+                  loading="lazy"
+                  referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
+        <p class="text-[11px] text-muted-foreground text-center">Map data © OpenStreetMap contributors</p>
+
+        <% green_holes = course.holes.select(&:green?) %>
+        <% if green_holes.any? %>
+          <div>
+            <p class="ui-label mb-2">Holes with green data</p>
+            <div class="flex flex-wrap gap-2">
+              <% green_holes.each do |hole| %>
+                <span class="ui-badge ui-badge-neutral text-xs">Hole <%= hole.number %></span>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
+        <%= button_to "Sync from OpenStreetMap",
+              sync_osm_admin_course_path(course),
+              method: :post,
+              class: "ui-btn-secondary ui-btn-md w-full",
+              form: { data: { turbo: false } } %>
+      <% else %>
+        <%= render "ui/banner",
+              tone: :info,
+              title: "No coordinates",
+              message: "Add latitude and longitude on the edit page to show the map and sync green geometry." %>
+      <% end %>
+    </div>
+  <% end %>
+</section>
