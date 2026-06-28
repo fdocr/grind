@@ -34,10 +34,21 @@ Open Once → **Settings** → **Environment** and add the variables below. Once
 | Variable | Example | Description |
 |----------|---------|-------------|
 | `APP_HOST` | `grind.example.com` | Public hostname for mailer links and Rails host authorization |
-| `MISSION_CONTROL_USERNAME` | `admin` | Username for HTTP basic auth on `/jobs` |
-| `MISSION_CONTROL_PASSWORD` | _(strong secret)_ | Password for `/jobs` |
+| `GRIND_ADMIN_EMAILS` | `you@example.com` | Comma-separated emails promoted to **admin** on registration (see [First admin user](#first-admin-user)) |
 
-Without `MISSION_CONTROL_USERNAME` and `MISSION_CONTROL_PASSWORD`, the jobs dashboard returns **503 Service Unavailable**.
+### First admin user
+
+Set `GRIND_ADMIN_EMAILS` to the email address you will use to create the first account (comma-separated if you need more than one). Then open your site, **Sign up** with that exact email, and you are an admin.
+
+Admins can use the admin UI (Users, Courses, green calibration) and the [Mission Control](#mission-control-jobs) jobs dashboard at `/jobs`. Only addresses on the allowlist receive admin at signup; later accounts stay regular users unless you promote them in **Users**.
+
+Example:
+
+```bash
+GRIND_ADMIN_EMAILS=owner@example.com
+```
+
+After deploying with this set, register at `https://grind.example.com/sign_up` with `owner@example.com`, sign in, and visit `/jobs`.
 
 ### Email (optional but recommended)
 
@@ -256,9 +267,13 @@ docker exec <container_id> printenv HONEYBADGER_API_KEY
 
 ## Mission Control (`/jobs`)
 
-The Solid Queue dashboard lives at `/jobs` and is protected by HTTP basic auth. Set `MISSION_CONTROL_USERNAME` and `MISSION_CONTROL_PASSWORD` in your Once environment.
+The Solid Queue dashboard lives at `/jobs`. Access requires a signed-in **admin** account (same session as the rest of the app), not HTTP basic auth.
 
-In local development only, if those variables are unset, the defaults `development` / `development` apply.
+1. Set `GRIND_ADMIN_EMAILS` before the first signup (see [First admin user](#first-admin-user)).
+2. Register and sign in with that email.
+3. Open `/jobs` while signed in.
+
+Non-admins are redirected to the homepage with “Not authorized.”
 
 ## Cloudflare (orange cloud)
 

@@ -1,36 +1,22 @@
 # frozen_string_literal: true
 
-class MissionControlController < ActionController::Base
-  before_action :authenticate_mission_control!
+class MissionControlController < ApplicationController
+  require_authentication
+  before_action :require_admin
   after_action :set_robots_header
 
   private
 
-  def authenticate_mission_control!
-    username, password = mission_control_credentials
-
-    unless username && password
-      head :service_unavailable
-      return
+    def request_authentication
+      session[:return_to_after_authenticating] = request.fullpath
+      redirect_to main_app.new_session_path, alert: "Please sign in to continue."
     end
 
-    authenticate_or_request_with_http_basic("Grind Jobs") do |given_username, given_password|
-      ActiveSupport::SecurityUtils.secure_compare(given_username, username) &&
-        ActiveSupport::SecurityUtils.secure_compare(given_password, password)
+    def require_admin
+      redirect_to main_app.root_path, alert: "Not authorized." unless current_user&.admin?
     end
-  end
 
-  def mission_control_credentials
-    username = ENV["MISSION_CONTROL_USERNAME"].presence
-    password = ENV["MISSION_CONTROL_PASSWORD"].presence
-    return [ username, password ] if username && password
-
-    return %w[development development] if Rails.env.development?
-
-    [ nil, nil ]
-  end
-
-  def set_robots_header
-    response.headers["X-Robots-Tag"] = "noindex, nofollow"
-  end
+    def set_robots_header
+      response.headers["X-Robots-Tag"] = "noindex, nofollow"
+    end
 end
