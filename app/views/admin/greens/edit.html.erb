@@ -1,0 +1,60 @@
+<% content_for :seo_title, "Calibrate greens — #{@course.name}" %>
+<% content_for :head do %>
+  <%= stylesheet_link_tag "leaflet", "data-turbo-track": "reload" %>
+<% end %>
+
+<div class="space-y-6"
+     data-controller="green-editor"
+     data-green-editor-holes-value="<%= @holes_json.to_json %>"
+     data-green-editor-center-value="<%= @map_center.to_json %>"
+     data-green-editor-tile-url-value="<%= @tile_url %>"
+     data-green-editor-tile-attribution-value="<%= @tile_attribution %>">
+  <header class="space-y-1">
+    <p class="text-sm text-muted-foreground">
+      <%= link_to "← #{@course.name}", admin_course_path(@course), class: "ui-btn-link" %>
+    </p>
+    <div>
+      <h1 class="text-xl font-bold text-foreground">Calibrate greens</h1>
+      <p class="text-sm text-muted-foreground mt-1">Tap the satellite map to trace each green outline.</p>
+    </div>
+  </header>
+
+  <%= render "ui/banner",
+        tone: :info,
+        title: "How it works",
+        message: "Select a hole, zoom to its green, then tap vertices around the putting surface. Use Undo to remove the last point and Clear to start over." %>
+
+  <section>
+    <div class="flex items-center justify-between gap-3 mb-3">
+      <h2 class="text-lg font-semibold">Holes</h2>
+      <p class="text-sm text-muted-foreground" data-green-editor-target="progress">0 / <%= @holes.size %> greens mapped</p>
+    </div>
+    <div class="ui-segmented flex flex-wrap gap-1" role="group" aria-label="Select hole">
+      <% @holes.each do |hole| %>
+        <button type="button"
+                class="ui-segmented-option min-w-[2.5rem]"
+                data-green-editor-target="holeButton"
+                data-hole="<%= hole.number %>"
+                data-state="<%= hole == @holes.first ? "active" : "inactive" %>"
+                data-action="green-editor#selectHole">
+          <%= hole.number %>
+        </button>
+      <% end %>
+    </div>
+  </section>
+
+  <%= render "ui/card", padding: :sm, extra_class: "overflow-hidden" do %>
+    <div data-green-editor-target="map" class="h-80 w-full rounded-lg z-0"></div>
+    <p class="text-[11px] text-muted-foreground mt-3 text-center"><%= @tile_attribution %> · Map data © OpenStreetMap contributors</p>
+  <% end %>
+
+  <div class="flex gap-2">
+    <button type="button" class="ui-btn-secondary ui-btn-md flex-1" data-action="green-editor#undo">Undo</button>
+    <button type="button" class="ui-btn-ghost ui-btn-md flex-1 text-destructive" data-action="green-editor#clearHole">Clear hole</button>
+  </div>
+
+  <%= form_with url: admin_course_greens_path(@course), method: :patch, class: "space-y-4", data: { turbo: false, green_editor_target: "form", action: "submit->green-editor#submit" } do %>
+    <input type="hidden" name="calibration" value="" data-green-editor-target="calibration">
+    <button type="submit" class="ui-btn-primary ui-btn-md w-full">Save calibration</button>
+  <% end %>
+</div>

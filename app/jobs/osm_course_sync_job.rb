@@ -45,10 +45,16 @@ class OsmCourseSyncJob < ApplicationJob
   def apply(course, geometry)
     Course.transaction do
       course.holes.find_each do |hole|
-        hole.update_column(:green_geometry, geometry[hole.number])
+        next if hole.green_source == "manual"
+
+        data = geometry[hole.number]
+        hole.update_columns(
+          green_geometry: data,
+          green_source: data ? "osm" : nil
+        )
       end
       course.update_columns(
-        osm_status: geometry.any? ? "ok" : "no_data",
+        osm_status: course.holes.any?(&:green?) ? "ok" : "no_data",
         osm_synced_at: Time.current
       )
     end

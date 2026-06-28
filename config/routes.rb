@@ -9,6 +9,7 @@ Rails.application.routes.draw do
   namespace :admin do
     resources :users, only: %i[index show update]
     resources :courses do
+      resource :greens, only: %i[edit update], controller: "greens"
       member do
         post :sync_osm
       end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_28_040000) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_28_051642) do
   create_table "courses", force: :cascade do |t|
     t.string "address"
     t.string "city"
@@ -52,6 +52,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_28_040000) do
     t.integer "course_id", null: false
     t.datetime "created_at", null: false
     t.json "green_geometry"
+    t.json "green_input"
+    t.string "green_source"
     t.integer "handicap", null: false
     t.integer "number", null: false
     t.integer "par", null: false
