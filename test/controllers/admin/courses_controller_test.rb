@@ -29,6 +29,18 @@ class Admin::CoursesControllerTest < ActionDispatch::IntegrationTest
     assert_no_match courses(:two).name, response.body
   end
 
+  test "admin course list paginates" do
+    sign_in_as(users(:admin))
+    original_limit = Pagy::OPTIONS[:limit]
+    Pagy::OPTIONS[:limit] = 1
+
+    get admin_courses_path, params: { page: 2 }
+    assert_response :success
+    assert_match "Page 2 of", response.body
+  ensure
+    Pagy::OPTIONS[:limit] = original_limit
+  end
+
   test "admin can view course with scorecard and map" do
     sign_in_as(users(:admin))
     get admin_course_path(@course)

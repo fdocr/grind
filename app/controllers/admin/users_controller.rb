@@ -1,11 +1,13 @@
 module Admin
   class UsersController < BaseController
     def index
-      @users = User.order(created_at: :desc)
-      return if params[:q].blank?
-
-      term = "%#{User.sanitize_sql_like(params[:q].strip.downcase)}%"
-      @users = @users.where("email LIKE ?", term)
+      @query = params[:q].to_s.strip
+      scope = User.order(created_at: :desc)
+      if @query.present?
+        term = "%#{User.sanitize_sql_like(@query.downcase)}%"
+        scope = scope.where("email LIKE ?", term)
+      end
+      @pagy, @users = pagy(scope)
     end
 
     def show

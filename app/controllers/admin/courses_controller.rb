@@ -6,11 +6,12 @@ module Admin
 
     def index
       @query = params[:q].to_s.strip
-      @courses = if @query.present?
+      scope = if @query.present?
         Course.search(@query).order(:name)
       else
         Course.order(:name)
       end
+      @pagy, @courses = pagy(scope)
     end
 
     def show

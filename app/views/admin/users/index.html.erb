@@ -11,23 +11,37 @@
       <%= render "ui/input",
             form: f, field: :q, type: :text, label: "Search by email",
             placeholder: "name@example.com",
-            value: params[:q] %>
+            value: @query %>
       <button type="submit" class="ui-btn-secondary ui-btn-md w-full">Search</button>
     <% end %>
   <% end %>
 
-  <div class="space-y-3">
-    <% @users.each do |user| %>
-      <%= link_to admin_user_path(user), class: "block" do %>
-        <%= render "ui/card", padding: :sm do %>
-          <div class="flex items-center justify-between gap-3">
-            <p class="font-medium text-foreground truncate"><%= user.email %></p>
-            <%= render "ui/badge",
-                  text: user.role.titleize,
-                  tone: user.admin? ? :info : (user.banned? ? :danger : :neutral) %>
-          </div>
+  <% if @users.any? %>
+    <div class="space-y-3">
+      <% @users.each do |user| %>
+        <%= link_to admin_user_path(user), class: "block" do %>
+          <%= render "ui/card", padding: :sm do %>
+            <div class="flex items-center justify-between gap-3">
+              <p class="font-medium text-foreground truncate"><%= user.email %></p>
+              <%= render "ui/badge",
+                    text: user.role.titleize,
+                    tone: user.admin? ? :info : (user.banned? ? :danger : :neutral) %>
+            </div>
+          <% end %>
         <% end %>
       <% end %>
+    </div>
+
+    <%= render "ui/pagination",
+          pagy: @pagy,
+          path: ->(p) { admin_users_path(p.merge(q: @query.presence)) } %>
+  <% elsif @query.present? %>
+    <%= render "ui/card" do %>
+      <%= render "ui/empty_state",
+            title: "No users found",
+            message: "Try a different search term.",
+            icon: "search",
+            compact: true %>
     <% end %>
-  </div>
+  <% end %>
 </div>

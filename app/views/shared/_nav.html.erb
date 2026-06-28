@@ -32,6 +32,7 @@
           <% if current_user.admin? %>
             <%= link_to "Users", admin_users_path, class: "ui-nav-link", role: "menuitem", data: { turbo: false, action: "click->nav-menu#close" } %>
             <%= link_to "Courses", admin_courses_path, class: "ui-nav-link", role: "menuitem", data: { turbo: false, action: "click->nav-menu#close" } %>
+            <%= link_to "Jobs", mission_control_jobs_path, class: "ui-nav-link", role: "menuitem", data: { turbo: false, action: "click->nav-menu#close" } %>
           <% end %>
         <% else %>
           <%= link_to "Sign in", new_session_path, class: "ui-nav-link", role: "menuitem", data: { turbo: false, action: "click->nav-menu#close" } %>

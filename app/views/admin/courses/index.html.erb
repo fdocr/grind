@@ -36,6 +36,10 @@
         <% end %>
       <% end %>
     </div>
+
+    <%= render "ui/pagination",
+          pagy: @pagy,
+          path: ->(p) { admin_courses_path(p.merge(q: @query.presence)) } %>
   <% elsif @query.present? %>
     <%= render "ui/card" do %>
       <%= render "ui/empty_state",
