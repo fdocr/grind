@@ -13,8 +13,8 @@ module Admin
       @holes = @course.holes.order(:number)
       @map_center = map_center_for(@course)
       @holes_json = @holes.map { |hole| hole_payload(hole) }
-      @tile_url = satellite_tile_url
-      @tile_attribution = satellite_tile_attribution
+      @tile_url = Grind::MapTiles.satellite_url
+      @tile_attribution = Grind::MapTiles.satellite_attribution
       @active_hole = active_hole_param
     end
 
@@ -125,14 +125,11 @@ module Admin
       end
 
       def satellite_tile_url
-        ENV.fetch(
-          "SATELLITE_TILE_URL",
-          "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-        )
+        Grind::MapTiles.satellite_url
       end
 
       def satellite_tile_attribution
-        ENV.fetch("SATELLITE_TILE_ATTRIBUTION", "Tiles © Esri")
+        Grind::MapTiles.satellite_attribution
       end
   end
 end

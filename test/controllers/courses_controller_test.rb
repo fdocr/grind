@@ -8,6 +8,20 @@ class CoursesControllerTest < ActionDispatch::IntegrationTest
     assert_match courses(:one).name, response.body
   end
 
+  test "index includes features section" do
+    get root_path
+    assert_response :success
+    assert_match "Track your round score", response.body
+    assert_match "Game improvement stats", response.body
+    assert_match "Rangefinder", response.body
+    assert_match "Stats to your inbox", response.body
+    assert_match "Keep every round logged", response.body
+    assert_match "grind@fdo.cr", response.body
+    assert_select "a[href=?]", about_path
+    assert_select "a[href=?]", new_registration_path
+    assert_no_match "sample_tracking.png", response.body
+  end
+
   test "search filters courses" do
     get courses_path, params: { q: "Pebble" }
     assert_response :success

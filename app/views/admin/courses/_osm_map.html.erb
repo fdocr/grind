@@ -1,4 +1,10 @@
 <%# locals: (course:) %>
+<% if course.coordinates? %>
+  <% content_for :head do %>
+    <%= stylesheet_link_tag "leaflet", "data-turbo-track": "reload" %>
+  <% end %>
+<% end %>
+
 <section>
   <div class="flex items-center justify-between gap-3 mb-3">
     <h2 class="text-lg font-semibold">OpenStreetMap</h2>
@@ -18,13 +24,16 @@
 
       <% if course.coordinates? %>
         <div class="overflow-hidden rounded-lg border border-border">
-          <iframe title="OpenStreetMap map of <%= course.name %>"
-                  src="<%= osm_embed_url(course) %>"
-                  class="w-full h-64 border-0"
-                  loading="lazy"
-                  referrerpolicy="no-referrer-when-downgrade"></iframe>
+          <div data-controller="map-embed"
+               data-map-embed-center-value="<%= [ course.latitude.to_f, course.longitude.to_f ].to_json %>"
+               data-map-embed-tile-url-value="<%= satellite_tile_url %>"
+               data-map-embed-tile-attribution-value="<%= satellite_tile_attribution %>"
+               data-map-embed-zoom-value="15"
+               class="h-64 w-full z-0"
+               role="img"
+               aria-label="Satellite map of <%= course.name %>"></div>
         </div>
-        <p class="text-[11px] text-muted-foreground text-center">Map data © OpenStreetMap contributors</p>
+        <p class="text-[11px] text-muted-foreground text-center"><%= satellite_tile_attribution %> · Map data © OpenStreetMap contributors</p>
 
         <% green_holes = course.holes.select(&:green?) %>
         <% if green_holes.any? %>

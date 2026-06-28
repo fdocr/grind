@@ -6,13 +6,13 @@
       Amateurs don't get the same value from stats you commonly see on TV or YouTube. They are built around a game most of us don't play.
     </p>
     <p class="text-muted-foreground">
-      It's a deliberately simple tool: track a round on your phone, finish, and get a clear picture of where are your misses coming from.
+      Grind is a deliberately simple tool: track a round on your phone, finish, and get a clear picture of where are your misses are coming from.
     </p>
     <p class="text-muted-foreground">
       <%= link_to "Learn more about these game improvement stats", about_path, class: "ui-btn-link" %>.
     </p>
     <p class="text-muted-foreground">
-      Get the result sent to your email for free and no registration needed. Grind is also <%= link_to "open source", "https://github.com/fdocr/grind", class: "ui-btn-link", target: "_blank", rel: "noopener" %>.
+      We'll email the result to your inbox for free and no registration needed. You can create an account for free though and enjoy some niceties. Grind is also <%= link_to "open source", "https://github.com/fdocr/grind", class: "ui-btn-link", target: "_blank", rel: "noopener" %>.
     </p>
   </div>
 
@@ -50,17 +50,5 @@
 
   <%= turbo_frame_tag "course_modal" %>
 
-  <section class="mt-32 space-y-6">
-    <h1 class="text-5xl font-bold text-foreground text-center">Features</h1>
-
-    <figure class="space-y-6">
-      <figcaption class="text-lg text-muted-foreground text-center mt-16">Round tracker on your phone.</figcaption>
-      <%= image_tag "sample_tracking.png", alt: "Grind round tracker on a phone", class: "w-full rounded-lg border border-border shadow-card" %>
-    </figure>
-
-    <figure class="space-y-6">
-      <figcaption class="text-lg text-muted-foreground text-center mt-16">Free stats email when you finish.</figcaption>
-      <%= image_tag "sample_email.png", alt: "Round stats email", class: "w-full rounded-lg border border-border shadow-card" %>
-    </figure>
-  </section>
+  <%= render "features" %>
 </div>

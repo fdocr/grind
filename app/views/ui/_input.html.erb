@@ -1,19 +1,23 @@
-<%# locals: (form:, field:, type: :text, label: nil, hint: nil, placeholder: nil, value: nil, required: false, autofocus: false, autocomplete: nil, inputmode: nil, readonly: false, minlength: nil, maxlength: nil, extra_class: nil) %>
+<%# locals: (form:, field:, type: :text, label: nil, hint: nil, placeholder: nil, required: false, autofocus: false, autocomplete: nil, inputmode: nil, readonly: false, minlength: nil, maxlength: nil, extra_class: nil, value: :__unset__) %>
 <div class="space-y-2">
   <% if label.present? %>
     <%= form.label field, label, class: "ui-label" %>
   <% end %>
-  <%= form.send("#{type}_field", field,
-        value: value,
-        placeholder: placeholder,
-        required: required,
-        autofocus: autofocus,
-        autocomplete: autocomplete,
-        inputmode: inputmode,
-        readonly: readonly,
-        minlength: minlength,
-        maxlength: maxlength,
-        class: ["ui-input", extra_class].compact.join(" ")) %>
+  <%
+    field_options = {
+      placeholder: placeholder,
+      required: required,
+      autofocus: autofocus,
+      autocomplete: autocomplete,
+      inputmode: inputmode,
+      readonly: readonly,
+      minlength: minlength,
+      maxlength: maxlength,
+      class: [ "ui-input", extra_class ].compact.join(" ")
+    }
+    field_options[:value] = value unless value == :__unset__
+  %>
+  <%= form.send("#{type}_field", field, **field_options) %>
   <% if hint.present? %>
     <p class="ui-hint"><%= hint %></p>
   <% end %>
