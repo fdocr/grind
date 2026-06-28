@@ -14,33 +14,30 @@ class NavigationTest < ApplicationSystemTestCase
     click_button "Sign in"
 
     assert_text "Signed in"
+    assert_current_path root_path
 
     open_nav_menu
-    within(".ui-nav-menu-panel") do
-      click_link "My Rounds"
-    end
+    assert_selector ".ui-nav-menu-panel a[href='#{my_rounds_path}']", visible: true, wait: 5
+    find(".ui-nav-menu-panel a[href='#{my_rounds_path}']").click
 
-    assert_current_path my_rounds_path
+    assert_current_path my_rounds_path, wait: 5
     assert_text "My Rounds"
 
     open_nav_menu
-    within(".ui-nav-menu-panel") do
-      click_button "Sign out"
-    end
+    find(".ui-nav-menu-panel button", text: "Sign out").click
 
     assert_text "Signed out"
+    assert_current_path root_path, wait: 5
+
     open_nav_menu
-    assert_selector ".ui-nav-menu-panel a", text: "Sign in"
-    assert_no_selector ".ui-nav-menu-panel a", text: "My Rounds"
+    assert_selector ".ui-nav-menu-panel a[href='#{new_session_path}']", visible: true
+    assert_no_selector ".ui-nav-menu-panel a[href='#{my_rounds_path}']"
   end
 
   private
 
     def open_nav_menu
-      menu = find("button[name=menu]")
-      menu.click
-
-      panel = find(".ui-nav-menu-panel", visible: :all)
-      assert panel.visible?, "expected navigation menu to open after clicking the menu button"
+      find("button[name=menu]").click
+      assert_no_selector ".ui-nav-menu-panel.hidden", wait: 5
     end
 end

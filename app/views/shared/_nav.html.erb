@@ -20,25 +20,25 @@
            class="ui-nav-menu-panel hidden"
            role="menu"
            aria-label="Main navigation">
-        <%= link_to "Home", root_path, class: "ui-nav-link", role: "menuitem", data: { action: "click->nav-menu#close" } %>
+        <%= link_to "Home", root_path, class: "ui-nav-link", role: "menuitem", data: { turbo: false, action: "click->nav-menu#close" } %>
 
         <% if authenticated? %>
-          <%= link_to "My Rounds", my_rounds_path, class: "ui-nav-link", role: "menuitem", data: { action: "click->nav-menu#close" } %>
+          <%= link_to "My Rounds", my_rounds_path, class: "ui-nav-link", role: "menuitem", data: { turbo: false, action: "click->nav-menu#close" } %>
           <% if current_user.admin? %>
-            <%= link_to "Admin", admin_users_path, class: "ui-nav-link", role: "menuitem", data: { action: "click->nav-menu#close" } %>
+            <%= link_to "Admin", admin_users_path, class: "ui-nav-link", role: "menuitem", data: { turbo: false, action: "click->nav-menu#close" } %>
           <% end %>
         <% else %>
-          <%= link_to "Sign in", new_session_path, class: "ui-nav-link", role: "menuitem", data: { action: "click->nav-menu#close" } %>
-          <%= link_to "Sign up", new_registration_path, class: "ui-nav-link", role: "menuitem", data: { action: "click->nav-menu#close" } %>
+          <%= link_to "Sign in", new_session_path, class: "ui-nav-link", role: "menuitem", data: { turbo: false, action: "click->nav-menu#close" } %>
+          <%= link_to "Sign up", new_registration_path, class: "ui-nav-link", role: "menuitem", data: { turbo: false, action: "click->nav-menu#close" } %>
         <% end %>
 
         <hr class="ui-nav-sep">
 
-        <%= link_to "About", about_path, class: "ui-nav-link", role: "menuitem", data: { action: "click->nav-menu#close" } %>
+        <%= link_to "About", about_path, class: "ui-nav-link", role: "menuitem", data: { turbo: false, action: "click->nav-menu#close" } %>
 
         <% if authenticated? %>
           <hr class="ui-nav-sep">
-          <%= button_to "Sign out", session_path, method: :delete, class: "ui-nav-link-danger", role: "menuitem" %>
+          <%= button_to "Sign out", session_path, method: :delete, class: "ui-nav-link-danger", role: "menuitem", form: { data: { turbo: false } } %>
         <% end %>
       </div>
     </div>
