@@ -41,6 +41,7 @@ class Admin::UsersControllerTest < ActionDispatch::IntegrationTest
     get admin_user_path(user)
     assert_response :success
     assert_match user.email, response.body
+    assert_select "select[name='user[role]'] option[selected][value='user']"
 
     patch admin_user_path(user), params: { user: { role: "banned" } }
     assert_redirected_to admin_user_path(user)

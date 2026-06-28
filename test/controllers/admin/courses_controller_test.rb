@@ -48,7 +48,19 @@ class Admin::CoursesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_match @course.name, response.body
     assert_match "Scorecard", response.body
-    assert_match "openstreetmap.org", response.body
+    assert_match "data-controller=\"map-embed\"", response.body
+    assert_match "arcgisonline.com", response.body
+  end
+
+  test "admin edit form shows existing course data" do
+    sign_in_as(users(:admin))
+    get edit_admin_course_path(@course)
+
+    assert_response :success
+    assert_select "input[name='course[name]'][value=?]", @course.name
+    assert_select "input[name='course[country]'][value=?]", @course.country
+    assert_select "input[name='course[city]'][value=?]", @course.city
+    assert_select "input[name='course[state_province]'][value=?]", @course.state_province
   end
 
   test "admin can create course" do
