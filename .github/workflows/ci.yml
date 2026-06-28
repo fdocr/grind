@@ -76,7 +76,7 @@ jobs:
     #    options: --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5
     steps:
       - name: Install packages
-        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y build-essential libvips google-chrome-stable
+        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y build-essential libvips
 
       - name: Checkout code
         uses: actions/checkout@v7
@@ -85,9 +85,6 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           bundler-cache: true
-
-      - name: Build assets
-        run: bin/rails tailwindcss:build
 
       - name: Run tests
         env:
@@ -107,7 +104,7 @@ jobs:
     #    options: --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5
     steps:
       - name: Install packages
-        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y build-essential libvips google-chrome-stable
+        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y build-essential libvips
 
       - name: Checkout code
         uses: actions/checkout@v7
@@ -116,9 +113,6 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           bundler-cache: true
-
-      - name: Build assets
-        run: bin/rails tailwindcss:build
 
       - name: Run System Tests
         env:
