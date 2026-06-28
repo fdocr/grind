@@ -1,5 +1,7 @@
 module Admin
   class BaseController < ApplicationController
+    include Pagy::Method
+
     require_authentication
     before_action :require_admin
 
