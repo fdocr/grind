@@ -1,47 +1,23 @@
+# frozen_string_literal: true
+
 require "test_helper"
 
 class MissionControlAuthTest < ActionDispatch::IntegrationTest
-  test "jobs dashboard requires basic auth when credentials are set" do
-    with_env(
-      "MISSION_CONTROL_USERNAME" => "admin",
-      "MISSION_CONTROL_PASSWORD" => "secret"
-    ) do
-      get "/jobs"
-      assert_response :unauthorized
-    end
+  test "jobs dashboard requires sign in" do
+    get "/jobs"
+    assert_redirected_to "/session/new"
   end
 
-  test "jobs dashboard allows access with valid basic auth" do
-    with_env(
-      "MISSION_CONTROL_USERNAME" => "admin",
-      "MISSION_CONTROL_PASSWORD" => "secret"
-    ) do
-      get "/jobs", headers: {
-        "HTTP_AUTHORIZATION" => ActionController::HttpAuthentication::Basic.encode_credentials("admin", "secret")
-      }
-      assert_response :success
-    end
+  test "jobs dashboard requires admin role" do
+    sign_in_as(users(:player))
+    get "/jobs"
+    assert_redirected_to "/"
+    assert_match "Not authorized", flash[:alert]
   end
 
-  test "jobs dashboard is unavailable without credentials outside development" do
-    with_env(
-      "MISSION_CONTROL_USERNAME" => nil,
-      "MISSION_CONTROL_PASSWORD" => nil
-    ) do
-      get "/jobs"
-      assert_response :service_unavailable
-    end
-  end
-
-  private
-
-  def with_env(vars)
-    original = vars.keys.index_with { |key| ENV[key] }
-    vars.each { |key, value| ENV[key] = value }
-    yield
-  ensure
-    original.each do |key, value|
-      value.nil? ? ENV.delete(key) : ENV[key] = value
-    end
+  test "jobs dashboard allows admin access" do
+    sign_in_as(users(:admin))
+    get "/jobs"
+    assert_response :success
   end
 end
