@@ -1,0 +1,90 @@
+<section class="pt-10 mt-10 border-t border-border space-y-4">
+  <header class="space-y-2">
+    <h2 class="text-xl font-semibold text-foreground">Features</h2>
+    <p class="text-sm text-muted-foreground">
+      A deliberately simple tool for the round you're actually playing.
+    </p>
+  </header>
+
+  <div class="space-y-3">
+    <%= render "ui/card", padding: :sm do %>
+      <div class="flex gap-4">
+        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-50 text-primary-700" aria-hidden="true">
+          <%= icon "flag", class: "w-5 h-5" %>
+        </div>
+        <div class="min-w-0 space-y-1">
+          <h3 class="font-semibold text-foreground">Track your round score</h3>
+          <p class="text-sm text-muted-foreground">
+            Post gross score and putts hole by hole on your phone. Score to par updates live as you play through the round.
+          </p>
+        </div>
+      </div>
+    <% end %>
+
+    <%= render "ui/card", padding: :sm do %>
+      <div class="flex gap-4">
+        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-50 text-primary-700" aria-hidden="true">
+          <%= icon "scorecard", class: "w-5 h-5" %>
+        </div>
+        <div class="min-w-0 space-y-1">
+          <h3 class="font-semibold text-foreground">Game improvement stats</h3>
+          <p class="text-sm text-muted-foreground">
+            Tap a few counters during your round to see identify where your strokes leak from.
+          </p>
+          <p class="text-sm mt-2">
+            <%= link_to "Read more about these stats", about_path, class: "ui-btn-link" %>.
+          </p>
+        </div>
+      </div>
+    <% end %>
+
+    <%= render "ui/card", padding: :sm do %>
+      <div class="flex gap-4">
+        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-50 text-primary-700" aria-hidden="true">
+          <%= icon "location", class: "w-5 h-5" %>
+        </div>
+        <div class="min-w-0 space-y-1">
+          <h3 class="font-semibold text-foreground">Rangefinder</h3>
+          <p class="text-sm text-muted-foreground">
+            Live GPS distances to the front, center, and back of the green when you're near the hole.
+          </p>
+          <p class="text-sm text-muted-foreground mt-2">
+            Want your course added or updated?
+            <%= mail_to "grind@fdo.cr", "Email us", class: "ui-btn-link" %>.
+          </p>
+        </div>
+      </div>
+    <% end %>
+
+    <%= render "ui/card", padding: :sm do %>
+      <div class="flex gap-4">
+        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-50 text-primary-700" aria-hidden="true">
+          <%= icon "envelope", class: "w-5 h-5" %>
+        </div>
+        <div class="min-w-0 space-y-1">
+          <h3 class="font-semibold text-foreground">Stats to your inbox</h3>
+          <p class="text-sm text-muted-foreground">
+            Finish your round and we'll email the result for free. No registration needed either, but creating an account does have some nice perks.
+          </p>
+        </div>
+      </div>
+    <% end %>
+
+    <%= render "ui/card", padding: :sm do %>
+      <div class="flex gap-4">
+        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-50 text-primary-700" aria-hidden="true">
+          <%= icon "check", class: "w-5 h-5" %>
+        </div>
+        <div class="min-w-0 space-y-1">
+          <h3 class="font-semibold text-foreground">Keep every round logged</h3>
+          <p class="text-sm text-muted-foreground">
+            Sign up for free to save finished rounds to your account and browse them anytime.
+          </p>
+          <p class="text-sm mt-2">
+            <%= link_to "Create a free account", new_registration_path, class: "ui-btn-link" %>.
+          </p>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</section>
