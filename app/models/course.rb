@@ -6,6 +6,8 @@ class Course < ApplicationRecord
   has_many :holes, -> { order(:number) }, dependent: :destroy, inverse_of: :course
   has_many :rounds, dependent: :destroy
 
+  accepts_nested_attributes_for :holes
+
   validates :name, :country, presence: true
   validates :name, uniqueness: { scope: [ :city, :state_province ] }
 
@@ -57,6 +59,19 @@ class Course < ApplicationRecord
 
   def osm_synced?
     osm_synced_at.present?
+  end
+
+  def green_holes_count
+    holes.count(&:green?)
+  end
+
+  def osm_status_label
+    case osm_status
+    when "ok" then "Synced"
+    when "no_data" then "No green data"
+    when "error" then "Sync error"
+    else "Not synced"
+    end
   end
 
   # Tee names in import order (longest course first when yardage is known).

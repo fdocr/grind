@@ -1,0 +1,12 @@
+<% content_for :seo_title, "New course" %>
+
+<div class="space-y-6">
+  <header class="space-y-1">
+    <p class="text-sm text-muted-foreground">
+      <%= link_to "← Courses", admin_courses_path, class: "ui-btn-link" %>
+    </p>
+    <h1 class="text-xl font-bold text-foreground">New course</h1>
+  </header>
+
+  <%= render "form", course: @course %>
+</div>

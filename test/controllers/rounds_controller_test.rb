@@ -1,7 +1,9 @@
 require "test_helper"
 
 class RoundsControllerTest < ActionDispatch::IntegrationTest
+  include ActiveJob::TestHelper
   include ScoreHelper
+
   setup do
     @course = courses(:one)
     build_eighteen_holes!(@course)
@@ -66,6 +68,51 @@ class RoundsControllerTest < ActionDispatch::IntegrationTest
     follow_redirect!
     assert_match "Round complete", response.body
     assert_match format_score_to_par(round.score_to_par), response.body
+    assert_match "Email your stats", response.body
+  end
+
+  test "signed in user gets auto recap and sees banner instead of email form" do
+    sign_in_as(users(:player))
+    hole_scores = (1..18).each_with_object({}) do |number, scores|
+      scores[number.to_s] = { gross: 4, putts: 2 }
+    end
+
+    assert_enqueued_with(job: SendRoundStatsJob) do
+      post course_rounds_path(@course), params: {
+        round: {
+          oop_tee_shots: 0, three_putts: 0, botched_up_downs: 0, inside_pw_9i: 0,
+          started_at: 1.hour.ago.iso8601, hole_scores: hole_scores
+        }
+      }
+    end
+
+    round = Round.last
+    assert_equal users(:player), round.user
+    assert_equal users(:player).email, round.deliveries.last.email
+
+    assert_redirected_to round_path(round.token)
+    follow_redirect!
+    assert_match "recap of your round in your inbox soon", response.body
+    assert_no_match "Email your stats", response.body
+  end
+
+  test "banned signed in user cannot finish a round" do
+    sign_in_as(users(:banned))
+    hole_scores = (1..18).each_with_object({}) do |number, scores|
+      scores[number.to_s] = { gross: 4, putts: 2 }
+    end
+
+    assert_no_difference "Round.count" do
+      post course_rounds_path(@course), params: {
+        round: {
+          oop_tee_shots: 0, three_putts: 0, botched_up_downs: 0, inside_pw_9i: 0,
+          started_at: 1.hour.ago.iso8601, hole_scores: hole_scores
+        }
+      }
+    end
+
+    assert_redirected_to new_session_path
+    assert_match "suspended", flash[:alert]
   end
 
   test "create renders friendly banner without losing data when save raises" do

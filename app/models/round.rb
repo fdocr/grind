@@ -4,6 +4,7 @@ class Round < ApplicationRecord
   has_secure_token
 
   belongs_to :course
+  belongs_to :user, optional: true
   has_many :deliveries, dependent: :destroy
 
   validates :oop_tee_shots, :three_putts, :botched_up_downs,

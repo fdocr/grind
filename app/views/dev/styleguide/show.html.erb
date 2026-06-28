@@ -103,6 +103,23 @@
   </section>
 
   <section>
+    <h2 class="text-xl font-semibold mb-4">Navigation menu</h2>
+    <%= render "ui/card", padding: :sm do %>
+      <div class="max-w-xs">
+        <div class="ui-nav-menu-panel relative right-auto top-auto mt-0 shadow-card">
+          <%= link_to "Home", "#", class: "ui-nav-link" %>
+          <%= link_to "My Rounds", "#", class: "ui-nav-link" %>
+          <%= link_to "Sign in", "#", class: "ui-nav-link" %>
+          <hr class="ui-nav-sep">
+          <%= link_to "About", "#", class: "ui-nav-link" %>
+          <hr class="ui-nav-sep">
+          <button type="button" class="ui-nav-link-danger">Sign out</button>
+        </div>
+      </div>
+    <% end %>
+  </section>
+
+  <section>
     <h2 class="text-xl font-semibold mb-4">Scorecard table</h2>
     <%= render "ui/card", padding: :sm do %>
       <%= render "ui/table",

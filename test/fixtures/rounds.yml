@@ -26,3 +26,33 @@ finished:
     16: { gross: 5, putts: 2 }
     17: { gross: 3, putts: 1 }
     18: { gross: 4, putts: 2 }
+
+player_round:
+  course: one
+  user: player
+  token: playerroundtoken01
+  oop_tee_shots: 0
+  three_putts: 1
+  botched_up_downs: 0
+  inside_pw_9i: 0
+  started_at: 2026-06-20 10:00:00
+  finished_at: 2026-06-20 14:00:00
+  hole_scores:
+    1: { gross: 4, putts: 2 }
+    2: { gross: 4, putts: 2 }
+    3: { gross: 3, putts: 1 }
+    4: { gross: 5, putts: 2 }
+    5: { gross: 4, putts: 2 }
+    6: { gross: 4, putts: 2 }
+    7: { gross: 5, putts: 2 }
+    8: { gross: 3, putts: 1 }
+    9: { gross: 4, putts: 2 }
+    10: { gross: 4, putts: 2 }
+    11: { gross: 4, putts: 2 }
+    12: { gross: 3, putts: 1 }
+    13: { gross: 5, putts: 2 }
+    14: { gross: 4, putts: 2 }
+    15: { gross: 4, putts: 2 }
+    16: { gross: 5, putts: 2 }
+    17: { gross: 3, putts: 1 }
+    18: { gross: 4, putts: 2 }

@@ -3,3 +3,10 @@ one:
   course: one
   email: player@example.com
   score_to_par: 2
+
+registered:
+  round: player_round
+  course: one
+  user: player
+  email: player@example.com
+  score_to_par: 2

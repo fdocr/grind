@@ -1,0 +1,129 @@
+<%# locals: (course:) %>
+<%= form_with model: course, url: course.persisted? ? admin_course_path(course) : admin_courses_path, class: "space-y-6", data: { turbo: false } do |f| %>
+  <% if course.errors.any? %>
+    <%= render "ui/banner",
+          tone: :warning,
+          title: "Could not save course",
+          message: course.errors.full_messages.to_sentence %>
+  <% end %>
+
+  <section>
+    <h2 class="text-lg font-semibold mb-3">Details</h2>
+    <%= render "ui/card", padding: :sm do %>
+      <div class="space-y-4">
+        <%= render "ui/input", form: f, field: :name, label: "Name", required: true %>
+        <%= render "ui/input", form: f, field: :country, label: "Country code", placeholder: "US", required: true %>
+        <%= render "ui/input", form: f, field: :city, label: "City" %>
+        <%= render "ui/input", form: f, field: :state_province, label: "State / province" %>
+        <%= render "ui/input", form: f, field: :address, label: "Address" %>
+        <%= render "ui/input", form: f, field: :zip, label: "ZIP / postal code" %>
+        <%= render "ui/input", form: f, field: :phone, label: "Phone" %>
+        <%= render "ui/input", form: f, field: :website, label: "Website", type: :url %>
+        <div class="flex items-center gap-2">
+          <%= f.check_box :metric, class: "rounded border-border" %>
+          <%= f.label :metric, "Use metric units", class: "text-sm text-foreground" %>
+        </div>
+      </div>
+    <% end %>
+  </section>
+
+  <section>
+    <h2 class="text-lg font-semibold mb-3">Coordinates</h2>
+    <%= render "ui/card", padding: :sm do %>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <%= render "ui/input", form: f, field: :latitude, label: "Latitude", inputmode: "decimal" %>
+        <%= render "ui/input", form: f, field: :longitude, label: "Longitude", inputmode: "decimal" %>
+      </div>
+      <p class="ui-hint mt-3">Coordinates enable the OpenStreetMap embed and green distance sync.</p>
+    <% end %>
+  </section>
+
+  <section>
+    <h2 class="text-lg font-semibold mb-3">Holes</h2>
+    <%= render "ui/card", padding: :sm, extra_class: "overflow-hidden" do %>
+      <div class="ui-scorecard-scroll">
+        <table class="ui-scorecard-table">
+          <thead>
+            <tr>
+              <th>Hole</th>
+              <th>Par</th>
+              <th>Hcp</th>
+            </tr>
+          </thead>
+          <tbody>
+            <%= f.fields_for :holes, course.holes.sort_by(&:number) do |hole_fields| %>
+              <tr>
+                <td>
+                  <%= hole_fields.hidden_field :id if hole_fields.object.persisted? %>
+                  <%= hole_fields.hidden_field :number %>
+                  <%= hole_fields.object.number %>
+                </td>
+                <td>
+                  <%= hole_fields.number_field :par, min: 3, max: 6, class: "ui-input w-16 text-center", required: true %>
+                </td>
+                <td>
+                  <%= hole_fields.number_field :handicap, min: 1, max: 18, class: "ui-input w-16 text-center", required: true %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% end %>
+  </section>
+
+  <section>
+    <h2 class="text-lg font-semibold mb-3">Tees</h2>
+    <% course.tees.each do |tee_name, tee_data| %>
+      <%= render "ui/card", padding: :sm, extra_class: "space-y-4" do %>
+        <h3 class="font-semibold text-foreground"><%= tee_name.titleize %> tee</h3>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="space-y-2">
+            <label class="ui-label" for="course_tees_<%= tee_name %>_rating">Rating</label>
+            <input type="text"
+                   name="course[tees][<%= tee_name %>][rating]"
+                   id="course_tees_<%= tee_name %>_rating"
+                   value="<%= tee_data["rating"] %>"
+                   class="ui-input">
+          </div>
+          <div class="space-y-2">
+            <label class="ui-label" for="course_tees_<%= tee_name %>_slope">Slope</label>
+            <input type="text"
+                   name="course[tees][<%= tee_name %>][slope]"
+                   id="course_tees_<%= tee_name %>_slope"
+                   value="<%= tee_data["slope"] %>"
+                   class="ui-input">
+          </div>
+        </div>
+
+        <% unit = course.metric? ? "m" : "yds" %>
+        <div class="ui-scorecard-scroll">
+          <table class="ui-scorecard-table">
+            <tr>
+              <th>Hole</th>
+              <% (1..18).each do |number| %><th><%= number %></th><% end %>
+            </tr>
+            <tr>
+              <td><%= unit.titleize %></td>
+              <% (1..18).each do |number| %>
+                <% yards = Array(tee_data["yardages"])[number - 1].to_i %>
+                <td>
+                  <input type="number"
+                         name="course[tees][<%= tee_name %>][yardages][]"
+                         value="<%= yards.positive? ? yards : nil %>"
+                         min="0"
+                         class="ui-input w-14 text-center px-1">
+                </td>
+              <% end %>
+            </tr>
+          </table>
+        </div>
+      <% end %>
+    <% end %>
+  </section>
+
+  <div class="flex gap-2">
+    <%= f.submit course.persisted? ? "Save changes" : "Create course", class: "ui-btn-primary ui-btn-md flex-1" %>
+    <%= link_to "Cancel", course.persisted? ? admin_course_path(course) : admin_courses_path, class: "ui-btn-secondary ui-btn-md flex-1 text-center" %>
+  </div>
+<% end %>

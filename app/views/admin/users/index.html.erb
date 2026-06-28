@@ -1,0 +1,33 @@
+<% content_for :seo_title, "Users" %>
+
+<div class="space-y-6">
+  <header class="space-y-1">
+    <h1 class="text-xl font-bold text-foreground">Users</h1>
+    <p class="text-sm text-muted-foreground">Manage registered accounts.</p>
+  </header>
+
+  <%= render "ui/card", padding: :sm do %>
+    <%= form_with url: admin_users_path, method: :get, class: "space-y-4", data: { turbo: false } do |f| %>
+      <%= render "ui/input",
+            form: f, field: :q, type: :text, label: "Search by email",
+            placeholder: "name@example.com",
+            value: params[:q] %>
+      <button type="submit" class="ui-btn-secondary ui-btn-md w-full">Search</button>
+    <% end %>
+  <% end %>
+
+  <div class="space-y-3">
+    <% @users.each do |user| %>
+      <%= link_to admin_user_path(user), class: "block" do %>
+        <%= render "ui/card", padding: :sm do %>
+          <div class="flex items-center justify-between gap-3">
+            <p class="font-medium text-foreground truncate"><%= user.email %></p>
+            <%= render "ui/badge",
+                  text: user.role.titleize,
+                  tone: user.admin? ? :info : (user.banned? ? :danger : :neutral) %>
+          </div>
+        <% end %>
+      <% end %>
+    <% end %>
+  </div>
+</div>

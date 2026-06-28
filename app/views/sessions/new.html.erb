@@ -1,0 +1,33 @@
+<% content_for :seo_title, "Sign in" %>
+
+<div class="space-y-6">
+  <header class="space-y-1">
+    <h1 class="text-xl font-bold text-foreground">Sign in</h1>
+    <p class="text-sm text-muted-foreground">Welcome back to Grind.</p>
+  </header>
+
+  <%= render "ui/card", padding: :sm do %>
+    <%= form_with url: session_path, class: "space-y-4", data: { turbo: false } do |f| %>
+      <%= render "ui/input",
+            form: f, field: :email, type: :email, label: "Email",
+            placeholder: "you@example.com",
+            value: params[:email],
+            required: true, autofocus: true, autocomplete: "email" %>
+
+      <%= render "ui/input",
+            form: f, field: :password, type: :password, label: "Password",
+            placeholder: "••••••••",
+            required: true, autocomplete: "current-password" %>
+
+      <%= render "shared/turnstile" %>
+
+      <button type="submit" class="ui-btn-primary ui-btn-md w-full">Sign in</button>
+    <% end %>
+  <% end %>
+
+  <p class="text-sm text-muted-foreground text-center">
+    <%= link_to "Forgot password?", new_password_path, class: "ui-btn-link" %>
+    ·
+    <%= link_to "Create account", new_registration_path, class: "ui-btn-link" %>
+  </p>
+</div>

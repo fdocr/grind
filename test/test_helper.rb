@@ -1,6 +1,8 @@
 ENV["RAILS_ENV"] ||= "test"
 require_relative "../config/environment"
 require "rails/test_help"
+require_relative "test_helpers/session_test_helper"
+require_relative "test_helpers/system_test_retry"
 
 module ActiveSupport
   class TestCase

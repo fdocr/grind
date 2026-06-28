@@ -1,4 +1,20 @@
 Rails.application.routes.draw do
+  resource :session
+  resources :passwords, param: :token
+  resource :registration, only: %i[new create]
+  get "sign_up", to: "registrations#new"
+
+  get "my-rounds", to: "my_rounds#index", as: :my_rounds
+
+  namespace :admin do
+    resources :users, only: %i[index show update]
+    resources :courses do
+      member do
+        post :sync_osm
+      end
+    end
+  end
+
   get "up" => "rails/health#show", as: :rails_health_check
 
   get "manifest" => "rails/pwa#manifest", as: :pwa_manifest

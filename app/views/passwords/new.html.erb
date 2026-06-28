@@ -1,0 +1,26 @@
+<% content_for :seo_title, "Forgot password" %>
+
+<div class="space-y-6">
+  <header class="space-y-1">
+    <h1 class="text-xl font-bold text-foreground">Forgot password</h1>
+    <p class="text-sm text-muted-foreground">Enter your email and we'll send reset instructions.</p>
+  </header>
+
+  <%= render "ui/card", padding: :sm do %>
+    <%= form_with url: passwords_path, class: "space-y-4", data: { turbo: false } do |f| %>
+      <%= render "ui/input",
+            form: f, field: :email, type: :email, label: "Email",
+            placeholder: "you@example.com",
+            value: params[:email],
+            required: true, autofocus: true, autocomplete: "email" %>
+
+      <%= render "shared/turnstile" %>
+
+      <button type="submit" class="ui-btn-primary ui-btn-md w-full">Send instructions</button>
+    <% end %>
+  <% end %>
+
+  <p class="text-sm text-muted-foreground text-center">
+    <%= link_to "Back to sign in", new_session_path, class: "ui-btn-link" %>
+  </p>
+</div>

@@ -1,0 +1,31 @@
+<% content_for :seo_title, "Reset password" %>
+
+<div class="space-y-6">
+  <header class="space-y-1">
+    <h1 class="text-xl font-bold text-foreground">Set new password</h1>
+    <p class="text-sm text-muted-foreground">Enter your new password below.</p>
+  </header>
+
+  <%= render "ui/card", padding: :sm do %>
+    <%= form_with url: password_path(params[:token]), method: :put, class: "space-y-4", data: { turbo: false } do |f| %>
+      <%= render "ui/input",
+            form: f, field: :password, type: :password, label: "New password",
+            placeholder: "••••••••",
+            required: true, autofocus: true, autocomplete: "new-password",
+            minlength: 8,
+            hint: "At least 8 characters" %>
+
+      <%= render "ui/input",
+            form: f, field: :password_confirmation, type: :password, label: "Confirm password",
+            placeholder: "••••••••",
+            required: true, autocomplete: "new-password",
+            minlength: 8 %>
+
+      <button type="submit" class="ui-btn-primary ui-btn-md w-full">Update password</button>
+    <% end %>
+  <% end %>
+
+  <p class="text-sm text-muted-foreground text-center">
+    <%= link_to "Back to sign in", new_session_path, class: "ui-btn-link" %>
+  </p>
+</div>

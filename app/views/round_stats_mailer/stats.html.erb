@@ -2,6 +2,14 @@
 
 <%= render "scorecard", round: @round, holes: @holes %>
 
+<% if @show_register_cta %>
+  <p class="email-footer">
+    Want a better experience? Create a free account at
+    <a href="https://grind.fdo.cr/sign_up?utm_source=round_recap&amp;utm_medium=email&amp;utm_campaign=register" class="email-footer-link">grind.fdo.cr</a>
+    to keep all your rounds in one place.
+  </p>
+<% end %>
+
 <p class="email-footer">
   Tracked with <a href="https://ugo.cr/7kG34" class="email-footer-link">grind.fdo.cr</a>
 </p>

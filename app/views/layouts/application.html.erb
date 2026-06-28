@@ -37,13 +37,7 @@
   </head>
 
   <body class="min-h-screen touch-manipulation">
-    <header class="border-b border-border bg-card">
-      <div class="max-w-lg mx-auto px-4 py-4 flex items-center justify-between">
-        <%= link_to root_path, class: "text-xl font-bold text-primary-700 tracking-tight" do %>
-          Grind
-        <% end %>
-      </div>
-    </header>
+    <%= render "shared/nav" %>
 
     <main class="max-w-lg mx-auto px-4 py-6 pb-24">
       <%= render "shared/connection_banner" %>
