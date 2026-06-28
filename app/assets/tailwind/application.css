@@ -297,4 +297,28 @@
   .ui-picker-row {
     @apply space-y-2;
   }
+
+  /* Nav menu dropdown — popover on desktop, near full-bleed sheet on mobile */
+  .ui-nav-menu-panel {
+    @apply absolute right-0 top-full z-40 mt-2
+           bg-card rounded-lg border border-border shadow-popover
+           flex flex-col gap-1 p-2 origin-top-right
+           min-w-[200px];
+  }
+  @media (max-width: 640px) {
+    .ui-nav-menu-panel {
+      @apply fixed right-4 left-4 top-[4.25rem] mt-0 p-3 gap-1.5 origin-top rounded-lg;
+    }
+  }
+  .ui-nav-link {
+    @apply block px-4 py-2.5 sm:py-2 rounded-md text-sm font-medium
+           text-foreground hover:text-white hover:bg-primary-600 transition-colors;
+  }
+  .ui-nav-link-danger {
+    @apply block px-4 py-2.5 sm:py-2 rounded-md text-sm font-medium text-left w-full
+           text-danger-700 hover:text-white hover:bg-danger-600 transition-colors cursor-pointer;
+  }
+  .ui-nav-sep {
+    @apply border-t border-border my-1;
+  }
 }

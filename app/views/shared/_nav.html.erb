@@ -1,0 +1,46 @@
+<header class="border-b border-border bg-card relative z-30">
+  <div class="max-w-lg mx-auto px-4 py-4 flex items-center justify-between">
+    <%= link_to root_path, class: "text-xl font-bold text-primary-700 tracking-tight" do %>
+      Grind
+    <% end %>
+
+    <div data-controller="nav-menu" class="ui-nav-menu relative">
+      <button type="button"
+              name="menu"
+              aria-label="Open menu"
+              aria-expanded="false"
+              aria-haspopup="true"
+              class="ui-icon-btn"
+              data-nav-menu-target="button"
+              data-action="click->nav-menu#toggle">
+        <%= render "shared/svg/menu", class: "w-5 h-5" %>
+      </button>
+
+      <div data-nav-menu-target="menu"
+           class="ui-nav-menu-panel hidden"
+           role="menu"
+           aria-label="Main navigation">
+        <%= link_to "Home", root_path, class: "ui-nav-link", role: "menuitem", data: { action: "click->nav-menu#close" } %>
+
+        <% if authenticated? %>
+          <%= link_to "My Rounds", my_rounds_path, class: "ui-nav-link", role: "menuitem", data: { action: "click->nav-menu#close" } %>
+          <% if current_user.admin? %>
+            <%= link_to "Admin", admin_users_path, class: "ui-nav-link", role: "menuitem", data: { action: "click->nav-menu#close" } %>
+          <% end %>
+        <% else %>
+          <%= link_to "Sign in", new_session_path, class: "ui-nav-link", role: "menuitem", data: { action: "click->nav-menu#close" } %>
+          <%= link_to "Sign up", new_registration_path, class: "ui-nav-link", role: "menuitem", data: { action: "click->nav-menu#close" } %>
+        <% end %>
+
+        <hr class="ui-nav-sep">
+
+        <%= link_to "About", about_path, class: "ui-nav-link", role: "menuitem", data: { action: "click->nav-menu#close" } %>
+
+        <% if authenticated? %>
+          <hr class="ui-nav-sep">
+          <%= button_to "Sign out", session_path, method: :delete, class: "ui-nav-link-danger", role: "menuitem" %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</header>
