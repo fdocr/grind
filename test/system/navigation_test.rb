@@ -8,36 +8,25 @@ class NavigationTest < ApplicationSystemTestCase
 
   test "sign in, visit my rounds via menu, and sign out via menu" do
     visit new_session_path
+    assert_javascript_ready
 
     fill_in "Email", with: @player.email
     fill_in "Password", with: "password"
     click_button "Sign in"
 
     assert_text "Signed in"
-    assert_current_path root_path
+    assert_current_path root_path, wait: Capybara.default_max_wait_time
 
-    open_nav_menu
-    assert_selector ".ui-nav-menu-panel a[href='#{my_rounds_path}']", visible: true, wait: 5
-    find(".ui-nav-menu-panel a[href='#{my_rounds_path}']").click
-
-    assert_current_path my_rounds_path, wait: 5
+    click_nav_link(my_rounds_path)
+    assert_current_path my_rounds_path, wait: Capybara.default_max_wait_time
     assert_text "My Rounds"
 
-    open_nav_menu
-    find(".ui-nav-menu-panel button", text: "Sign out").click
-
+    click_nav_sign_out
     assert_text "Signed out"
-    assert_current_path root_path, wait: 5
+    assert_current_path root_path, wait: Capybara.default_max_wait_time
 
     open_nav_menu
-    assert_selector ".ui-nav-menu-panel a[href='#{new_session_path}']", visible: true
-    assert_no_selector ".ui-nav-menu-panel a[href='#{my_rounds_path}']"
+    assert_selector "[data-testid='nav-menu-panel'] a[href='#{new_session_path}']", visible: true
+    assert_no_selector "[data-testid='nav-menu-panel'] a[href='#{my_rounds_path}']"
   end
-
-  private
-
-    def open_nav_menu
-      find("button[name=menu]").click
-      assert_no_selector ".ui-nav-menu-panel.hidden", wait: 5
-    end
 end

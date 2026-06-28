@@ -6,6 +6,7 @@ export default class extends Controller {
   connect() {
     this.boundClickOutside = this.clickOutside.bind(this)
     this.boundKeydown = this.keydown.bind(this)
+    this.syncAccessibility(false)
   }
 
   disconnect() {
@@ -25,13 +26,13 @@ export default class extends Controller {
 
   close() {
     this.menuTarget.classList.add("hidden")
-    this.setExpanded(false)
+    this.syncAccessibility(false)
     this.removeListeners()
   }
 
   open() {
     this.menuTarget.classList.remove("hidden")
-    this.setExpanded(true)
+    this.syncAccessibility(true)
     // Defer so the opening click does not immediately hit the document listener.
     window.setTimeout(() => {
       document.addEventListener("click", this.boundClickOutside)
@@ -53,10 +54,12 @@ export default class extends Controller {
     if (event.key === "Escape") this.close()
   }
 
-  setExpanded(expanded) {
+  syncAccessibility(open) {
     if (this.hasButtonTarget) {
-      this.buttonTarget.setAttribute("aria-expanded", expanded ? "true" : "false")
+      this.buttonTarget.setAttribute("aria-expanded", open ? "true" : "false")
     }
+
+    this.menuTarget.setAttribute("aria-hidden", open ? "false" : "true")
   }
 
   removeListeners() {

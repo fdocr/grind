@@ -10,16 +10,21 @@
               aria-label="Open menu"
               aria-expanded="false"
               aria-haspopup="true"
+              aria-controls="nav-menu-panel"
               class="ui-icon-btn"
+              data-testid="nav-menu-button"
               data-nav-menu-target="button"
               data-action="click->nav-menu#toggle">
         <%= render "shared/svg/menu", class: "w-5 h-5" %>
       </button>
 
-      <div data-nav-menu-target="menu"
+      <div id="nav-menu-panel"
+           data-nav-menu-target="menu"
+           data-testid="nav-menu-panel"
            class="ui-nav-menu-panel hidden"
            role="menu"
-           aria-label="Main navigation">
+           aria-label="Main navigation"
+           aria-hidden="true">
         <%= link_to "Home", root_path, class: "ui-nav-link", role: "menuitem", data: { turbo: false, action: "click->nav-menu#close" } %>
 
         <% if authenticated? %>
@@ -38,7 +43,13 @@
 
         <% if authenticated? %>
           <hr class="ui-nav-sep">
-          <%= button_to "Sign out", session_path, method: :delete, class: "ui-nav-link-danger", role: "menuitem", form: { data: { turbo: false } } %>
+          <%= button_to "Sign out",
+                session_path,
+                method: :delete,
+                class: "ui-nav-link-danger",
+                role: "menuitem",
+                data: { testid: "nav-sign-out" },
+                form: { data: { turbo: false } } %>
         <% end %>
       </div>
     </div>
