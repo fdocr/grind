@@ -25,6 +25,34 @@ class OsmCourseSyncJobTest < ActiveSupport::TestCase
     assert_equal 4, hole.green_polygon.size
   end
 
+
+  test "does not overwrite manual green geometry" do
+    manual_polygon = [ [ 9.99, -84.15 ], [ 9.99, -84.14 ], [ 9.98, -84.14 ] ]
+    holes(:cariari_01).update!(
+      green_geometry: { "centroid" => [ 9.985, -84.145 ], "polygon" => manual_polygon },
+      green_source: "manual"
+    )
+
+    with_slot do
+      stub_method(Grind::Osm::Overpass, :fetch, overpass_with_green) do
+        OsmCourseSyncJob.perform_now(@course.id)
+      end
+    end
+
+    hole = holes(:cariari_01).reload
+    assert hole.green_manual?
+    assert_equal manual_polygon, hole.green_polygon
+  end
+
+  test "stamps osm as green source when syncing" do
+    with_slot do
+      stub_method(Grind::Osm::Overpass, :fetch, overpass_with_green) do
+        OsmCourseSyncJob.perform_now(@course.id)
+      end
+    end
+
+    assert_equal "osm", holes(:cariari_01).reload.green_source
+  end
   test "clears stale geometry and marks no_data when nothing is found" do
     with_slot do
       stub_method(Grind::Osm::Overpass, :fetch, { "elements" => [] }) do

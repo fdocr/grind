@@ -155,35 +155,8 @@ module Grind
         max.positive? ? max : 18
       end
 
-      # Area weighted polygon centroid. Computed in a local frame (offsets from
-      # the first vertex) to avoid float cancellation, since greens are tiny
-      # polygons sitting at large lat/lng magnitudes. Returns [lat, lng].
       def centroid(ring)
-        points = ring.map { |lat, lng| [ lng.to_f, lat.to_f ] }
-        points = points[0...-1] if points.size > 1 && points.first == points.last
-
-        origin_x, origin_y = points.first
-        local = points.map { |x, y| [ x - origin_x, y - origin_y ] }
-
-        area = 0.0
-        cx = 0.0
-        cy = 0.0
-        local.each_with_index do |(x0, y0), index|
-          x1, y1 = local[(index + 1) % local.size]
-          cross = (x0 * y1) - (x1 * y0)
-          area += cross
-          cx += (x0 + x1) * cross
-          cy += (y0 + y1) * cross
-        end
-        area /= 2.0
-
-        if area.abs < 1e-15
-          avg_x = local.sum { |x, _y| x } / local.size
-          avg_y = local.sum { |_x, y| y } / local.size
-          return [ origin_y + avg_y, origin_x + avg_x ]
-        end
-
-        [ origin_y + (cy / (6.0 * area)), origin_x + (cx / (6.0 * area)) ]
+        Grind::Greens::Geometry.centroid(ring)
       end
 
       # Ray casting point in polygon. point and ring are [lat, lng].
