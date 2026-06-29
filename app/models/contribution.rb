@@ -11,7 +11,7 @@ class Contribution < ApplicationRecord
   MAX_IMAGE_BYTES = Grind::ContributionImage::MAX_BYTES
 
   before_validation :normalize_for_kind
-  after_commit :normalize_attached_image, on: %i[create update]
+  after_commit :optimize_attached_image, on: %i[create update]
 
   validates :comments, length: { maximum: 1000 }
   validate :image_present
@@ -72,7 +72,7 @@ class Contribution < ApplicationRecord
       blob = image.blob
 
       if blob.byte_size > MAX_IMAGE_BYTES
-        errors.add(:image, "must be under 10 MB")
+        errors.add(:image, "must be under 4 MB")
         return
       end
 
@@ -86,10 +86,10 @@ class Contribution < ApplicationRecord
       end
     end
 
-    def normalize_attached_image
+    def optimize_attached_image
       return unless image.attached?
-      return unless Grind::ContributionImage.needs_normalization?(image)
+      return unless Grind::ContributionImage.needs_optimization?(image)
 
-      Grind::ContributionImage.normalize!(image)
+      Grind::ContributionImage.optimize!(image)
     end
 end
