@@ -15,5 +15,6 @@ class SeoControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_match "<loc>http://example.com/</loc>", response.body
     assert_match "<loc>http://example.com/about</loc>", response.body
+    assert_match "<loc>http://example.com/contribute</loc>", response.body
   end
 end

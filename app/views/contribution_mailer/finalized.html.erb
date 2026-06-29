@@ -1,0 +1,9 @@
+<p>Hi,</p>
+
+<p>Your contribution for <strong><%= @contribution.course_label %></strong> has been processed.</p>
+
+<% if @contribution.admin_reply.present? %>
+  <p><%= @contribution.admin_reply %></p>
+<% end %>
+
+<p class="email-footer">— Grind</p>

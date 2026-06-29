@@ -1,0 +1,83 @@
+<% content_for :seo_title, "Contributions" %>
+
+<div class="space-y-6">
+  <header class="space-y-1">
+    <h1 class="text-xl font-bold text-foreground">Contributions</h1>
+    <p class="text-sm text-muted-foreground">Review scorecard submissions from users.</p>
+  </header>
+
+  <%= render "ui/card", padding: :sm do %>
+    <%= render "ui/search_field",
+          url: admin_contributions_path,
+          value: @query,
+          placeholder: "Search by course, email, or proposed name",
+          submit_text: "Search" %>
+
+    <div class="space-y-3 mt-4">
+      <div>
+        <p class="ui-label mb-2">Status</p>
+        <div class="ui-segmented">
+          <% [["All", nil], ["Pending", "pending"], ["Finalized", "finalized"]].each do |label, value| %>
+            <%= link_to label,
+                  admin_contributions_path(q: @query.presence, status: value, kind: @kind),
+                  class: "ui-segmented-option",
+                  data: { turbo: false, state: (@status == value || (value.nil? && @status.nil?) ? "active" : "inactive") } %>
+          <% end %>
+        </div>
+      </div>
+
+      <div>
+        <p class="ui-label mb-2">Kind</p>
+        <div class="ui-segmented">
+          <% [["All", nil], ["Correction", "correction"], ["New course", "new_course"]].each do |label, value| %>
+            <%= link_to label,
+                  admin_contributions_path(q: @query.presence, status: @status, kind: value),
+                  class: "ui-segmented-option",
+                  data: { turbo: false, state: (@kind == value || (value.nil? && @kind.nil?) ? "active" : "inactive") } %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <% if @contributions.any? %>
+    <div class="space-y-3">
+      <% @contributions.each do |contribution| %>
+        <%= link_to admin_contribution_path(contribution), class: "block" do %>
+          <%= render "ui/card", padding: :sm do %>
+            <div class="flex items-start justify-between gap-3">
+              <div class="min-w-0">
+                <p class="font-medium text-foreground truncate"><%= contribution.course_label %></p>
+                <p class="text-sm text-muted-foreground mt-0.5"><%= contribution.user.email %></p>
+              </div>
+              <div class="flex flex-col items-end gap-1 shrink-0">
+                <%= render "ui/badge", text: contribution_kind_label(contribution), tone: contribution_kind_tone(contribution), size: :sm %>
+                <%= render "ui/badge", text: contribution.status.titleize, tone: contribution_status_tone(contribution), size: :sm %>
+              </div>
+            </div>
+            <p class="text-xs text-muted-foreground mt-2"><%= l(contribution.created_at, format: :long) %></p>
+          <% end %>
+        <% end %>
+      <% end %>
+    </div>
+
+    <%= render "ui/pagination",
+          pagy: @pagy,
+          path: ->(p) { admin_contributions_path(p.merge(q: @query.presence, status: @status, kind: @kind)) } %>
+  <% elsif @query.present? || @status.present? || @kind.present? %>
+    <%= render "ui/card" do %>
+      <%= render "ui/empty_state",
+            title: "No contributions found",
+            message: "Try different filters.",
+            icon: "search",
+            compact: true %>
+    <% end %>
+  <% else %>
+    <%= render "ui/card" do %>
+      <%= render "ui/empty_state",
+            title: "No contributions yet",
+            message: "User submissions will appear here.",
+            compact: true %>
+    <% end %>
+  <% end %>
+</div>

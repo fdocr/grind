@@ -1,0 +1,10 @@
+<%# locals: (course:, style: :link) %>
+<%
+  classes = style == :button ? "ui-btn-secondary ui-btn-md w-full" : "ui-btn-link text-sm inline-flex items-center gap-1.5"
+%>
+<%= link_to contribute_path(course_id: course.id),
+      class: classes,
+      data: { turbo_frame: "_top" } do %>
+  <%= icon "scorecard", class: "w-4 h-4" %>
+  <span>Fix scorecard data</span>
+<% end %>

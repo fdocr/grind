@@ -1,0 +1,92 @@
+<% content_for :seo_title, "Contribution" %>
+
+<div class="space-y-6">
+  <header class="space-y-3">
+    <p class="text-sm text-muted-foreground">
+      <%= link_to "← Contributions", admin_contributions_path, class: "ui-btn-link" %>
+    </p>
+    <div class="flex items-start justify-between gap-3">
+      <div class="min-w-0 space-y-1">
+        <h1 class="text-xl font-bold text-foreground"><%= @contribution.course_label %></h1>
+        <p class="text-sm text-muted-foreground"><%= @contribution.location_label %></p>
+        <p class="text-sm text-muted-foreground">Submitted by <%= @contribution.user.email %></p>
+      </div>
+      <div class="flex flex-col items-end gap-1 shrink-0">
+        <%= render "ui/badge", text: contribution_kind_label(@contribution), tone: contribution_kind_tone(@contribution) %>
+        <%= render "ui/badge", text: @contribution.status.titleize, tone: contribution_status_tone(@contribution) %>
+      </div>
+    </div>
+  </header>
+
+  <%= render "ui/card", padding: :sm do %>
+    <dl class="grid grid-cols-1 gap-x-6 gap-y-3 text-sm">
+      <div>
+        <dt class="text-muted-foreground">Submitted</dt>
+        <dd class="font-medium"><%= l(@contribution.created_at, format: :long) %></dd>
+      </div>
+      <% if @contribution.finalized_at.present? %>
+        <div>
+          <dt class="text-muted-foreground">Finalized</dt>
+          <dd class="font-medium"><%= l(@contribution.finalized_at, format: :long) %></dd>
+        </div>
+      <% end %>
+      <% if @contribution.comments.present? %>
+        <div>
+          <dt class="text-muted-foreground">Comments</dt>
+          <dd><%= @contribution.comments %></dd>
+        </div>
+      <% end %>
+      <% if @contribution.new_course? %>
+        <div>
+          <dt class="text-muted-foreground">Proposed name</dt>
+          <dd class="font-medium"><%= @contribution.proposed_name %></dd>
+        </div>
+        <div>
+          <dt class="text-muted-foreground">Proposed location</dt>
+          <dd class="font-medium"><%= @contribution.location_label %></dd>
+        </div>
+      <% end %>
+    </dl>
+  <% end %>
+
+  <% if @contribution.image.attached? %>
+    <%= render "ui/card", padding: :sm do %>
+      <h2 class="text-lg font-semibold mb-3">Scorecard photo</h2>
+      <%= link_to url_for(@contribution.image), target: "_blank", rel: "noopener" do %>
+        <%= image_tag @contribution.image, class: "rounded-lg max-h-96 w-full object-contain bg-muted/30" %>
+      <% end %>
+    <% end %>
+  <% end %>
+
+  <div class="flex flex-col gap-2">
+    <% if @contribution.correction? && @course %>
+      <%= link_to "Edit course", edit_admin_course_path(@course), class: "ui-btn-secondary ui-btn-md" %>
+      <%= link_to "View scorecard", course_path(@course), class: "ui-btn-secondary ui-btn-md", data: { turbo_frame: "course_modal" } %>
+    <% elsif @contribution.new_course? %>
+      <%= link_to "Create course",
+            new_admin_course_path(
+              name: @contribution.proposed_name,
+              country: @contribution.proposed_country,
+              city: @contribution.proposed_city,
+              state_province: @contribution.proposed_state_province
+            ),
+            class: "ui-btn-secondary ui-btn-md" %>
+    <% end %>
+  </div>
+
+  <%= turbo_frame_tag "course_modal" %>
+
+  <%= render "ui/card", padding: :sm do %>
+    <h2 class="text-lg font-semibold mb-3"><%= @contribution.finalized? ? "Update reply" : "Finalize contribution" %></h2>
+    <%= form_with model: @contribution, url: admin_contribution_path(@contribution), method: :patch, data: { turbo: false }, class: "space-y-4" do |f| %>
+      <div class="space-y-2">
+        <%= f.label :admin_reply, "Reply to contributor", class: "ui-label" %>
+        <%= f.text_area :admin_reply,
+              class: "ui-input",
+              placeholder: "We just updated your golf course. Let us know if it looks good now!" %>
+        <p class="ui-hint">Optional — included in the email to the contributor</p>
+      </div>
+      <%= f.submit(@contribution.finalized? ? "Update reply" : "Mark as finalized", class: "ui-btn-primary ui-btn-md w-full") %>
+    <% end %>
+  <% end %>
+</div>

@@ -1,0 +1,40 @@
+<%# locals: (contribution:) %>
+<section>
+  <h2 class="text-lg font-semibold mb-3">Submit scorecard</h2>
+
+  <%= form_with model: contribution, url: contribute_path, class: "space-y-4", data: { turbo: false } do |f| %>
+    <%= f.hidden_field :kind, value: contribution.kind %>
+
+    <% if contribution.correction? %>
+      <%= f.hidden_field :course_id, value: contribution.course_id %>
+    <% else %>
+      <%= render "ui/input", form: f, field: :proposed_name, label: "Course name", required: true, placeholder: "Pine Valley Golf Club" %>
+      <%= render "ui/input", form: f, field: :proposed_country, label: "Country", required: true, placeholder: "US" %>
+      <%= render "ui/input", form: f, field: :proposed_city, label: "City", placeholder: "Optional" %>
+      <%= render "ui/input", form: f, field: :proposed_state_province, label: "State / province", placeholder: "Optional" %>
+    <% end %>
+
+    <div class="space-y-2">
+      <%= f.label :image, "Scorecard photo", class: "ui-label" %>
+      <%= f.file_field :image, accept: "image/*", required: true, class: "ui-input" %>
+      <p class="ui-hint">Upload a clear photo of the scorecard (PNG, JPEG, WEBP, or HEIC, max 10 MB).</p>
+    </div>
+
+    <div class="space-y-2">
+      <%= f.label :comments, "Comments", class: "ui-label" %>
+      <%= f.text_area :comments, maxlength: 1000, class: "ui-input", placeholder: "Optional notes about what's wrong or missing" %>
+      <p class="ui-hint">Up to 1,000 characters</p>
+    </div>
+
+    <% if contribution.errors.any? %>
+      <%= render "ui/banner",
+            tone: :warning,
+            title: "Could not submit",
+            message: contribution.errors.full_messages.to_sentence %>
+    <% end %>
+
+    <%= render "shared/turnstile" %>
+
+    <button type="submit" class="ui-btn-primary ui-btn-md w-full">Submit contribution</button>
+  <% end %>
+</section>
