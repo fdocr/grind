@@ -81,7 +81,7 @@ module Grind
 
       old_blob.purge_later
       attachment
-    rescue Vips::Error, ImageProcessing::Error => error
+    rescue ImageProcessing::Error => error
       Rails.logger.error("ContributionImage optimize failed: #{error.message}")
       raise
     end
@@ -115,25 +115,31 @@ module Grind
     end
 
     def render_jpeg(source_path, quality:, dimension:)
-      begin
-        require "image_processing/vips"
+      render_jpeg_with_vips(source_path, quality: quality, dimension: dimension)
+    rescue LoadError, ImageProcessing::Error
+      render_jpeg_with_mini_magick(source_path, quality: quality, dimension: dimension)
+    end
 
-        ImageProcessing::Vips
-          .source(source_path)
-          .resize_to_limit(dimension, dimension)
-          .convert("jpg")
-          .saver(Q: quality, strip: true)
-          .call
-      rescue LoadError, Vips::Error
-        require "image_processing/mini_magick"
+    def render_jpeg_with_vips(source_path, quality:, dimension:)
+      require "image_processing/vips"
 
-        ImageProcessing::MiniMagick
-          .source(source_path)
-          .resize_to_limit(dimension, dimension)
-          .convert("jpg")
-          .saver(quality: quality, strip: true)
-          .call
-      end
+      ImageProcessing::Vips
+        .source(source_path)
+        .resize_to_limit(dimension, dimension)
+        .convert("jpg")
+        .saver(Q: quality, strip: true)
+        .call
+    end
+
+    def render_jpeg_with_mini_magick(source_path, quality:, dimension:)
+      require "image_processing/mini_magick"
+
+      ImageProcessing::MiniMagick
+        .source(source_path)
+        .resize_to_limit(dimension, dimension)
+        .convert("jpg")
+        .saver(quality: quality, strip: true)
+        .call
     end
 
     def jpeg_filename(original)
