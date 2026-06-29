@@ -12,7 +12,7 @@ Inside PW/9i: <%= format_inside_pw_9i(@round.inside_pw_9i) %>
 
 <% if @show_register_cta %>
 Want a better experience? Create a free account at grind.fdo.cr to keep all your rounds in one place:
-https://grind.fdo.cr/sign_up?utm_source=round_recap&utm_medium=email&utm_campaign=register
+<%= new_registration_url(utm_source: "round_recap", utm_medium: "email", utm_campaign: "register") %>
 
 <% end %>
-Tracked with grind.fdo.cr — https://ugo.cr/7kG34
+<%= render "mailer/site_footer" %>

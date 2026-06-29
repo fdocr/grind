@@ -1,0 +1,8 @@
+A new contribution was submitted for <%= @contribution.course_label %>.
+
+<% if @contribution.comments.present? %>
+Comments: <%= @contribution.comments %>
+<% end %>
+
+Review: <%= admin_contribution_url(@contribution) %>
+<%= render "mailer/site_footer" %>

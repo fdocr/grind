@@ -88,6 +88,10 @@
     Reset round
   </button>
 
+  <div class="pt-2">
+    <%= render "shared/contribute_link", course: @course, style: :button %>
+  </div>
+
   <%= form_with url: course_rounds_path(@course), method: :post, data: { round_target: "finishForm", action: "turbo:submit-end->round#submitEnd" }, class: "hidden" do %>
     <input type="hidden" name="round[oop_tee_shots]" value="0">
     <input type="hidden" name="round[three_putts]" value="0">
@@ -198,6 +202,9 @@
         <button type="button" class="ui-btn-ghost ui-btn-sm" data-action="round#closePanels">Close</button>
       </div>
       <div class="min-w-0" data-round-target="scorecardBody"></div>
+      <div class="mt-4 pt-4 border-t border-border">
+        <%= render "shared/contribute_link", course: @course, style: :link %>
+      </div>
     <% end %>
   </div>
 

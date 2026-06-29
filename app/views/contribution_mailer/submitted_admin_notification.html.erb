@@ -1,0 +1,11 @@
+<p>A new contribution was submitted for <strong><%= @contribution.course_label %></strong>.</p>
+
+<% if @contribution.comments.present? %>
+  <p><strong>Comments:</strong> <%= @contribution.comments %></p>
+<% end %>
+
+<p>
+  <%= link_to "Review contribution", admin_contribution_url(@contribution), class: "email-footer-link" %>
+</p>
+
+<%= render "mailer/site_footer" %>

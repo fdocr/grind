@@ -21,7 +21,14 @@ module Admin
     end
 
     def new
-      @course = Course.new(metric: false, tees: default_tees)
+      @course = Course.new(
+        metric: false,
+        tees: default_tees,
+        name: params[:name],
+        country: params[:country],
+        city: params[:city],
+        state_province: params[:state_province]
+      )
       build_holes
     end
 

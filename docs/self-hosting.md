@@ -60,7 +60,7 @@ Round stats emails require SMTP. Turnstile is strongly recommended to reduce spa
 | `SMTP_PORT` | `587` | SMTP port |
 | `SMTP_USERNAME` | _(unset)_ | SMTP username |
 | `SMTP_PASSWORD` | _(unset)_ | SMTP password |
-| `SMTP_FROM_EMAIL` | `noreply@grind.fdo.cr` | From address on outbound mail |
+| `SMTP_FROM_EMAIL` | `grind@fdo.cr` | From address on outbound mail |
 | `CLOUDFLARE_TURNSTILE_SITE_KEY` | _(unset)_ | Turnstile site key shown on the round summary page |
 | `CLOUDFLARE_TURNSTILE_SECRET_KEY` | _(unset)_ | Turnstile secret for server-side verification. Verification is skipped when unset |
 
@@ -219,12 +219,14 @@ Grind is a Rails 8 application using SQLite for storage. All persistent data liv
 
 | File | Purpose |
 |------|---------|
-| `production.sqlite3` | Primary application data (courses, rounds, deliveries) |
+| `production.sqlite3` | Primary application data (courses, rounds, deliveries, contributions) |
 | `production_cache.sqlite3` | Solid Cache |
 | `production_queue.sqlite3` | Solid Queue jobs |
 | `production_cable.sqlite3` | Solid Cable |
 
 On container boot, `bin/docker-entrypoint` runs `db:create` and `db:migrate`. It does **not** run seeds, so you import courses manually.
+
+Contribution scorecard photos are stored on the local disk under `storage/` (Active Storage). The `/rails/storage` volume must persist across deploys or uploads are lost. Images are served through the app in proxy mode so a CDN can cache them via `Cache-Control` headers.
 
 The container listens on port **80** via Thruster, which proxies to Puma on port 3000. Solid Queue runs inside Puma by default.
 
@@ -289,7 +291,7 @@ Set `APP_HOST` to your public hostname so mailer links and host authorization ma
 
 ### CDN cache notes
 
-Bypass cache for round tracking pages, form submissions, `/up`, and `/jobs`. Static assets (CSS, JS with digests) can be cached aggressively at the edge.
+Bypass cache for round tracking pages, form submissions, `/up`, and `/jobs`. Static assets (CSS, JS with digests) and Active Storage proxy URLs (`/rails/active_storage/...`) can be cached aggressively at the edge when the origin sends `Cache-Control: public`. With Cloudflare proxied (orange cloud), add a Cache Rule to cache `/assets/*` and `/rails/active_storage/*` and respect origin cache headers.
 
 ## Building your own image
 

@@ -5,6 +5,7 @@ class Course < ApplicationRecord
 
   has_many :holes, -> { order(:number) }, dependent: :destroy, inverse_of: :course
   has_many :rounds, dependent: :destroy
+  has_many :contributions, dependent: :destroy
 
   accepts_nested_attributes_for :holes
 

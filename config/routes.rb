@@ -8,6 +8,7 @@ Rails.application.routes.draw do
 
   namespace :admin do
     resources :users, only: %i[index show update]
+    resources :contributions, only: %i[index show update]
     resources :courses do
       resource :greens, only: %i[edit update], controller: "greens"
       member do
@@ -33,6 +34,9 @@ Rails.application.routes.draw do
   root "courses#index"
 
   get "about", to: "pages#about"
+
+  get "contribute", to: "contributions#new", as: :contribute
+  post "contribute", to: "contributions#create"
 
   resources :courses, only: %i[index show] do
     member do

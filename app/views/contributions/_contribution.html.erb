@@ -1,0 +1,26 @@
+<%# locals: (contribution:) %>
+<%= render "ui/card", padding: :sm do %>
+  <div class="flex items-start justify-between gap-3 mb-2">
+    <div class="min-w-0">
+      <p class="font-medium text-foreground"><%= contribution.course_label %></p>
+      <p class="text-sm text-muted-foreground mt-0.5"><%= contribution.location_label %></p>
+    </div>
+    <div class="flex flex-col items-end gap-1 shrink-0">
+      <%= render "ui/badge", text: contribution_kind_label(contribution), tone: contribution_kind_tone(contribution), size: :sm %>
+      <%= render "ui/badge", text: contribution.status.titleize, tone: contribution_status_tone(contribution), size: :sm %>
+    </div>
+  </div>
+
+  <p class="text-xs text-muted-foreground">Submitted <%= l(contribution.created_at, format: :long) %></p>
+
+  <% if contribution.comments.present? %>
+    <p class="text-sm text-muted-foreground mt-3"><%= contribution.comments %></p>
+  <% end %>
+
+  <% if contribution.admin_reply.present? %>
+    <div class="mt-3 pt-3 border-t border-border">
+      <p class="text-xs font-medium text-muted-foreground mb-1">Response</p>
+      <p class="text-sm text-foreground"><%= contribution.admin_reply %></p>
+    </div>
+  <% end %>
+<% end %>

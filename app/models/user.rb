@@ -2,6 +2,7 @@ class User < ApplicationRecord
   has_secure_password
   has_many :sessions, dependent: :destroy
   has_many :rounds, dependent: :nullify
+  has_many :contributions, dependent: :destroy
 
   enum :role, { user: 0, admin: 1, banned: 2 }, default: :user
 

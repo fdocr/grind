@@ -83,7 +83,11 @@
           <% end %>
         </div>
 
-        <div class="flex gap-2 mt-6 pt-4 border-t border-border">
+        <div class="flex flex-col gap-2 mt-4 pt-4 border-t border-border">
+          <%= render "shared/contribute_link", course: @course, style: :link %>
+        </div>
+
+        <div class="flex gap-2 mt-4">
           <button type="button" class="ui-btn-secondary ui-btn-md flex-1" data-action="modal#close">Cancel</button>
           <%= link_to "Start round",
                 round_course_path(@course, tee: @active_tee),

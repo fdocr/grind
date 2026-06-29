@@ -17,7 +17,8 @@ class RoundStatsMailerTest < ActionMailer::TestCase
     assert_includes body, "Score to par"
     assert_includes body, "grind.fdo.cr"
     assert_includes body, "utm_campaign=register"
-    assert_includes body, 'href="https://ugo.cr/7kG34"'
+    assert_includes body, "Tracked with"
+    assert_includes body, 'href="http://example.com/"'
   end
 
   test "registered user stats email excludes register CTA" do

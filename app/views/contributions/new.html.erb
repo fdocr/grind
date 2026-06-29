@@ -1,0 +1,51 @@
+<% content_for :seo_title, "Contribute" %>
+<% content_for :seo_description, "Help improve Grind by submitting a scorecard photo to fix course data or request a missing golf course." %>
+
+<div class="space-y-6">
+  <header class="space-y-1">
+    <h1 class="text-xl font-bold text-foreground">Contribute</h1>
+    <p class="text-sm text-muted-foreground">Help us keep course data accurate for everyone.</p>
+  </header>
+
+  <%= render "intro" %>
+
+  <% if authenticated? %>
+    <% unless @selected_course %>
+      <section>
+        <p class="ui-label mb-2">What would you like to do?</p>
+        <div class="ui-segmented">
+          <%= link_to "Fix existing course",
+                contribute_path,
+                class: "ui-segmented-option",
+                data: { turbo: false, state: (@kind == "correction" ? "active" : "inactive") } %>
+          <%= link_to "Add missing course",
+                contribute_path(kind: "new_course"),
+                class: "ui-segmented-option",
+                data: { turbo: false, state: (@kind == "new_course" ? "active" : "inactive") } %>
+        </div>
+      </section>
+    <% end %>
+
+    <% if @kind == "correction" %>
+      <%= render "course_picker" %>
+      <%= render "form", contribution: @contribution if @selected_course %>
+    <% else %>
+      <%= render "form", contribution: @contribution %>
+    <% end %>
+
+    <% if @contributions.any? %>
+      <hr class="mt-24">
+      <section class="space-y-3">
+        <h2 class="text-lg font-semibold">Your contributions</h2>
+        <% @contributions.each do |contribution| %>
+          <%= render "contribution", contribution: contribution %>
+        <% end %>
+      </section>
+    <% end %>
+  <% else %>
+    <div class="flex flex-col gap-2 sm:flex-row">
+      <%= link_to "Sign up", new_registration_path, class: "ui-btn-primary ui-btn-md flex-1 text-center" %>
+      <%= link_to "Sign in", new_session_path, class: "ui-btn-secondary ui-btn-md flex-1 text-center" %>
+    </div>
+  <% end %>
+</div>
