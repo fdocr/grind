@@ -52,8 +52,8 @@
   <% if @contribution.image.attached? %>
     <%= render "ui/card", padding: :sm do %>
       <h2 class="text-lg font-semibold mb-3">Scorecard photo</h2>
-      <%= link_to url_for(@contribution.image), target: "_blank", rel: "noopener" do %>
-        <%= image_tag @contribution.image, class: "rounded-lg max-h-96 w-full object-contain bg-muted/30" %>
+      <%= link_to url_for(@contribution.displayable_image), target: "_blank", rel: "noopener" do %>
+        <%= image_tag @contribution.displayable_image, class: "rounded-lg max-h-96 w-full object-contain bg-muted/30", alt: "Scorecard photo for #{@contribution.course_label}" %>
       <% end %>
     <% end %>
   <% end %>

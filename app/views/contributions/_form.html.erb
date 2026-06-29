@@ -16,8 +16,12 @@
 
     <div class="space-y-2">
       <%= f.label :image, "Scorecard photo", class: "ui-label" %>
-      <%= f.file_field :image, accept: "image/*", required: true, class: "ui-input" %>
-      <p class="ui-hint">Upload a clear photo of the scorecard (PNG, JPEG, WEBP, or HEIC, max 10 MB).</p>
+      <%= f.file_field :image,
+            accept: "image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif,image/*",
+            capture: "environment",
+            required: true,
+            class: "ui-input" %>
+      <p class="ui-hint">Take a photo or upload from your library (JPEG, PNG, WEBP, or HEIC, max 10 MB).</p>
     </div>
 
     <div class="space-y-2">

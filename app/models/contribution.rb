@@ -8,10 +8,10 @@ class Contribution < ApplicationRecord
   enum :kind, { correction: 0, new_course: 1 }, default: :correction
   enum :status, { pending: 0, finalized: 1 }, default: :pending
 
-  ALLOWED_IMAGE_TYPES = %w[image/png image/jpeg image/webp image/heic image/heif].freeze
-  MAX_IMAGE_BYTES = 10.megabytes
+  MAX_IMAGE_BYTES = Grind::ContributionImage::MAX_BYTES
 
   before_validation :normalize_for_kind
+  after_commit :normalize_attached_image, on: %i[create update]
 
   validates :comments, length: { maximum: 1000 }
   validate :image_present
@@ -43,6 +43,15 @@ class Contribution < ApplicationRecord
     update!(status: :finalized, finalized_at: Time.current, admin_reply: reply.presence)
   end
 
+  def displayable_image
+    return image unless image.attached?
+
+    @displayable_image ||= begin
+      Grind::ContributionImage.ensure_displayable!(image)
+      image
+    end
+  end
+
   private
 
     def normalize_for_kind
@@ -60,9 +69,27 @@ class Contribution < ApplicationRecord
     def image_type_and_size
       return unless image.attached?
 
-      unless ALLOWED_IMAGE_TYPES.include?(image.content_type)
-        errors.add(:image, "must be PNG, JPEG, WEBP, or HEIC")
+      blob = image.blob
+
+      if blob.byte_size > MAX_IMAGE_BYTES
+        errors.add(:image, "must be under 10 MB")
+        return
       end
-      errors.add(:image, "must be under 10 MB") if image.byte_size > MAX_IMAGE_BYTES
+
+      unless Grind::ContributionImage.extension_allowed?(blob.filename.to_s)
+        errors.add(:image, "must be a photo (JPEG, PNG, WEBP, or HEIC)")
+        return
+      end
+
+      unless Grind::ContributionImage.allowed_content_type?(blob)
+        errors.add(:image, "must be a photo (JPEG, PNG, WEBP, or HEIC)")
+      end
+    end
+
+    def normalize_attached_image
+      return unless image.attached?
+      return unless Grind::ContributionImage.needs_normalization?(image)
+
+      Grind::ContributionImage.normalize!(image)
     end
 end

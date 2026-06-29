@@ -78,4 +78,28 @@ class ContributionTest < ActiveSupport::TestCase
     assert_includes Contribution.search(@course.name), correction
     assert_includes Contribution.search("Unique Meadow"), new_course
   end
+
+  test "rejects pdf uploads" do
+    contribution = Contribution.new(user: @user, course: @course, kind: :correction)
+    contribution.image.attach(
+      io: StringIO.new("%PDF-1.4"),
+      filename: "scorecard.pdf",
+      content_type: "application/pdf"
+    )
+
+    assert_not contribution.valid?
+    assert_includes contribution.errors[:image], "must be a photo (JPEG, PNG, WEBP, or HEIC)"
+  end
+
+  test "rejects text file uploads" do
+    contribution = Contribution.new(user: @user, course: @course, kind: :correction)
+    contribution.image.attach(
+      io: StringIO.new("hole,par\n1,4"),
+      filename: "scorecard.csv",
+      content_type: "text/csv"
+    )
+
+    assert_not contribution.valid?
+    assert_includes contribution.errors[:image], "must be a photo (JPEG, PNG, WEBP, or HEIC)"
+  end
 end
