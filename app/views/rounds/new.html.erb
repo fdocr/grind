@@ -102,7 +102,10 @@
     <div data-round-hole-scores></div>
   <% end %>
 
-  <div class="fixed inset-0 z-40 hidden bg-black/40" data-round-target="overlay" data-action="click->round#closePanels"></div>
+  <%# -m-24 bleeds the backdrop past the viewport so it also covers the iOS
+      home-indicator safe-area strip (a plain inset-0 fixed element stops above
+      it in the native web view). The overflow is clipped by the device. %>
+  <div class="fixed inset-0 -m-24 z-40 hidden bg-black/40" data-round-target="overlay" data-action="click->round#closePanels"></div>
 
   <div class="fixed inset-x-4 bottom-4 z-50 hidden" data-round-target="scorePanel">
     <%= render "ui/card", padding: :sm do %>

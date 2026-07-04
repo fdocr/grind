@@ -19,6 +19,10 @@ Rails.application.routes.draw do
 
   get "up" => "rails/health#show", as: :rails_health_check
 
+  # Deep-link association files for the Hotwire Native apps.
+  get "/.well-known/apple-app-site-association" => "well_known#aasa"
+  get "/.well-known/assetlinks.json" => "well_known#assetlinks"
+
   get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
   get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 

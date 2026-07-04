@@ -1,0 +1,31 @@
+<%# Shared menu items for both the web header (shared/_nav) and the native
+    bridge menu (shared/_native_menu), so auth/admin logic lives in one place. %>
+<%= link_to "Home", root_path, class: "ui-nav-link", role: "menuitem", data: { turbo: false, action: "click->nav-menu#close" } %>
+
+<% if authenticated? %>
+  <%= link_to "My Rounds", my_rounds_path, class: "ui-nav-link", role: "menuitem", data: { turbo: false, action: "click->nav-menu#close" } %>
+  <% if current_user.admin? %>
+    <%= link_to "Users", admin_users_path, class: "ui-nav-link", role: "menuitem", data: { turbo: false, action: "click->nav-menu#close" } %>
+    <%= link_to "Courses", admin_courses_path, class: "ui-nav-link", role: "menuitem", data: { turbo: false, action: "click->nav-menu#close" } %>
+    <%= link_to "Contributions", admin_contributions_path, class: "ui-nav-link", role: "menuitem", data: { turbo: false, action: "click->nav-menu#close" } %>
+    <%= link_to "Jobs", mission_control_jobs_path, class: "ui-nav-link", role: "menuitem", data: { turbo: false, action: "click->nav-menu#close" } %>
+  <% end %>
+<% else %>
+  <%= link_to "Sign in", new_session_path, class: "ui-nav-link", role: "menuitem", data: { turbo: false, action: "click->nav-menu#close" } %>
+  <%= link_to "Sign up", new_registration_path, class: "ui-nav-link", role: "menuitem", data: { turbo: false, action: "click->nav-menu#close" } %>
+<% end %>
+
+<hr class="ui-nav-sep">
+
+<%= link_to "About", about_path, class: "ui-nav-link", role: "menuitem", data: { turbo: false, action: "click->nav-menu#close" } %>
+
+<% if authenticated? %>
+  <hr class="ui-nav-sep">
+  <%= button_to "Sign out",
+        session_path,
+        method: :delete,
+        class: "ui-nav-link-danger",
+        role: "menuitem",
+        data: { testid: "nav-sign-out" },
+        form: { data: { turbo: false } } %>
+<% end %>
