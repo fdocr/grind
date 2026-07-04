@@ -310,6 +310,13 @@
       @apply fixed right-4 left-4 top-[4.25rem] mt-0 p-3 gap-1.5 origin-top rounded-lg;
     }
   }
+  /* Native apps: the OS nav bar owns the top, so the menu drops straight from it.
+     No web header exists, so anchor near the top of the web view's safe area. */
+  .ui-native-menu-panel {
+    @apply fixed right-4 left-4 z-50 mt-0 p-3 gap-1.5 origin-top rounded-lg
+           flex flex-col bg-card border border-border shadow-popover;
+    top: calc(env(safe-area-inset-top, 0px) + 0.5rem);
+  }
   .ui-nav-link {
     @apply block px-4 py-2.5 sm:py-2 rounded-md text-sm font-medium
            text-foreground hover:text-white hover:bg-primary-600 transition-colors;

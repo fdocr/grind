@@ -1,0 +1,14 @@
+<%# Native apps don't render the web header. Instead the "menu" bridge component
+    adds a hamburger button to the native navigation bar; tapping it toggles this
+    panel. The panel markup/links are shared with the web header via nav_links. %>
+<div data-controller="nav-menu menu-bridge">
+  <div id="nav-menu-panel"
+       data-nav-menu-target="menu"
+       data-testid="nav-menu-panel"
+       class="ui-native-menu-panel hidden"
+       role="menu"
+       aria-label="Main navigation"
+       aria-hidden="true">
+    <%= render "shared/nav_links" %>
+  </div>
+</div>

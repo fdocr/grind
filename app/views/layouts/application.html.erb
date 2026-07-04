@@ -2,7 +2,10 @@
 <html lang="en">
   <head>
     <title><%= seo_page_title %></title>
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+    <%# viewport-fit=cover lets the PWA/browser draw into the safe areas, but inside
+        a Hotwire Native web view it suppresses the automatic top inset and renders
+        content under the native nav bar, so only opt into it outside the apps. %>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no<%= ", viewport-fit=cover" unless hotwire_native_app? %>">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#276f54">
@@ -37,7 +40,13 @@
   </head>
 
   <body class="min-h-screen touch-manipulation">
-    <%= render "shared/nav" %>
+    <%# Native apps provide their own navigation bar. Instead of the web header
+        they get a bridge-driven menu opened from a native hamburger button. %>
+    <% if hotwire_native_app? %>
+      <%= render "shared/native_menu" %>
+    <% else %>
+      <%= render "shared/nav" %>
+    <% end %>
 
     <main class="max-w-lg mx-auto px-4 py-6 pb-24">
       <%= render "shared/connection_banner" %>

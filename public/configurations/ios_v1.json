@@ -1,0 +1,34 @@
+{
+  "settings": {},
+  "rules": [
+    {
+      "patterns": [".*"],
+      "properties": {
+        "context": "default",
+        "pull_to_refresh_enabled": true
+      }
+    },
+    {
+      "patterns": ["/contribute$"],
+      "properties": {
+        "context": "modal",
+        "pull_to_refresh_enabled": false
+      }
+    },
+    {
+      "patterns": ["/round$"],
+      "properties": {
+        "context": "default",
+        "pull_to_refresh_enabled": false
+      }
+    },
+    {
+      "patterns": ["^/?$"],
+      "properties": {
+        "context": "default",
+        "presentation": "replace_root",
+        "pull_to_refresh_enabled": true
+      }
+    }
+  ]
+}
