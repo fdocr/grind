@@ -34,6 +34,13 @@
     <button type="button" class="ui-btn-secondary ui-btn-md w-full" data-action="round#openDistancesPanel">Distances</button>
     <button type="button" class="ui-btn-secondary ui-btn-md w-full" data-action="round#openHolesPanel">Holes</button>
     <button type="button" class="ui-btn-secondary ui-btn-md w-full" data-action="round#openScorecardPanel">Scorecard</button>
+    <button type="button"
+            class="ui-btn-primary ui-btn-md w-full"
+            data-round-target="finishButton"
+            data-action="round#finishRound"
+            disabled>
+      Finish round
+    </button>
   </div>
 
   <section>
@@ -81,14 +88,6 @@
       <%= icon "chevron_right", class: "w-5 h-5" %>
     </button>
   </div>
-
-  <button type="button"
-          class="ui-btn-primary ui-btn-lg w-full"
-          data-round-target="finishButton"
-          data-action="round#finishRound"
-          disabled>
-    Finish round
-  </button>
 
   <button type="button"
           class="ui-btn-ghost ui-btn-md w-full text-destructive"
