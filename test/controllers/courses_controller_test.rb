@@ -54,7 +54,7 @@ class CoursesControllerTest < ActionDispatch::IntegrationTest
     assert_select "turbo-frame#course_modal"
     assert_match "data-tee-select-active-value=\"white\"", response.body
     assert_match "White tee", response.body
-    assert_select "a[href*='round'][data-turbo-frame='_top']"
+    assert_select "a[href*='round'][data-turbo-frame='_top'][data-action='click->modal#close']"
   end
 
   test "show renders a segmented control for multi-tee courses" do
