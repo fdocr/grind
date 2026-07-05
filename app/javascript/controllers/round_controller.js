@@ -50,7 +50,6 @@ export default class extends Controller {
       startedAt: new Date().toISOString(),
       currentHole: 1,
       oopTeeShots: 0,
-      threePutts: 0,
       botchedUpDowns: 0,
       insidePw9i: 0,
       holes: {},
@@ -106,6 +105,11 @@ export default class extends Controller {
     })
   }
 
+  threePuttCount() {
+    return Object.values(this.state.holes)
+      .filter((entry) => Number(entry.putts) >= 3).length
+  }
+
   render() {
     this.scoreToParTarget.textContent = this.formatScoreToPar(this.scoreToPar())
     this.holeNumberTarget.textContent = `Hole ${this.state.currentHole}`
@@ -118,7 +122,7 @@ export default class extends Controller {
 
     this.insidePw9iTarget.textContent = this.formatInside(this.state.insidePw9i)
     this.oopTeeShotsTarget.textContent = this.state.oopTeeShots
-    this.threePuttsTarget.textContent = this.state.threePutts
+    this.threePuttsTarget.textContent = this.threePuttCount()
     this.botchedUpDownsTarget.textContent = this.state.botchedUpDowns
 
     if (this.hasStartedAtTarget) {
@@ -491,7 +495,6 @@ export default class extends Controller {
 
     const form = this.finishFormTarget
     form.querySelector('[name="round[oop_tee_shots]"]').value = this.state.oopTeeShots
-    form.querySelector('[name="round[three_putts]"]').value = this.state.threePutts
     form.querySelector('[name="round[botched_up_downs]"]').value = this.state.botchedUpDowns
     form.querySelector('[name="round[inside_pw_9i]"]').value = this.state.insidePw9i
     form.querySelector('[name="round[started_at]"]').value = this.state.startedAt

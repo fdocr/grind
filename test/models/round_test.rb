@@ -6,6 +6,20 @@ class RoundTest < ActiveSupport::TestCase
     build_eighteen_holes!(@course)
   end
 
+  test "three putts counts holes with three or more putts" do
+    round = Round.new(
+      course: @course,
+      hole_scores: {
+        "1" => { "gross" => 4, "putts" => 2 },
+        "2" => { "gross" => 5, "putts" => 3 },
+        "3" => { "gross" => 4, "putts" => 4 },
+        "4" => { "gross" => 5, "putts" => "" }
+      }
+    )
+
+    assert_equal 2, round.three_putts
+  end
+
   test "score to par calculates over under and even" do
     round = Round.new(
       course: @course,

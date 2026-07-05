@@ -20,11 +20,14 @@ class RoundFlowTest < ApplicationSystemTestCase
 
     18.times do |index|
       click_button "Post Score"
+      if [ 0, 1 ].include?(index)
+        find("[data-round-target='puttsPicker'] [data-value='3']").click
+      end
       click_button "Save"
       break if index == 17
     end
 
-    2.times { find("[data-stat='threePutts'][data-action*='increment']").click }
+    assert_equal "2", find("[data-round-target='threePutts']").text
 
     click_button "Finish round"
 
@@ -43,11 +46,11 @@ class RoundFlowTest < ApplicationSystemTestCase
     visit round_course_path(@course)
 
     click_button "Post Score"
+    find("[data-round-target='puttsPicker'] [data-value='3']").click
     click_button "Save"
 
     assert_text "Hole 2"
 
-    find("[data-stat='threePutts'][data-action*='increment']").click
     assert_equal "1", find("[data-round-target='threePutts']").text
 
     click_button "Reset round"

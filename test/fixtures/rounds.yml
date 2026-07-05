@@ -2,7 +2,6 @@ finished:
   course: one
   token: finishedroundtoken
   oop_tee_shots: 1
-  three_putts: 2
   botched_up_downs: 1
   inside_pw_9i: 0
   started_at: 2026-06-19 10:00:00
@@ -32,7 +31,6 @@ player_round:
   user: player
   token: playerroundtoken01
   oop_tee_shots: 0
-  three_putts: 1
   botched_up_downs: 0
   inside_pw_9i: 0
   started_at: 2026-06-20 10:00:00

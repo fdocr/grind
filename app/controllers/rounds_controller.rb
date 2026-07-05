@@ -49,7 +49,6 @@ class RoundsController < ApplicationController
   def round_params
     params.require(:round).permit(
       :oop_tee_shots,
-      :three_putts,
       :botched_up_downs,
       :inside_pw_9i,
       :started_at,

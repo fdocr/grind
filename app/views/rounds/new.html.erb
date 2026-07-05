@@ -41,22 +41,26 @@
     <%= render "ui/card", padding: :sm do %>
       <div class="space-y-4">
         <% [
-          ["OOP Tee Shots", "oopTeeShots", "oopTeeShots"],
-          ["3 Putts", "threePutts", "threePutts"],
-          ["Botched Up/Down", "botchedUpDowns", "botchedUpDowns"],
-          ["Inside PW/9i", "insidePw9i", "insidePw9i"]
-        ].each do |label, target, stat| %>
+          ["OOP Tee Shots", "oopTeeShots", "oopTeeShots", false],
+          ["3 Putts", "threePutts", nil, true],
+          ["Botched Up/Down", "botchedUpDowns", "botchedUpDowns", false],
+          ["Inside PW/9i", "insidePw9i", "insidePw9i", false]
+        ].each do |label, target, stat, readonly| %>
           <div class="flex items-center justify-between gap-3">
             <span class="text-sm font-medium"><%= label %></span>
-            <div class="flex items-center gap-2">
-              <button type="button" class="ui-icon-btn" data-action="round#decrement" data-stat="<%= stat %>" aria-label="Decrease <%= label %>">
-                <%= icon "minus", class: "w-5 h-5" %>
-              </button>
+            <% if readonly %>
               <span class="w-10 text-center text-lg font-semibold" data-round-target="<%= target %>">0</span>
-              <button type="button" class="ui-icon-btn" data-action="round#increment" data-stat="<%= stat %>" aria-label="Increase <%= label %>">
-                <%= icon "plus", class: "w-5 h-5" %>
-              </button>
-            </div>
+            <% else %>
+              <div class="flex items-center gap-2">
+                <button type="button" class="ui-icon-btn" data-action="round#decrement" data-stat="<%= stat %>" aria-label="Decrease <%= label %>">
+                  <%= icon "minus", class: "w-5 h-5" %>
+                </button>
+                <span class="w-10 text-center text-lg font-semibold" data-round-target="<%= target %>">0</span>
+                <button type="button" class="ui-icon-btn" data-action="round#increment" data-stat="<%= stat %>" aria-label="Increase <%= label %>">
+                  <%= icon "plus", class: "w-5 h-5" %>
+                </button>
+              </div>
+            <% end %>
           </div>
         <% end %>
       </div>
@@ -94,7 +98,6 @@
 
   <%= form_with url: course_rounds_path(@course), method: :post, data: { round_target: "finishForm", action: "turbo:submit-end->round#submitEnd" }, class: "hidden" do %>
     <input type="hidden" name="round[oop_tee_shots]" value="0">
-    <input type="hidden" name="round[three_putts]" value="0">
     <input type="hidden" name="round[botched_up_downs]" value="0">
     <input type="hidden" name="round[inside_pw_9i]" value="0">
     <input type="hidden" name="round[started_at]" value="" data-round-target="startedAt">

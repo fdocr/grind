@@ -7,7 +7,7 @@ class Round < ApplicationRecord
   belongs_to :user, optional: true
   has_many :deliveries, dependent: :destroy
 
-  validates :oop_tee_shots, :three_putts, :botched_up_downs,
+  validates :oop_tee_shots, :botched_up_downs,
             numericality: { greater_than_or_equal_to: 0 }
   validates :inside_pw_9i, numericality: true
   validate :hole_scores_complete, if: :finished_at?
@@ -41,6 +41,11 @@ class Round < ApplicationRecord
 
   def total_putts
     hole_scores.values.sum { |entry| entry["putts"].to_i }
+  end
+
+  # Holes where the player needed three or more putts, derived from hole_scores.
+  def three_putts
+    hole_scores.values.count { |entry| entry["putts"].to_i >= 3 }
   end
 
   def score_to_par
