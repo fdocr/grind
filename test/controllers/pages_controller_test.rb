@@ -27,8 +27,8 @@ class PagesControllerTest < ActionDispatch::IntegrationTest
   test "about page includes seo metadata" do
     get about_path
     assert_response :success
-    assert_select "title", text: "About · Grind"
-    assert_select "meta[property='og:title'][content='About · Grind']"
+    assert_select "title", text: "About"
+    assert_select "meta[property='og:title'][content='About']"
     assert_select "link[rel='canonical'][href='http://example.com/about']"
   end
 end
