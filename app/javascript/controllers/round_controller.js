@@ -7,7 +7,7 @@ export default class extends Controller {
     "grossInput", "puttsInput", "grossPicker", "puttsPicker",
     "scorePanelHole", "scorePanelPar", "scorePanelHcp", "scorePanelYards", "holeMeta",
     "finishButton", "finishForm", "startedAt",
-    "scorecardBody", "holesList"
+    "scorecardBody", "holesList", "statsLastHole", "statsLastHoleLabel"
   ]
 
   static values = {
@@ -52,6 +52,7 @@ export default class extends Controller {
       oopTeeShots: 0,
       botchedUpDowns: 0,
       insidePw9i: 0,
+      statsLastHole: null,
       holes: {},
       pendingFinish: false
     }
@@ -135,7 +136,23 @@ export default class extends Controller {
 
     this.renderScorecard()
     this.renderHolesList()
+    this.renderStatsLastHole()
     this.saveState()
+  }
+
+  renderStatsLastHole() {
+    if (!this.hasStatsLastHoleTarget) return
+
+    const hole = this.state.statsLastHole
+    if (hole == null) {
+      this.statsLastHoleTarget.classList.add("hidden")
+      return
+    }
+
+    this.statsLastHoleTarget.classList.remove("hidden")
+    if (this.hasStatsLastHoleLabelTarget) {
+      this.statsLastHoleLabelTarget.textContent = `Hole ${hole}`
+    }
   }
 
   renderScorecard() {
@@ -282,6 +299,10 @@ export default class extends Controller {
     return button
   }
 
+  touchStatCounter() {
+    this.state.statsLastHole = this.state.currentHole
+  }
+
   increment(event) {
     const stat = event.currentTarget.dataset.stat
     if (stat === "insidePw9i") {
@@ -289,6 +310,7 @@ export default class extends Controller {
     } else {
       this.state[stat] += 1
     }
+    this.touchStatCounter()
     this.render()
   }
 
@@ -299,6 +321,7 @@ export default class extends Controller {
     } else if (this.state[stat] > 0) {
       this.state[stat] -= 1
     }
+    this.touchStatCounter()
     this.render()
   }
 

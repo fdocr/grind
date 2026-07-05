@@ -53,6 +53,9 @@ class RoundFlowTest < ApplicationSystemTestCase
 
     assert_equal "1", find("[data-round-target='threePutts']").text
 
+    find("[data-stat='oopTeeShots'][data-action*='increment']").click
+    assert_text "Hole 2"
+
     click_button "Reset round"
     assert_text "Reset round?"
     click_button "Cancel"
@@ -64,5 +67,6 @@ class RoundFlowTest < ApplicationSystemTestCase
     assert_text "Hole 1"
     assert_text "Even"
     assert_equal "0", find("[data-round-target='threePutts']").text
+    assert_no_selector "[data-round-target='statsLastHole']", visible: :visible
   end
 end
