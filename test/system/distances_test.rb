@@ -33,7 +33,7 @@ class DistancesTest < ApplicationSystemTestCase
 
     click_button "Distances"
 
-    assert_text "You're too far from the hole"
+    assert_text "You're too far away from the hole"
   end
 
   test "shows an empty state for a hole without map data" do
