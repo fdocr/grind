@@ -99,6 +99,14 @@ export default class extends Controller {
     return `${value}`
   }
 
+  ordinalHole(number) {
+    const n = Number(number)
+    const suffixes = [ "th", "st", "nd", "rd" ]
+    const mod100 = n % 100
+    const suffix = suffixes[(mod100 - 20) % 10] || suffixes[mod100] || suffixes[0]
+    return `${n}${suffix} hole`
+  }
+
   allHolesComplete() {
     return this.courseValue.holes.every((hole) => {
       const entry = this.holeEntry(hole.number)
@@ -113,7 +121,7 @@ export default class extends Controller {
 
   render() {
     this.scoreToParTarget.textContent = this.formatScoreToPar(this.scoreToPar())
-    this.holeNumberTarget.textContent = `Hole ${this.state.currentHole}`
+    this.holeNumberTarget.textContent = this.ordinalHole(this.state.currentHole)
 
     const hole = this.currentHoleData()
     if (hole && this.hasHoleMetaTarget) {
@@ -151,7 +159,7 @@ export default class extends Controller {
 
     this.statsLastHoleTarget.classList.remove("hidden")
     if (this.hasStatsLastHoleLabelTarget) {
-      this.statsLastHoleLabelTarget.textContent = `Hole ${hole}`
+      this.statsLastHoleLabelTarget.textContent = this.ordinalHole(hole)
     }
   }
 

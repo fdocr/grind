@@ -49,22 +49,22 @@ class RoundFlowTest < ApplicationSystemTestCase
     find("[data-round-target='puttsPicker'] [data-value='3']").click
     click_button "Save"
 
-    assert_text "Hole 2"
+    assert_text "2nd hole"
 
     assert_equal "1", find("[data-round-target='threePutts']").text
 
     find("[data-stat='oopTeeShots'][data-action*='increment']").click
-    assert_text "Hole 2"
+    assert_text "2nd hole"
 
     click_button "Reset round"
     assert_text "Reset round?"
     click_button "Cancel"
-    assert_text "Hole 2"
+    assert_text "2nd hole"
 
     click_button "Reset round"
     find("[data-action='round#confirmReset']").click
 
-    assert_text "Hole 1"
+    assert_text "1st hole"
     assert_text "Even"
     assert_equal "0", find("[data-round-target='threePutts']").text
     assert_no_selector "[data-round-target='statsLastHole']", visible: :visible
@@ -99,7 +99,7 @@ class RoundFlowTest < ApplicationSystemTestCase
     click_button "Post Score"
     click_button "Save"
 
-    assert_text "Hole 1"
+    assert_text "1st hole"
   end
 
   test "posting on the last hole stays put when hole 1 already has a score" do
@@ -107,7 +107,7 @@ class RoundFlowTest < ApplicationSystemTestCase
 
     click_button "Post Score"
     click_button "Save"
-    assert_text "Hole 2"
+    assert_text "2nd hole"
 
     click_button "Holes"
     find("[data-hole-number='18']").click
@@ -115,6 +115,6 @@ class RoundFlowTest < ApplicationSystemTestCase
     click_button "Post Score"
     click_button "Save"
 
-    assert_text "Hole 18"
+    assert_text "18th hole"
   end
 end

@@ -2,7 +2,9 @@
 
 <div class="space-y-6">
   <header class="space-y-1">
-    <h1 class="text-xl font-bold text-foreground">Contributions</h1>
+    <% unless hotwire_native_app? %>
+      <h1 class="text-xl font-bold text-foreground">Contributions</h1>
+    <% end %>
     <p class="text-sm text-muted-foreground">Review scorecard submissions from users.</p>
   </header>
 

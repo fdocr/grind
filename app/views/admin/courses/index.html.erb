@@ -3,7 +3,9 @@
 <div class="space-y-6">
   <header class="flex items-start justify-between gap-3">
     <div class="space-y-1 min-w-0">
-      <h1 class="text-xl font-bold text-foreground">Courses</h1>
+      <% unless hotwire_native_app? %>
+        <h1 class="text-xl font-bold text-foreground">Courses</h1>
+      <% end %>
       <p class="text-sm text-muted-foreground">Manage course details, scorecards, and map data.</p>
     </div>
     <%= link_to "New course", new_admin_course_path, class: "ui-btn-primary ui-btn-md shrink-0" %>

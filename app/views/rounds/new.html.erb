@@ -10,7 +10,9 @@
      data-round-tee-value="<%= @tee %>"
      data-round-course-value="<%= course_json.to_json %>">
   <header class="space-y-1">
-    <h1 class="text-xl font-bold text-foreground"><%= @course.name %></h1>
+    <% unless hotwire_native_app? %>
+      <h1 class="text-xl font-bold text-foreground"><%= @course.name %></h1>
+    <% end %>
     <div class="flex items-center gap-2 flex-wrap">
       <p class="text-sm text-muted-foreground"><%= Time.zone.today.strftime("%a %b %-d, %Y") %></p>
       <% if @tee.present? %>
@@ -19,7 +21,7 @@
     </div>
     <div class="flex items-start justify-between pt-2 gap-4">
       <div>
-        <p class="text-lg font-semibold" data-round-target="holeNumber">Hole 1</p>
+        <p class="text-lg font-semibold" data-round-target="holeNumber">1st hole</p>
         <p class="text-sm text-muted-foreground mt-1" data-round-target="holeMeta">Par 4 · Hcp 1</p>
       </div>
       <div class="text-right shrink-0">
@@ -80,7 +82,7 @@
        data-round-target="statsLastHole"
        aria-live="polite">
       <%= icon "pencil", class: "w-3.5 h-3.5 shrink-0" %>
-      <span data-round-target="statsLastHoleLabel">Hole 1</span>
+      <span data-round-target="statsLastHoleLabel">1st hole</span>
     </p>
   </section>
 
