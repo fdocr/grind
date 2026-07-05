@@ -1,6 +1,8 @@
 require "test_helper"
 
 class CoursesControllerTest < ActionDispatch::IntegrationTest
+  setup { Rails.cache.clear }
+
   test "index lists featured courses without a search query" do
     get root_path
     assert_response :success
@@ -41,7 +43,7 @@ class CoursesControllerTest < ActionDispatch::IntegrationTest
 
     get courses_path, params: { q: "Searchable" }
     assert_response :success
-    assert_select "a[data-turbo-frame='course_modal']", count: 10
+    assert_select "a[data-turbo-frame='course_modal']", count: Course::RESULT_LIMIT
     assert_match "Refine your search", response.body
   end
 
@@ -54,7 +56,7 @@ class CoursesControllerTest < ActionDispatch::IntegrationTest
     assert_select "turbo-frame#course_modal"
     assert_match "data-tee-select-active-value=\"white\"", response.body
     assert_match "White tee", response.body
-    assert_select "a[href*='round'][data-turbo-frame='_top']"
+    assert_select "a[href*='round'][data-turbo-frame='_top'][data-action='click->modal#close']"
   end
 
   test "show renders a segmented control for multi-tee courses" do
@@ -83,5 +85,15 @@ class CoursesControllerTest < ActionDispatch::IntegrationTest
     get root_path
     assert_response :success
     assert_match "Recently played courses", response.body
+  end
+
+  test "index is rate limited after fifteen requests in a minute" do
+    15.times { get courses_path, params: { q: "Pebble" } }
+    assert_response :success
+
+    get courses_path, params: { q: "Pebble" }
+    assert_redirected_to root_path
+    follow_redirect!
+    assert_select ".ui-banner-danger", text: /Rate limit reached: Try again in a minute and slow down a bit/
   end
 end

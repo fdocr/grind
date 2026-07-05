@@ -7,7 +7,7 @@ Hosted at [grind.fdo.cr](https://grind.fdo.cr). Anyone can self host with the [O
 ## Features
 
 - Mobile first round tracker with gross score and putts per hole
-- Custom stats: OOP Tee Shots, 3 Putts, Botched Up/Down, Inside PW/9i
+- Custom stats: OOP Tee Shots, 3 Putts (derived from per-hole putts), Botched Up/Down, Inside PW/9i
 - Offline friendly active round tracking with service worker caching
 - Email round stats with Cloudflare Turnstile protection
 - SQLite, Solid Queue, Solid Cache, and Solid Cable in production

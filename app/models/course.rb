@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Course < ApplicationRecord
-  RESULT_LIMIT = 10
+  RESULT_LIMIT = 6
 
   has_many :holes, -> { order(:number) }, dependent: :destroy, inverse_of: :course
   has_many :rounds, dependent: :destroy

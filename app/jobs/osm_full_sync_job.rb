@@ -8,7 +8,7 @@
 class OsmFullSyncJob < ApplicationJob
   queue_as :overpass
 
-  STAGGER = 20.seconds
+  STAGGER = 61.seconds
   RESYNC_AFTER = 30.days
 
   def perform(resync_after: RESYNC_AFTER)

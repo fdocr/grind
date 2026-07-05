@@ -92,7 +92,7 @@
           <%= link_to "Start round",
                 round_course_path(@course, tee: @active_tee),
                 class: "ui-btn-primary ui-btn-md flex-1",
-                data: { turbo_frame: "_top", tee_select_target: "startLink" } %>
+                data: { turbo_frame: "_top", tee_select_target: "startLink", action: "click->modal#close" } %>
         </div>
       <% end %>
     </div>

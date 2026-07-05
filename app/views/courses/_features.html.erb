@@ -81,7 +81,11 @@
             Sign up for free to save finished rounds to your account and browse them anytime.
           </p>
           <p class="text-sm mt-2">
-            <%= link_to "Create a free account", new_registration_path, class: "ui-btn-link" %>.
+            <% if authenticated? %>
+              <%= link_to "My Rounds", my_rounds_path, class: "ui-btn-link" %>
+            <% else %>
+              <%= link_to "Create a free account", new_registration_path, class: "ui-btn-link" %>.
+            <% end %>
           </p>
         </div>
       </div>

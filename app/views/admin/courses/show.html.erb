@@ -2,9 +2,11 @@
 
 <div class="space-y-6">
   <header class="space-y-3">
-    <p class="text-sm text-muted-foreground">
-      <%= link_to "← Courses", admin_courses_path, class: "ui-btn-link" %>
-    </p>
+    <% unless hotwire_native_app? %>
+      <p class="text-sm text-muted-foreground">
+        <%= link_to "← Courses", admin_courses_path, class: "ui-btn-link" %>
+      </p>
+    <% end %>
     <div class="flex items-start justify-between gap-3">
       <div class="min-w-0 space-y-1">
         <h1 class="text-xl font-bold text-foreground"><%= @course.name %></h1>

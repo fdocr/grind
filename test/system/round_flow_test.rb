@@ -20,11 +20,14 @@ class RoundFlowTest < ApplicationSystemTestCase
 
     18.times do |index|
       click_button "Post Score"
+      if [ 0, 1 ].include?(index)
+        find("[data-round-target='puttsPicker'] [data-value='3']").click
+      end
       click_button "Save"
       break if index == 17
     end
 
-    2.times { find("[data-stat='threePutts'][data-action*='increment']").click }
+    assert_equal "2", find("[data-round-target='threePutts']").text
 
     click_button "Finish round"
 
@@ -43,23 +46,75 @@ class RoundFlowTest < ApplicationSystemTestCase
     visit round_course_path(@course)
 
     click_button "Post Score"
+    find("[data-round-target='puttsPicker'] [data-value='3']").click
     click_button "Save"
 
-    assert_text "Hole 2"
+    assert_text "2nd hole"
 
-    find("[data-stat='threePutts'][data-action*='increment']").click
     assert_equal "1", find("[data-round-target='threePutts']").text
+
+    find("[data-stat='oopTeeShots'][data-action*='increment']").click
+    assert_text "2nd hole"
 
     click_button "Reset round"
     assert_text "Reset round?"
     click_button "Cancel"
-    assert_text "Hole 2"
+    assert_text "2nd hole"
 
     click_button "Reset round"
     find("[data-action='round#confirmReset']").click
 
-    assert_text "Hole 1"
+    assert_text "1st hole"
     assert_text "Even"
     assert_equal "0", find("[data-round-target='threePutts']").text
+    assert_no_selector "[data-round-target='statsLastHole']", visible: :visible
+  end
+
+  test "hole picker shows a check icon for posted scores" do
+    visit round_course_path(@course)
+    page.execute_script("window.localStorage.clear()")
+    visit round_course_path(@course)
+
+    click_button "Post Score"
+    assert_text "Post score"
+    click_button "Save"
+
+    click_button "Holes"
+
+    scored = find("[data-hole-number='1']")
+    unscored = find("[data-hole-number='2']")
+
+    assert scored.has_css?("svg")
+    assert_not unscored.has_css?("svg")
+    assert_no_text "Score 4"
+    assert_no_text "Open"
+  end
+
+  test "posting on the last hole wraps to hole 1 when it has no score" do
+    visit round_course_path(@course)
+
+    click_button "Holes"
+    find("[data-hole-number='18']").click
+
+    click_button "Post Score"
+    click_button "Save"
+
+    assert_text "1st hole"
+  end
+
+  test "posting on the last hole stays put when hole 1 already has a score" do
+    visit round_course_path(@course)
+
+    click_button "Post Score"
+    click_button "Save"
+    assert_text "2nd hole"
+
+    click_button "Holes"
+    find("[data-hole-number='18']").click
+
+    click_button "Post Score"
+    click_button "Save"
+
+    assert_text "18th hole"
   end
 end

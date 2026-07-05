@@ -7,7 +7,7 @@ export default class extends Controller {
     "grossInput", "puttsInput", "grossPicker", "puttsPicker",
     "scorePanelHole", "scorePanelPar", "scorePanelHcp", "scorePanelYards", "holeMeta",
     "finishButton", "finishForm", "startedAt",
-    "scorecardBody", "holesList"
+    "scorecardBody", "holesList", "statsLastHole", "statsLastHoleLabel", "holeScoredIcon"
   ]
 
   static values = {
@@ -50,9 +50,9 @@ export default class extends Controller {
       startedAt: new Date().toISOString(),
       currentHole: 1,
       oopTeeShots: 0,
-      threePutts: 0,
       botchedUpDowns: 0,
       insidePw9i: 0,
+      statsLastHole: null,
       holes: {},
       pendingFinish: false
     }
@@ -99,6 +99,14 @@ export default class extends Controller {
     return `${value}`
   }
 
+  ordinalHole(number) {
+    const n = Number(number)
+    const suffixes = [ "th", "st", "nd", "rd" ]
+    const mod100 = n % 100
+    const suffix = suffixes[(mod100 - 20) % 10] || suffixes[mod100] || suffixes[0]
+    return `${n}${suffix} hole`
+  }
+
   allHolesComplete() {
     return this.courseValue.holes.every((hole) => {
       const entry = this.holeEntry(hole.number)
@@ -106,9 +114,14 @@ export default class extends Controller {
     })
   }
 
+  threePuttCount() {
+    return Object.values(this.state.holes)
+      .filter((entry) => Number(entry.putts) >= 3).length
+  }
+
   render() {
     this.scoreToParTarget.textContent = this.formatScoreToPar(this.scoreToPar())
-    this.holeNumberTarget.textContent = `Hole ${this.state.currentHole}`
+    this.holeNumberTarget.textContent = this.ordinalHole(this.state.currentHole)
 
     const hole = this.currentHoleData()
     if (hole && this.hasHoleMetaTarget) {
@@ -118,7 +131,7 @@ export default class extends Controller {
 
     this.insidePw9iTarget.textContent = this.formatInside(this.state.insidePw9i)
     this.oopTeeShotsTarget.textContent = this.state.oopTeeShots
-    this.threePuttsTarget.textContent = this.state.threePutts
+    this.threePuttsTarget.textContent = this.threePuttCount()
     this.botchedUpDownsTarget.textContent = this.state.botchedUpDowns
 
     if (this.hasStartedAtTarget) {
@@ -131,7 +144,23 @@ export default class extends Controller {
 
     this.renderScorecard()
     this.renderHolesList()
+    this.renderStatsLastHole()
     this.saveState()
+  }
+
+  renderStatsLastHole() {
+    if (!this.hasStatsLastHoleTarget) return
+
+    const hole = this.state.statsLastHole
+    if (hole == null) {
+      this.statsLastHoleTarget.classList.add("hidden")
+      return
+    }
+
+    this.statsLastHoleTarget.classList.remove("hidden")
+    if (this.hasStatsLastHoleLabelTarget) {
+      this.statsLastHoleLabelTarget.textContent = this.ordinalHole(hole)
+    }
   }
 
   renderScorecard() {
@@ -232,7 +261,7 @@ export default class extends Controller {
     grid.className = backHoles.length > 0 ? "grid grid-cols-2 gap-2" : "grid grid-cols-1 gap-2"
 
     const frontColumn = document.createElement("div")
-    frontColumn.className = "space-y-2"
+    frontColumn.className = "space-y-1.5"
 
     frontHoles.forEach((hole) => {
       frontColumn.appendChild(this.buildHoleButton(hole))
@@ -242,7 +271,7 @@ export default class extends Controller {
 
     if (backHoles.length > 0) {
       const backColumn = document.createElement("div")
-      backColumn.className = "space-y-2"
+      backColumn.className = "space-y-1.5"
       backHoles.forEach((hole) => {
         backColumn.appendChild(this.buildHoleButton(hole))
       })
@@ -255,27 +284,42 @@ export default class extends Controller {
   buildHoleButton(hole) {
     const button = document.createElement("button")
     button.type = "button"
-    button.className = "ui-btn-secondary ui-btn-sm w-full text-left !items-start !justify-start flex-col gap-0.5 h-auto py-2 px-2"
+    button.className = "ui-btn-secondary ui-btn-sm w-full text-left !justify-between flex-row items-center gap-2 h-auto py-1.5 px-2.5"
+    button.dataset.holeNumber = hole.number
+    button.setAttribute("aria-label", `Hole ${hole.number}`)
+
     const entry = this.holeEntry(hole.number)
-    const scoreLabel = entry.gross == null ? "Open" : `Score ${entry.gross}`
+    const scored = entry.gross != null && entry.gross !== ""
 
-    const title = document.createElement("span")
-    title.className = "font-medium text-sm"
-    title.textContent = `Hole ${hole.number}`
+    const label = document.createElement("span")
+    label.className = "flex items-center gap-1.5 min-w-0"
 
-    const meta = document.createElement("span")
-    meta.className = "text-xs text-muted-foreground"
-    const yards = hole.yardage ? ` · ${hole.yardage} ${this.unit()}` : ""
-    meta.textContent = `Par ${hole.par} · ${scoreLabel}${yards}`
+    const number = document.createElement("span")
+    number.className = "font-semibold text-sm tabular-nums"
+    number.textContent = hole.number
 
-    button.appendChild(title)
-    button.appendChild(meta)
+    const par = document.createElement("span")
+    par.className = "text-xs text-muted-foreground"
+    par.textContent = `Par ${hole.par}`
+
+    label.appendChild(number)
+    label.appendChild(par)
+    button.appendChild(label)
+
+    if (scored && this.hasHoleScoredIconTarget) {
+      button.appendChild(this.holeScoredIconTarget.content.cloneNode(true))
+    }
+
     button.addEventListener("click", () => {
       this.state.currentHole = hole.number
       this.closePanels()
       this.render()
     })
     return button
+  }
+
+  touchStatCounter() {
+    this.state.statsLastHole = this.state.currentHole
   }
 
   increment(event) {
@@ -285,6 +329,7 @@ export default class extends Controller {
     } else {
       this.state[stat] += 1
     }
+    this.touchStatCounter()
     this.render()
   }
 
@@ -295,6 +340,7 @@ export default class extends Controller {
     } else if (this.state[stat] > 0) {
       this.state[stat] -= 1
     }
+    this.touchStatCounter()
     this.render()
   }
 
@@ -438,13 +484,28 @@ export default class extends Controller {
     const putts = Number(this.puttsInputTarget.value)
 
     this.state.holes[this.state.currentHole] = { gross, putts }
-
-    if (this.state.currentHole < this.lastHoleNumber()) {
-      this.state.currentHole += 1
-    }
+    this.advanceAfterScore()
 
     this.closePanels()
     this.render()
+  }
+
+  // After posting, advance to the next hole. On the last hole, wrap to hole 1
+  // when it still has no score (shotgun starts that finish 18 before playing 1).
+  advanceAfterScore() {
+    const last = this.lastHoleNumber()
+
+    if (this.state.currentHole < last) {
+      this.state.currentHole += 1
+      return
+    }
+
+    if (this.state.currentHole === last) {
+      const first = this.holeEntry(1)
+      if (first.gross == null || first.gross === "") {
+        this.state.currentHole = 1
+      }
+    }
   }
 
   previousHole() {
@@ -491,7 +552,6 @@ export default class extends Controller {
 
     const form = this.finishFormTarget
     form.querySelector('[name="round[oop_tee_shots]"]').value = this.state.oopTeeShots
-    form.querySelector('[name="round[three_putts]"]').value = this.state.threePutts
     form.querySelector('[name="round[botched_up_downs]"]').value = this.state.botchedUpDowns
     form.querySelector('[name="round[inside_pw_9i]"]').value = this.state.insidePw9i
     form.querySelector('[name="round[started_at]"]').value = this.state.startedAt

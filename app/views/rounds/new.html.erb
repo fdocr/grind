@@ -10,7 +10,9 @@
      data-round-tee-value="<%= @tee %>"
      data-round-course-value="<%= course_json.to_json %>">
   <header class="space-y-1">
-    <h1 class="text-xl font-bold text-foreground"><%= @course.name %></h1>
+    <% unless hotwire_native_app? %>
+      <h1 class="text-xl font-bold text-foreground"><%= @course.name %></h1>
+    <% end %>
     <div class="flex items-center gap-2 flex-wrap">
       <p class="text-sm text-muted-foreground"><%= Time.zone.today.strftime("%a %b %-d, %Y") %></p>
       <% if @tee.present? %>
@@ -19,7 +21,7 @@
     </div>
     <div class="flex items-start justify-between pt-2 gap-4">
       <div>
-        <p class="text-lg font-semibold" data-round-target="holeNumber">Hole 1</p>
+        <p class="text-lg font-semibold" data-round-target="holeNumber">1st hole</p>
         <p class="text-sm text-muted-foreground mt-1" data-round-target="holeMeta">Par 4 · Hcp 1</p>
       </div>
       <div class="text-right shrink-0">
@@ -34,6 +36,13 @@
     <button type="button" class="ui-btn-secondary ui-btn-md w-full" data-action="round#openDistancesPanel">Distances</button>
     <button type="button" class="ui-btn-secondary ui-btn-md w-full" data-action="round#openHolesPanel">Holes</button>
     <button type="button" class="ui-btn-secondary ui-btn-md w-full" data-action="round#openScorecardPanel">Scorecard</button>
+    <button type="button"
+            class="ui-btn-primary ui-btn-md w-full"
+            data-round-target="finishButton"
+            data-action="round#finishRound"
+            disabled>
+      Finish round
+    </button>
   </div>
 
   <section>
@@ -41,26 +50,40 @@
     <%= render "ui/card", padding: :sm do %>
       <div class="space-y-4">
         <% [
-          ["OOP Tee Shots", "oopTeeShots", "oopTeeShots"],
-          ["3 Putts", "threePutts", "threePutts"],
-          ["Botched Up/Down", "botchedUpDowns", "botchedUpDowns"],
-          ["Inside PW/9i", "insidePw9i", "insidePw9i"]
-        ].each do |label, target, stat| %>
+          ["OOP Tee Shots", "oopTeeShots", "oopTeeShots", false],
+          ["3 Putts", "threePutts", nil, true],
+          ["Botched Up/Down", "botchedUpDowns", "botchedUpDowns", false],
+          ["Inside PW/9i", "insidePw9i", "insidePw9i", false]
+        ].each do |label, target, stat, readonly| %>
           <div class="flex items-center justify-between gap-3">
             <span class="text-sm font-medium"><%= label %></span>
-            <div class="flex items-center gap-2">
-              <button type="button" class="ui-icon-btn" data-action="round#decrement" data-stat="<%= stat %>" aria-label="Decrease <%= label %>">
-                <%= icon "minus", class: "w-5 h-5" %>
-              </button>
-              <span class="w-10 text-center text-lg font-semibold" data-round-target="<%= target %>">0</span>
-              <button type="button" class="ui-icon-btn" data-action="round#increment" data-stat="<%= stat %>" aria-label="Increase <%= label %>">
-                <%= icon "plus", class: "w-5 h-5" %>
-              </button>
-            </div>
+            <% if readonly %>
+              <div class="flex items-center gap-2">
+                <span class="inline-flex h-11 w-11 shrink-0" aria-hidden="true"></span>
+                <span class="w-10 text-center text-lg font-semibold" data-round-target="<%= target %>">0</span>
+                <span class="inline-flex h-11 w-11 shrink-0" aria-hidden="true"></span>
+              </div>
+            <% else %>
+              <div class="flex items-center gap-2">
+                <button type="button" class="ui-icon-btn" data-action="round#decrement" data-stat="<%= stat %>" aria-label="Decrease <%= label %>">
+                  <%= icon "minus", class: "w-5 h-5" %>
+                </button>
+                <span class="w-10 text-center text-lg font-semibold" data-round-target="<%= target %>">0</span>
+                <button type="button" class="ui-icon-btn" data-action="round#increment" data-stat="<%= stat %>" aria-label="Increase <%= label %>">
+                  <%= icon "plus", class: "w-5 h-5" %>
+                </button>
+              </div>
+            <% end %>
           </div>
         <% end %>
       </div>
     <% end %>
+    <p class="hidden mt-2 flex items-center justify-center gap-1.5 text-xs text-muted-foreground"
+       data-round-target="statsLastHole"
+       aria-live="polite">
+      <%= icon "pencil", class: "w-3.5 h-3.5 shrink-0" %>
+      <span data-round-target="statsLastHoleLabel">1st hole</span>
+    </p>
   </section>
 
   <div class="flex gap-3">
@@ -75,14 +98,6 @@
   </div>
 
   <button type="button"
-          class="ui-btn-primary ui-btn-lg w-full"
-          data-round-target="finishButton"
-          data-action="round#finishRound"
-          disabled>
-    Finish round
-  </button>
-
-  <button type="button"
           class="ui-btn-ghost ui-btn-md w-full text-destructive"
           data-action="round#openResetPanel">
     Reset round
@@ -94,7 +109,6 @@
 
   <%= form_with url: course_rounds_path(@course), method: :post, data: { round_target: "finishForm", action: "turbo:submit-end->round#submitEnd" }, class: "hidden" do %>
     <input type="hidden" name="round[oop_tee_shots]" value="0">
-    <input type="hidden" name="round[three_putts]" value="0">
     <input type="hidden" name="round[botched_up_downs]" value="0">
     <input type="hidden" name="round[inside_pw_9i]" value="0">
     <input type="hidden" name="round[started_at]" value="" data-round-target="startedAt">
@@ -197,6 +211,10 @@
       <div data-round-target="holesList"></div>
     <% end %>
   </div>
+
+  <template data-round-target="holeScoredIcon">
+    <%= icon "check", class: "w-3.5 h-3.5 shrink-0 text-primary-600" %>
+  </template>
 
   <div class="fixed inset-x-4 bottom-4 z-50 hidden max-h-[80vh] overflow-y-auto overflow-x-hidden" data-round-target="scorecardPanel">
     <%= render "ui/card", padding: :sm, extra_class: "overflow-hidden" do %>

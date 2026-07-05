@@ -20,7 +20,7 @@ class ContributionsControllerTest < ActionDispatch::IntegrationTest
 
   test "new includes seo meta tags" do
     get contribute_path
-    assert_select "meta[property='og:title'][content='Contribute · Grind']"
+    assert_select "meta[property='og:title'][content='Contribute']"
   end
 
   test "authenticated user sees submission form for new course" do
