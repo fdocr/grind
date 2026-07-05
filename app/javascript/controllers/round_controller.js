@@ -465,13 +465,28 @@ export default class extends Controller {
     const putts = Number(this.puttsInputTarget.value)
 
     this.state.holes[this.state.currentHole] = { gross, putts }
-
-    if (this.state.currentHole < this.lastHoleNumber()) {
-      this.state.currentHole += 1
-    }
+    this.advanceAfterScore()
 
     this.closePanels()
     this.render()
+  }
+
+  // After posting, advance to the next hole. On the last hole, wrap to hole 1
+  // when it still has no score (shotgun starts that finish 18 before playing 1).
+  advanceAfterScore() {
+    const last = this.lastHoleNumber()
+
+    if (this.state.currentHole < last) {
+      this.state.currentHole += 1
+      return
+    }
+
+    if (this.state.currentHole === last) {
+      const first = this.holeEntry(1)
+      if (first.gross == null || first.gross === "") {
+        this.state.currentHole = 1
+      }
+    }
   }
 
   previousHole() {

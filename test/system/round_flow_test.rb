@@ -69,4 +69,32 @@ class RoundFlowTest < ApplicationSystemTestCase
     assert_equal "0", find("[data-round-target='threePutts']").text
     assert_no_selector "[data-round-target='statsLastHole']", visible: :visible
   end
+
+  test "posting on the last hole wraps to hole 1 when it has no score" do
+    visit round_course_path(@course)
+
+    click_button "Holes"
+    find("button", text: "Hole 18", match: :first).click
+
+    click_button "Post Score"
+    click_button "Save"
+
+    assert_text "Hole 1"
+  end
+
+  test "posting on the last hole stays put when hole 1 already has a score" do
+    visit round_course_path(@course)
+
+    click_button "Post Score"
+    click_button "Save"
+    assert_text "Hole 2"
+
+    click_button "Holes"
+    find("button", text: "Hole 18", match: :first).click
+
+    click_button "Post Score"
+    click_button "Save"
+
+    assert_text "Hole 18"
+  end
 end
