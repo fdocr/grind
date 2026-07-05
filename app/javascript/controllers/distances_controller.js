@@ -16,7 +16,7 @@ const TOO_FAR_METERS = 800
 // navigator.geolocation.watchPosition, exactly as before.
 export default class extends BridgeComponent {
   static component = "geolocation"
-  static targets = ["title", "front", "center", "back", "accuracy", "status", "statusMessage", "empty", "tooFar", "content", "unitOption"]
+  static targets = ["front", "center", "back", "accuracy", "status", "statusMessage", "empty", "tooFar", "content", "unitOption"]
   static values = { unit: String }
 
   // BridgeComponent gates loading on native support by default; force it to
@@ -43,8 +43,6 @@ export default class extends BridgeComponent {
   // Called by the round controller when the Distances panel opens.
   start(detail) {
     this.green = (detail && detail.green) || null
-    const hole = detail && detail.hole
-    if (this.hasTitleTarget) this.titleTarget.textContent = hole ? `Distances · Hole ${hole}` : "Distances"
 
     if (!this.green || !Array.isArray(this.green.polygon) || this.green.polygon.length < 3) {
       this.stop()

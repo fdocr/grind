@@ -425,7 +425,7 @@ export default class extends Controller {
     const controller = this.distancesController()
     if (controller) {
       const hole = this.currentHoleData()
-      controller.start({ green: hole && hole.green, hole: this.state.currentHole })
+      controller.start({ green: hole && hole.green })
     }
     this.showPanel(this.distancesPanelTarget)
   }

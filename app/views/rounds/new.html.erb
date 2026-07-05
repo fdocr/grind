@@ -154,14 +154,11 @@
        data-distances-unit-value="<%= @course.metric? ? "m" : "yds" %>">
     <%= render "ui/card", padding: :sm do %>
       <div class="flex items-center justify-between mb-4 gap-3">
-        <h3 class="font-semibold" data-distances-target="title">Distances</h3>
-        <div class="flex items-center gap-2">
-          <div class="ui-segmented" role="group" aria-label="Distance unit">
-            <button type="button" class="ui-segmented-option" data-distances-target="unitOption" data-value="yds" data-action="distances#setUnit">yds</button>
-            <button type="button" class="ui-segmented-option" data-distances-target="unitOption" data-value="m" data-action="distances#setUnit">m</button>
-          </div>
-          <button type="button" class="ui-btn-ghost ui-btn-sm" data-action="round#closePanels">Close</button>
+        <div class="ui-segmented" role="group" aria-label="Distance unit">
+          <button type="button" class="ui-segmented-option" data-distances-target="unitOption" data-value="yds" data-action="distances#setUnit">yds</button>
+          <button type="button" class="ui-segmented-option" data-distances-target="unitOption" data-value="m" data-action="distances#setUnit">m</button>
         </div>
+        <button type="button" class="ui-btn-ghost ui-btn-sm" data-action="round#closePanels">Close</button>
       </div>
 
       <div class="hidden" data-distances-target="content">
@@ -185,8 +182,8 @@
       </div>
 
       <div class="hidden py-6 text-center" data-distances-target="tooFar">
-        <p class="text-base font-medium text-foreground">You're too far from the hole</p>
-        <p class="text-sm text-muted-foreground mt-1">Distances show when you're near the green.</p>
+        <p class="text-base font-medium text-foreground">You're too far away from the hole</p>
+        <p class="text-sm text-muted-foreground mt-1">Distances will appear here once you're closer</p>
       </div>
 
       <div class="hidden py-2 text-center space-y-3" data-distances-target="status">
