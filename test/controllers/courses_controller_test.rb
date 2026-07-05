@@ -18,7 +18,7 @@ class CoursesControllerTest < ActionDispatch::IntegrationTest
     assert_match "Rangefinder", response.body
     assert_match "Stats to your inbox", response.body
     assert_match "Keep every round logged", response.body
-    assert_match "grind@fdo.cr", response.body
+    assert_match "Contribute here", response.body
     assert_select "a[href=?]", about_path
     assert_select "a[href=?]", new_registration_path
     assert_no_match "sample_tracking.png", response.body

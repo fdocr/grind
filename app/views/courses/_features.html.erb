@@ -29,7 +29,7 @@
         <div class="min-w-0 space-y-1">
           <h3 class="font-semibold text-foreground">Game improvement stats</h3>
           <p class="text-sm text-muted-foreground">
-            Tap a few counters during your round to see identify where your strokes leak from.
+            Track a few stats during your round to see where strokes are slipping away.
           </p>
           <p class="text-sm mt-2">
             <%= link_to "Read more about these stats", about_path, class: "ui-btn-link" %>.
@@ -50,7 +50,7 @@
           </p>
           <p class="text-sm text-muted-foreground mt-2">
             Want your course added or updated?
-            <%= mail_to "grind@fdo.cr", "Email us", class: "ui-btn-link" %>.
+            <%= link_to "Contribute here", contribute_path, class: "ui-btn-link" %>
           </p>
         </div>
       </div>
