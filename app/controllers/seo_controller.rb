@@ -9,6 +9,7 @@ class SeoController < ApplicationController
     @entries = [
       { loc: root_url, changefreq: "weekly", priority: "1.0" },
       { loc: about_url, changefreq: "monthly", priority: "0.8" },
+      { loc: privacy_url, changefreq: "monthly", priority: "0.4" },
       { loc: contribute_url, changefreq: "monthly", priority: "0.7" }
     ]
   end

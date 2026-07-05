@@ -38,6 +38,7 @@ Rails.application.routes.draw do
   root "courses#index"
 
   get "about", to: "pages#about"
+  get "privacy", to: "pages#privacy"
 
   get "contribute", to: "contributions#new", as: :contribute
   post "contribute", to: "contributions#create"

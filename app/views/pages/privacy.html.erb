@@ -1,0 +1,126 @@
+<% content_for :seo_title, "Privacy" %>
+<% content_for :seo_description, "How Grind handles your data: what we collect, what stays on your device, and our commitment to never selling your information." %>
+
+<div class="space-y-6">
+  <header class="space-y-2">
+    <% unless hotwire_native_app? %>
+      <h1 class="text-2xl font-bold text-foreground">Privacy</h1>
+    <% end %>
+    <p class="text-muted-foreground">
+      Grind is built to help you track golf rounds, not to monetize your data. We collect only what we need to run the service and improve it. We never sell your data.
+    </p>
+    <p class="text-sm text-muted-foreground">Last updated: July 2026</p>
+  </header>
+
+  <section class="space-y-3">
+    <h2 class="text-lg font-semibold">What we collect</h2>
+    <%= render "ui/card", padding: :sm do %>
+      <dl class="space-y-4">
+        <div>
+          <dt class="font-semibold text-foreground">Account data</dt>
+          <dd class="text-sm text-muted-foreground mt-1">If you sign up: your email address and a hashed password. Accounts are optional — you can track and finish rounds without one.</dd>
+        </div>
+        <div>
+          <dt class="font-semibold text-foreground">Round data</dt>
+          <dd class="text-sm text-muted-foreground mt-1">When you finish a round: hole scores, putts, the four game-improvement stats, course, tee, and timestamps. Anonymous rounds get a private link; signed-in rounds are tied to your account.</dd>
+        </div>
+        <div>
+          <dt class="font-semibold text-foreground">Email address</dt>
+          <dd class="text-sm text-muted-foreground mt-1">Only if you ask us to email your round stats. We use it to send that message and do not add you to marketing lists.</dd>
+        </div>
+        <div>
+          <dt class="font-semibold text-foreground">Contributions</dt>
+          <dd class="text-sm text-muted-foreground mt-1">If you submit a scorecard or course correction: the photo, your notes, and your account email so we can follow up.</dd>
+        </div>
+        <div>
+          <dt class="font-semibold text-foreground">Cookies</dt>
+          <dd class="text-sm text-muted-foreground mt-1">A session cookie keeps you signed in. We do not use third-party advertising or tracking cookies.</dd>
+        </div>
+      </dl>
+    <% end %>
+  </section>
+
+  <section class="space-y-3">
+    <h2 class="text-lg font-semibold">What stays on your device</h2>
+    <%= render "ui/card", padding: :sm do %>
+      <dl class="space-y-4">
+        <div>
+          <dt class="font-semibold text-foreground">In-progress rounds</dt>
+          <dd class="text-sm text-muted-foreground mt-1">Saved in your browser's local storage until you finish, reset, or clear them. They are not sent to our servers until you post the round.</dd>
+        </div>
+        <div>
+          <dt class="font-semibold text-foreground">GPS for distances</dt>
+          <dd class="text-sm text-muted-foreground mt-1">Used on your device to calculate yardages to the green. Your location is not stored on our servers.</dd>
+        </div>
+      </dl>
+    <% end %>
+  </section>
+
+  <section class="space-y-3">
+    <h2 class="text-lg font-semibold">What we don't do</h2>
+    <%= render "ui/card", padding: :sm do %>
+      <dl class="space-y-4">
+        <div>
+          <dt class="font-semibold text-foreground">No selling your data</dt>
+          <dd class="text-sm text-muted-foreground mt-1">We do not sell, rent, or share your personal data with third parties for marketing.</dd>
+        </div>
+        <div>
+          <dt class="font-semibold text-foreground">No ads or ad trackers</dt>
+          <dd class="text-sm text-muted-foreground mt-1">We do not run advertising or third-party ad trackers on Grind.</dd>
+        </div>
+        <div>
+          <dt class="font-semibold text-foreground">No cross-site profiling</dt>
+          <dd class="text-sm text-muted-foreground mt-1">We do not profile you across other websites.</dd>
+        </div>
+      </dl>
+    <% end %>
+  </section>
+
+  <section class="space-y-3">
+    <h2 class="text-lg font-semibold">How we use data</h2>
+    <p class="text-muted-foreground text-sm">
+      We use your data to operate Grind — store rounds, send requested emails, review contributions, and keep accounts working. We may use aggregated, non-identifiable information to understand usage and improve the product.
+    </p>
+  </section>
+
+  <section class="space-y-3">
+    <h2 class="text-lg font-semibold">Security</h2>
+    <%= render "ui/card", padding: :sm do %>
+      <p class="text-sm text-muted-foreground">Traffic is encrypted over TLS. Passwords are stored using bcrypt and are never logged.</p>
+    <% end %>
+  </section>
+
+  <section class="space-y-3">
+    <h2 class="text-lg font-semibold">Your rights</h2>
+    <%= render "ui/card", padding: :sm do %>
+      <p class="text-sm text-muted-foreground">
+        You can ask for access to, correction of, or deletion of your personal data by emailing <%= mail_to "grind@fdo.cr", "grind@fdo.cr", class: "ui-btn-link" %>.
+      </p>
+    <% end %>
+  </section>
+
+  <section class="space-y-3">
+    <h2 class="text-lg font-semibold">Self-hosted instances</h2>
+    <%= render "ui/card", padding: :sm do %>
+      <p class="text-sm text-muted-foreground">
+        Grind is <%= link_to "open source", "https://github.com/fdocr/grind", class: "ui-btn-link", target: "_blank", rel: "noopener" %> and can be self-hosted. If you run your own instance, you are the data controller. This policy applies to the service operated at <%= link_to "grind.fdo.cr", root_url, class: "ui-btn-link" %>.
+      </p>
+    <% end %>
+  </section>
+
+  <section class="space-y-3">
+    <h2 class="text-lg font-semibold">Changes</h2>
+    <%= render "ui/card", padding: :sm do %>
+      <p class="text-sm text-muted-foreground">We may update this policy from time to time. Changes will be posted on this page with an updated date.</p>
+    <% end %>
+  </section>
+
+  <section class="space-y-3">
+    <p class="text-muted-foreground text-sm">
+      Questions? Email <%= mail_to "grind@fdo.cr", "grind@fdo.cr", class: "ui-btn-link" %> or read more <%= link_to "about Grind", about_path, class: "ui-btn-link" %>.
+    </p>
+    <div class="text-center">
+      <%= link_to "Start tracking a round", root_path, class: "ui-btn-primary ui-btn-md" %>
+    </div>
+  </section>
+</div>

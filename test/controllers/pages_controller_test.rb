@@ -31,4 +31,21 @@ class PagesControllerTest < ActionDispatch::IntegrationTest
     assert_select "meta[property='og:title'][content='About']"
     assert_select "link[rel='canonical'][href='http://example.com/about']"
   end
+
+  test "privacy page covers data handling basics" do
+    get privacy_path
+    assert_response :success
+    assert_match "Privacy", response.body
+    assert_match "never sell", response.body
+    assert_match "local storage", response.body
+    assert_match "grind@fdo.cr", response.body
+  end
+
+  test "privacy page includes seo metadata" do
+    get privacy_path
+    assert_response :success
+    assert_select "title", text: "Privacy"
+    assert_select "meta[property='og:title'][content='Privacy']"
+    assert_select "link[rel='canonical'][href='http://example.com/privacy']"
+  end
 end
