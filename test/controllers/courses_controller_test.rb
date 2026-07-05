@@ -96,4 +96,11 @@ class CoursesControllerTest < ActionDispatch::IntegrationTest
     follow_redirect!
     assert_select ".ui-banner-danger", text: /Rate limit reached: Try again in a minute and slow down a bit/
   end
+
+  test "index search is not rate limited for hotwire native requests" do
+    headers = { "HTTP_USER_AGENT" => "Grind/1.0 Hotwire Native iOS; Turbo Native iOS;" }
+
+    16.times { get courses_path, params: { q: "Pebble" }, headers: headers }
+    assert_response :success
+  end
 end

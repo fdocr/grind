@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class CoursesController < ApplicationController
-  rate_limit to: 15, within: 60.seconds, only: :index, if: -> { params[:q].present? }, with: -> {
+  rate_limit to: 15, within: 60.seconds, only: :index, if: -> { params[:q].present? && !hotwire_native_app? }, with: -> {
     redirect_to root_path, alert: "Rate limit reached: Try again in a minute and slow down a bit"
   }
 
