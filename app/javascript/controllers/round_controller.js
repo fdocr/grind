@@ -7,7 +7,7 @@ export default class extends Controller {
     "grossInput", "puttsInput", "grossPicker", "puttsPicker",
     "scorePanelHole", "scorePanelPar", "scorePanelHcp", "scorePanelYards", "holeMeta",
     "finishButton", "finishForm", "startedAt",
-    "scorecardBody", "holesList", "statsLastHole", "statsLastHoleLabel"
+    "scorecardBody", "holesList", "statsLastHole", "statsLastHoleLabel", "holeScoredIcon"
   ]
 
   static values = {
@@ -253,7 +253,7 @@ export default class extends Controller {
     grid.className = backHoles.length > 0 ? "grid grid-cols-2 gap-2" : "grid grid-cols-1 gap-2"
 
     const frontColumn = document.createElement("div")
-    frontColumn.className = "space-y-2"
+    frontColumn.className = "space-y-1.5"
 
     frontHoles.forEach((hole) => {
       frontColumn.appendChild(this.buildHoleButton(hole))
@@ -263,7 +263,7 @@ export default class extends Controller {
 
     if (backHoles.length > 0) {
       const backColumn = document.createElement("div")
-      backColumn.className = "space-y-2"
+      backColumn.className = "space-y-1.5"
       backHoles.forEach((hole) => {
         backColumn.appendChild(this.buildHoleButton(hole))
       })
@@ -276,21 +276,32 @@ export default class extends Controller {
   buildHoleButton(hole) {
     const button = document.createElement("button")
     button.type = "button"
-    button.className = "ui-btn-secondary ui-btn-sm w-full text-left !items-start !justify-start flex-col gap-0.5 h-auto py-2 px-2"
+    button.className = "ui-btn-secondary ui-btn-sm w-full text-left !justify-between flex-row items-center gap-2 h-auto py-1.5 px-2.5"
+    button.dataset.holeNumber = hole.number
+    button.setAttribute("aria-label", `Hole ${hole.number}`)
+
     const entry = this.holeEntry(hole.number)
-    const scoreLabel = entry.gross == null ? "Open" : `Score ${entry.gross}`
+    const scored = entry.gross != null && entry.gross !== ""
 
-    const title = document.createElement("span")
-    title.className = "font-medium text-sm"
-    title.textContent = `Hole ${hole.number}`
+    const label = document.createElement("span")
+    label.className = "flex items-center gap-1.5 min-w-0"
 
-    const meta = document.createElement("span")
-    meta.className = "text-xs text-muted-foreground"
-    const yards = hole.yardage ? ` · ${hole.yardage} ${this.unit()}` : ""
-    meta.textContent = `Par ${hole.par} · ${scoreLabel}${yards}`
+    const number = document.createElement("span")
+    number.className = "font-semibold text-sm tabular-nums"
+    number.textContent = hole.number
 
-    button.appendChild(title)
-    button.appendChild(meta)
+    const par = document.createElement("span")
+    par.className = "text-xs text-muted-foreground"
+    par.textContent = `Par ${hole.par}`
+
+    label.appendChild(number)
+    label.appendChild(par)
+    button.appendChild(label)
+
+    if (scored && this.hasHoleScoredIconTarget) {
+      button.appendChild(this.holeScoredIconTarget.content.cloneNode(true))
+    }
+
     button.addEventListener("click", () => {
       this.state.currentHole = hole.number
       this.closePanels()

@@ -43,7 +43,7 @@ class DistancesTest < ApplicationSystemTestCase
     # Hole 2 has no green geometry in the fixtures.
     click_button "Holes"
     assert_text "Select hole"
-    click_button "Hole 2"
+    find("[data-hole-number='2']").click
 
     click_button "Distances"
     assert_text "No map data for this hole yet"

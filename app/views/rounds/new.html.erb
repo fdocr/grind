@@ -210,6 +210,10 @@
     <% end %>
   </div>
 
+  <template data-round-target="holeScoredIcon">
+    <%= icon "check", class: "w-3.5 h-3.5 shrink-0 text-primary-600" %>
+  </template>
+
   <div class="fixed inset-x-4 bottom-4 z-50 hidden max-h-[80vh] overflow-y-auto overflow-x-hidden" data-round-target="scorecardPanel">
     <%= render "ui/card", padding: :sm, extra_class: "overflow-hidden" do %>
       <div class="flex items-center justify-between mb-4">

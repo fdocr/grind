@@ -70,11 +70,31 @@ class RoundFlowTest < ApplicationSystemTestCase
     assert_no_selector "[data-round-target='statsLastHole']", visible: :visible
   end
 
+  test "hole picker shows a check icon for posted scores" do
+    visit round_course_path(@course)
+    page.execute_script("window.localStorage.clear()")
+    visit round_course_path(@course)
+
+    click_button "Post Score"
+    assert_text "Post score"
+    click_button "Save"
+
+    click_button "Holes"
+
+    scored = find("[data-hole-number='1']")
+    unscored = find("[data-hole-number='2']")
+
+    assert scored.has_css?("svg")
+    assert_not unscored.has_css?("svg")
+    assert_no_text "Score 4"
+    assert_no_text "Open"
+  end
+
   test "posting on the last hole wraps to hole 1 when it has no score" do
     visit round_course_path(@course)
 
     click_button "Holes"
-    find("button", text: "Hole 18", match: :first).click
+    find("[data-hole-number='18']").click
 
     click_button "Post Score"
     click_button "Save"
@@ -90,7 +110,7 @@ class RoundFlowTest < ApplicationSystemTestCase
     assert_text "Hole 2"
 
     click_button "Holes"
-    find("button", text: "Hole 18", match: :first).click
+    find("[data-hole-number='18']").click
 
     click_button "Post Score"
     click_button "Save"
