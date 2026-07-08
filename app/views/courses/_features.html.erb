@@ -82,7 +82,7 @@
           </p>
           <p class="text-sm mt-2">
             <% if authenticated? %>
-              <%= link_to "My Rounds", my_rounds_path, class: "ui-btn-link" %>
+              <%= link_to "Dashboard", dashboard_path, class: "ui-btn-link" %>
             <% else %>
               <%= link_to "Create a free account", new_registration_path, class: "ui-btn-link" %>.
             <% end %>

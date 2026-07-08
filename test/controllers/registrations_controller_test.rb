@@ -59,4 +59,27 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
     get new_registration_path
     assert_redirected_to root_path
   end
+
+  test "destroy requires authentication" do
+    delete registration_path
+    assert_redirected_to new_session_path
+  end
+
+  test "destroy deletes account, sends notification, and signs out" do
+    sign_in_as(users(:player))
+    user = users(:player)
+    round = rounds(:player_round)
+
+    assert_emails 1 do
+      assert_difference "User.count", -1 do
+        delete registration_path
+      end
+    end
+
+    assert_redirected_to root_path
+    assert_equal "Your account has been permanently deleted.", flash[:notice]
+    assert_nil User.find_by(id: user.id)
+    assert_not cookies[:session_id].present?
+    assert_nil round.reload.user_id
+  end
 end

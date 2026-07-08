@@ -1,0 +1,49 @@
+<h3>Deleted User</h3>
+
+<p>The user with the following information has deleted their account:</p>
+
+<div style="margin: 20px 0; padding: 15px; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #f8fafc;">
+  <p><strong>Email:</strong> <%= @user.email %></p>
+  <p><strong>Role:</strong> <%= @user.admin? ? "Admin" : "User" %></p>
+  <p><strong>Registration date:</strong> <%= I18n.l(@user.created_at, format: :long) %></p>
+  <p><strong>Time as user:</strong> <%= time_ago_in_words(@user.created_at) %></p>
+</div>
+
+<h4>Rounds Played (<%= @rounds.size %>)</h4>
+
+<% if @rounds.any? %>
+  <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px;">
+    <thead>
+      <tr style="background-color: #f1f5f9; text-align: left;">
+        <th style="padding: 8px; border: 1px solid #e2e8f0;">Course</th>
+        <th style="padding: 8px; border: 1px solid #e2e8f0;">Date</th>
+        <th style="padding: 8px; border: 1px solid #e2e8f0;">To par</th>
+        <th style="padding: 8px; border: 1px solid #e2e8f0;">Putts</th>
+        <th style="padding: 8px; border: 1px solid #e2e8f0;">OOP</th>
+        <th style="padding: 8px; border: 1px solid #e2e8f0;">3 Putts</th>
+        <th style="padding: 8px; border: 1px solid #e2e8f0;">Botched</th>
+        <th style="padding: 8px; border: 1px solid #e2e8f0;">PW/9i</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @rounds.each do |round| %>
+        <tr>
+          <td style="padding: 8px; border: 1px solid #e2e8f0;"><%= round.course.name %></td>
+          <td style="padding: 8px; border: 1px solid #e2e8f0;"><%= round.finished_at ? I18n.l(round.finished_at.to_date, format: :long) : "—" %></td>
+          <td style="padding: 8px; border: 1px solid #e2e8f0;"><%= format_score_to_par(round.score_to_par) %></td>
+          <td style="padding: 8px; border: 1px solid #e2e8f0;"><%= round.total_putts %></td>
+          <td style="padding: 8px; border: 1px solid #e2e8f0;"><%= round.oop_tee_shots %></td>
+          <td style="padding: 8px; border: 1px solid #e2e8f0;"><%= round.three_putts %></td>
+          <td style="padding: 8px; border: 1px solid #e2e8f0;"><%= round.botched_up_downs %></td>
+          <td style="padding: 8px; border: 1px solid #e2e8f0;"><%= format_inside_pw_9i(round.inside_pw_9i) %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <p>No finished rounds.</p>
+<% end %>
+
+<p style="margin-top: 30px; color: #64748b; font-style: italic;">
+  This information is sent as a record before the user's account is permanently deleted. Finished rounds remain anonymized in Grind.
+</p>

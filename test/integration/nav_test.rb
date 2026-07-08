@@ -12,13 +12,14 @@ class NavTest < ActionDispatch::IntegrationTest
     get root_path
     assert_select "[data-testid=nav-menu-panel] a", text: "Sign in"
     assert_select "[data-testid=nav-menu-panel] a", text: "Sign up"
+    assert_select "[data-testid=nav-menu-panel] a", text: "Contribute"
     assert_select "[data-testid=nav-sign-out]", count: 0
   end
 
-  test "signed in menu shows my rounds and sign out" do
+  test "signed in menu shows dashboard and sign out" do
     sign_in_as(users(:player))
     get root_path
-    assert_select "[data-testid=nav-menu-panel] a", text: "My Rounds"
+    assert_select "[data-testid=nav-menu-panel] a", text: "Dashboard"
     assert_select "[data-testid=nav-sign-out]", text: "Sign out"
     assert_select "[data-testid=nav-menu-panel] a", text: "Sign in", count: 0
   end

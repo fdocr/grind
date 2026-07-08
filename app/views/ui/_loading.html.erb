@@ -1,0 +1,7 @@
+<%# locals: (label: "Loading…", compact: false) %>
+<div class="text-center <%= compact ? "py-6" : "py-12" %>">
+  <div class="text-muted-foreground/50 mb-3 inline-flex">
+    <%= render "shared/svg/spinner", class: "h-8 w-8 animate-spin" %>
+  </div>
+  <p class="text-sm text-muted-foreground"><%= label %></p>
+</div>

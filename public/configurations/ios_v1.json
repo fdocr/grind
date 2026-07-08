@@ -9,13 +9,6 @@
       }
     },
     {
-      "patterns": ["/contribute$"],
-      "properties": {
-        "context": "modal",
-        "pull_to_refresh_enabled": false
-      }
-    },
-    {
       "patterns": ["/round$"],
       "properties": {
         "context": "default",

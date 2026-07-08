@@ -10,14 +10,6 @@
       }
     },
     {
-      "patterns": ["/contribute$"],
-      "properties": {
-        "context": "modal",
-        "uri": "hotwire://fragment/web/modal/sheet",
-        "pull_to_refresh_enabled": false
-      }
-    },
-    {
       "patterns": ["/round$"],
       "properties": {
         "context": "default",
