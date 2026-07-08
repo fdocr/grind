@@ -1,0 +1,19 @@
+Deleted User
+
+The user with the following information has deleted their account:
+
+Email: <%= @user.email %>
+Role: <%= @user.admin? ? "Admin" : "User" %>
+Registration date: <%= I18n.l(@user.created_at, format: :long) %>
+Time as user: <%= time_ago_in_words(@user.created_at) %>
+
+Rounds Played (<%= @rounds.size %>)
+<% if @rounds.any? %>
+<% @rounds.each do |round| %>
+- <%= round.course.name %> | <%= round.finished_at ? I18n.l(round.finished_at.to_date, format: :long) : "—" %> | To par: <%= format_score_to_par(round.score_to_par) %> | Putts: <%= round.total_putts %> | OOP: <%= round.oop_tee_shots %> | 3 Putts: <%= round.three_putts %> | Botched: <%= round.botched_up_downs %> | PW/9i: <%= format_inside_pw_9i(round.inside_pw_9i) %>
+<% end %>
+<% else %>
+No finished rounds.
+<% end %>
+
+This information is sent as a record before the user's account is permanently deleted. Finished rounds remain anonymized in Grind.

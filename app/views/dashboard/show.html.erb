@@ -1,0 +1,77 @@
+<% content_for :seo_title, "Dashboard" %>
+
+<div class="space-y-6" data-controller="delete-account">
+  <header class="space-y-1">
+    <% unless hotwire_native_app? %>
+      <h1 class="text-xl font-bold text-foreground">Dashboard</h1>
+    <% end %>
+    <p class="text-sm text-muted-foreground">Manage your account and view your finished rounds.</p>
+  </header>
+
+  <%= render "ui/card", padding: :sm do %>
+    <div class="space-y-4">
+      <div class="space-y-1">
+        <h2 class="text-lg font-semibold">Account</h2>
+        <div class="flex items-center gap-2">
+          <p class="text-sm text-muted-foreground"><%= current_user.email %></p>
+          <% if current_user.admin? %>
+            <%= render "ui/badge", text: "Admin", tone: :info %>
+          <% end %>
+        </div>
+      </div>
+
+      <div class="flex flex-col sm:flex-row gap-2">
+        <%= link_to edit_account_password_path, class: "ui-btn-secondary ui-btn-sm" do %>
+          <%= render "shared/svg/lock", class: "w-4 h-4" %>
+          Change Password
+        <% end %>
+        <% if current_user.admin? %>
+          <%= link_to admin_users_path, class: "ui-btn-secondary ui-btn-sm" do %>
+            Admin
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <%= render "ui/card", padding: :sm do %>
+    <h2 class="text-lg font-semibold mb-4">Your Rounds</h2>
+    <%= turbo_frame_tag "dashboard-rounds", src: dashboard_rounds_path, loading: :lazy do %>
+      <%= render "ui/loading", label: "Loading rounds…" %>
+    <% end %>
+  <% end %>
+
+  <%= render "ui/card", tone: :danger, padding: :sm do %>
+    <h2 class="text-lg font-semibold text-danger-700 mb-2">Delete Account</h2>
+    <p class="text-sm text-muted-foreground mb-4">
+      This permanently deletes your account, sessions, and contributions.
+    </p>
+
+    <div class="flex justify-end">
+      <button type="button" class="ui-btn-danger ui-btn-md" data-action="delete-account#openConfirm">
+        <%= render "shared/svg/trash", class: "w-4 h-4" %>
+        Delete my account
+      </button>
+    </div>
+  <% end %>
+
+  <div class="hidden" data-delete-account-target="confirm">
+    <div class="fixed inset-0 z-40 bg-black/40" data-action="delete-account#cancel"></div>
+    <div class="fixed inset-x-4 bottom-4 z-50">
+      <%= render "ui/card", padding: :sm do %>
+        <h3 class="font-semibold mb-2">Delete your account?</h3>
+        <p class="text-sm text-muted-foreground mb-4">
+          This cannot be undone. Your account will be permanently deleted. Finished rounds will remain anonymized in Grind.
+        </p>
+        <div class="flex gap-2">
+          <button type="button" class="ui-btn-secondary ui-btn-md flex-1" data-action="delete-account#cancel">Cancel</button>
+          <button type="button" class="ui-btn-danger ui-btn-md flex-1" data-action="delete-account#confirmDelete">Delete account</button>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="hidden" data-delete-account-target="form">
+    <%= button_to "Delete account", registration_path, method: :delete, form: { data: { turbo: false } } %>
+  </div>
+</div>

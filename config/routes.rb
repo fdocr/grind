@@ -1,10 +1,15 @@
 Rails.application.routes.draw do
   resource :session
   resources :passwords, param: :token
-  resource :registration, only: %i[new create]
+  resource :registration, only: %i[new create destroy]
   get "sign_up", to: "registrations#new"
 
-  get "my-rounds", to: "my_rounds#index", as: :my_rounds
+  get "dashboard", to: "dashboard#show"
+  get "dashboard/rounds", to: "dashboard#rounds", as: :dashboard_rounds
+  get "my-rounds", to: redirect("/dashboard")
+
+  get "account/password", to: "account#edit_password", as: :edit_account_password
+  patch "account/password", to: "account#update_password", as: :update_account_password
 
   namespace :admin do
     resources :users, only: %i[index show update]

@@ -18,7 +18,7 @@
       <dl class="space-y-4">
         <div>
           <dt class="font-semibold text-foreground">Account data</dt>
-          <dd class="text-sm text-muted-foreground mt-1">If you sign up: your email address and a hashed password. Accounts are optional — you can track and finish rounds without one.</dd>
+          <dd class="text-sm text-muted-foreground mt-1">If you sign up your email address and a hashed password. Accounts are optional. You can track and finish rounds without one.</dd>
         </div>
         <div>
           <dt class="font-semibold text-foreground">Round data</dt>
@@ -84,17 +84,14 @@
   </section>
 
   <section class="space-y-3">
-    <h2 class="text-lg font-semibold">Security</h2>
-    <%= render "ui/card", padding: :sm do %>
-      <p class="text-sm text-muted-foreground">Traffic is encrypted over TLS. Passwords are stored using bcrypt and are never logged.</p>
-    <% end %>
-  </section>
-
-  <section class="space-y-3">
     <h2 class="text-lg font-semibold">Your rights</h2>
     <%= render "ui/card", padding: :sm do %>
+      <p class="text-sm text-muted-foreground mb-2">
+        You can easily delete your account directly from your dashboard anytime.
+      </p>
+
       <p class="text-sm text-muted-foreground">
-        You can ask for access to, correction of, or deletion of your personal data by emailing <%= mail_to "grind@fdo.cr", "grind@fdo.cr", class: "ui-btn-link" %>.
+        You can also ask for access to, correction of, or deletion of your personal data by emailing <%= mail_to "grind@fdo.cr", "grind@fdo.cr", class: "ui-btn-link" %>.
       </p>
     <% end %>
   </section>
@@ -103,7 +100,7 @@
     <h2 class="text-lg font-semibold">Self-hosted instances</h2>
     <%= render "ui/card", padding: :sm do %>
       <p class="text-sm text-muted-foreground">
-        Grind is <%= link_to "open source", "https://github.com/fdocr/grind", class: "ui-btn-link", target: "_blank", rel: "noopener" %> and can be self-hosted. If you run your own instance, you are the data controller. This policy applies to the service operated at <%= link_to "grind.fdo.cr", root_url, class: "ui-btn-link" %>.
+        Grind is <%= link_to "open source", "https://github.com/fdocr/grind", class: "ui-btn-link", target: "_blank", rel: "noopener" %> and can be self-hosted. If you run your own instance, you are the data controller. This policy applies to the service operated at <%= link_to "grind.fdo.cr", root_url, class: "ui-btn-link" %>
       </p>
     <% end %>
   </section>
@@ -119,7 +116,7 @@
     <p class="text-muted-foreground text-sm">
       Questions? Email <%= mail_to "grind@fdo.cr", "grind@fdo.cr", class: "ui-btn-link" %> or read more <%= link_to "about Grind", about_path, class: "ui-btn-link" %>.
     </p>
-    <div class="text-center">
+    <div class="text-center my-8">
       <%= link_to "Start tracking a round", root_path, class: "ui-btn-primary ui-btn-md" %>
     </div>
   </section>

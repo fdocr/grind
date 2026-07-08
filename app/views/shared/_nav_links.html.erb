@@ -3,7 +3,7 @@
 <%= link_to "Home", root_path, class: "ui-nav-link", role: "menuitem", data: { turbo: false, action: "click->nav-menu#close" } %>
 
 <% if authenticated? %>
-  <%= link_to "My Rounds", my_rounds_path, class: "ui-nav-link", role: "menuitem", data: { turbo: false, action: "click->nav-menu#close" } %>
+  <%= link_to "Dashboard", dashboard_path, class: "ui-nav-link", role: "menuitem", data: { turbo: false, action: "click->nav-menu#close" } %>
   <% if current_user.admin? %>
     <%= link_to "Users", admin_users_path, class: "ui-nav-link", role: "menuitem", data: { turbo: false, action: "click->nav-menu#close" } %>
     <%= link_to "Courses", admin_courses_path, class: "ui-nav-link", role: "menuitem", data: { turbo: false, action: "click->nav-menu#close" } %>

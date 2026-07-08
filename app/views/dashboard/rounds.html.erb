@@ -1,17 +1,8 @@
-<% content_for :seo_title, "My Rounds" %>
-
-<div class="space-y-6">
-  <header class="space-y-1">
-    <% unless hotwire_native_app? %>
-      <h1 class="text-xl font-bold text-foreground">My Rounds</h1>
-    <% end %>
-    <p class="text-sm text-muted-foreground">Your finished rounds, most recent first.</p>
-  </header>
-
+<%= turbo_frame_tag "dashboard-rounds" do %>
   <% if @rounds.any? %>
     <div class="space-y-3">
       <% @rounds.each do |round| %>
-        <%= link_to round_path(round.token), class: "block" do %>
+        <%= link_to round_path(round.token), class: "block", data: { turbo_frame: "_top" } do %>
           <%= render "ui/card", padding: :sm do %>
             <div class="flex items-center justify-between gap-3">
               <div class="min-w-0">
@@ -29,12 +20,12 @@
         <% end %>
       <% end %>
     </div>
+
+    <%= render "ui/pagination", pagy: @pagy, path: ->(params) { dashboard_rounds_path(params) }, frame: "dashboard-rounds" %>
   <% else %>
-    <%= render "ui/card" do %>
-      <%= render "ui/empty_state",
-            title: "No rounds yet",
-            message: "Finish a round while signed in and it will show up here.",
-            icon: "scorecard" %>
-    <% end %>
+    <%= render "ui/empty_state",
+          title: "No rounds yet",
+          message: "Finish a round while signed in and it will show up here.",
+          icon: "scorecard" %>
   <% end %>
-</div>
+<% end %>

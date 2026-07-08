@@ -1,13 +1,16 @@
-<%# locals: (pagy:, path: nil, params: {}) %>
+<%# locals: (pagy:, path: nil, params: {}, frame: nil) %>
 <% return unless pagy.pages > 1 %>
+<%
+  link_data = frame.present? ? { turbo_frame: frame } : { turbo: false }
+%>
 
 <div class="flex items-center justify-center gap-2 pt-4 border-t border-border">
   <% if pagy.previous %>
     <% prev_params = params.merge(page: pagy.previous) %>
     <% if path %>
-      <%= link_to "Previous", path.call(prev_params), class: "ui-btn-secondary ui-btn-sm", data: { turbo: false } %>
+      <%= link_to "Previous", path.call(prev_params), class: "ui-btn-secondary ui-btn-sm", data: link_data %>
     <% else %>
-      <%= link_to "Previous", url_for(prev_params), class: "ui-btn-secondary ui-btn-sm", data: { turbo: false } %>
+      <%= link_to "Previous", url_for(prev_params), class: "ui-btn-secondary ui-btn-sm", data: link_data %>
     <% end %>
   <% end %>
 
@@ -18,9 +21,9 @@
   <% if pagy.next %>
     <% next_params = params.merge(page: pagy.next) %>
     <% if path %>
-      <%= link_to "Next", path.call(next_params), class: "ui-btn-secondary ui-btn-sm", data: { turbo: false } %>
+      <%= link_to "Next", path.call(next_params), class: "ui-btn-secondary ui-btn-sm", data: link_data %>
     <% else %>
-      <%= link_to "Next", url_for(next_params), class: "ui-btn-secondary ui-btn-sm", data: { turbo: false } %>
+      <%= link_to "Next", url_for(next_params), class: "ui-btn-secondary ui-btn-sm", data: link_data %>
     <% end %>
   <% end %>
 </div>
