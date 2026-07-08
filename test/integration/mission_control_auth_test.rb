@@ -20,4 +20,13 @@ class MissionControlAuthTest < ActionDispatch::IntegrationTest
     get "/jobs"
     assert_response :success
   end
+
+  test "jobs layout includes the same turbo-tracked assets as the main app" do
+    sign_in_as(users(:admin))
+    get "/jobs"
+
+    assert_select "link[rel=stylesheet][data-turbo-track=reload][href*='tailwind']"
+    assert_select "link[rel=stylesheet][data-turbo-track=reload][href*='app']"
+    assert_select "link[rel=stylesheet][href*='mission_control/jobs/application']:not([data-turbo-track])"
+  end
 end

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Mission control - <%= page_title %></title>
+  <%= csrf_meta_tags %>
+  <%= csp_meta_tag %>
+
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <%# Keep turbo-tracked assets aligned with layouts/application.html.erb so Hotwire
+      Native back navigation can restore the previous page without pageInvalidated
+      spinning forever (see hotwire-native-ios#218). %>
+  <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
+  <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+  <%= stylesheet_link_tag "mission_control/jobs/bulma.min" %>
+  <%= stylesheet_link_tag "mission_control/jobs/application" %>
+  <%= javascript_importmap_tags "application", importmap: MissionControl::Jobs.importmap %>
+</head>
+<body>
+
+<section class="section">
+  <div class="container">
+    <%= render "layouts/mission_control/jobs/application_selection" %>
+    <%= render "layouts/mission_control/jobs/flash" %>
+    <%= render "layouts/mission_control/jobs/navigation" %>
+    <%= yield %>
+  </div>
+</section>
+
+</body>
+</html>
