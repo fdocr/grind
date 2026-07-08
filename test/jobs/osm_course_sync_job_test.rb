@@ -79,6 +79,37 @@ class OsmCourseSyncJobTest < ActiveSupport::TestCase
     assert_nil @course.osm_synced_at
   end
 
+  test "does not mark the course as errored when Overpass is rate limited" do
+    rate_limited = ->(**) { raise Grind::Osm::Overpass::RateLimitedError, "429" }
+
+    with_slot do
+      stub_method(Grind::Osm::Overpass, :fetch, rate_limited) do
+        assert_enqueued_with(job: OsmCourseSyncJob, args: [ @course.id ]) do
+          OsmCourseSyncJob.perform_now(@course.id)
+        end
+      end
+    end
+
+    assert_nil @course.reload.osm_status
+    assert_nil @course.osm_synced_at
+  end
+
+  test "marks the course as errored when rate limit retries are exhausted" do
+    rate_limited = ->(**) { raise Grind::Osm::Overpass::RateLimitedError, "429" }
+    job = OsmCourseSyncJob.new(@course.id)
+    job.exception_executions = { "[Grind::Osm::Overpass::RateLimitedError]" => 9 }
+
+    with_slot do
+      stub_method(Grind::Osm::Overpass, :fetch, rate_limited) do
+        job.perform_now
+      end
+    end
+
+    @course.reload
+    assert_equal "error", @course.osm_status
+    assert_nil @course.osm_synced_at
+  end
+
   test "reschedules itself without querying when no Overpass slot is free" do
     busy = Grind::Osm::Overpass::Status.new(slots_available: 0, wait_seconds: 12)
 

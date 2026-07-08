@@ -9,10 +9,16 @@ class OsmCourseSyncJob < ApplicationJob
   limits_concurrency key: "overpass", to: 1
   discard_on ActiveRecord::RecordNotFound
   retry_on Grind::Osm::Overpass::Error, wait: :polynomially_longer, attempts: 5
-  retry_on Grind::Osm::Overpass::RateLimitedError, wait: 1.minute, attempts: 10
+  retry_on Grind::Osm::Overpass::RateLimitedError, wait: 1.minute, attempts: 10 do |job, _error|
+    OsmCourseSyncJob.mark_overpass_error(job.arguments.first)
+  end
 
   # Extra seconds added when rescheduling past a busy Overpass slot.
   SLOT_BUFFER = 2
+
+  def self.mark_overpass_error(course_id)
+    Course.find_by(id: course_id)&.update_column(:osm_status, "error")
+  end
 
   def perform(course_id)
     course = Course.find(course_id)
@@ -22,9 +28,10 @@ class OsmCourseSyncJob < ApplicationJob
     overpass = Grind::Osm::Overpass.fetch(latitude: course.latitude, longitude: course.longitude)
     geometry = Grind::Osm::CourseGeometry.new(overpass, course).build
     apply(course, geometry)
+  rescue Grind::Osm::Overpass::RateLimitedError
+    raise
   rescue Grind::Osm::Overpass::Error
-    # Leave osm_synced_at untouched so the next full sync retries this course.
-    course.update_column(:osm_status, "error")
+    self.class.mark_overpass_error(course_id)
     raise
   end
 

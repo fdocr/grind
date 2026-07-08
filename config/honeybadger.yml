@@ -21,3 +21,5 @@ puma:
 solid_queue:
   insights:
     metrics: true
+
+active_job.attempt_threshold: 3
