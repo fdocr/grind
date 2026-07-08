@@ -12,6 +12,7 @@ class NavTest < ActionDispatch::IntegrationTest
     get root_path
     assert_select "[data-testid=nav-menu-panel] a", text: "Sign in"
     assert_select "[data-testid=nav-menu-panel] a", text: "Sign up"
+    assert_select "[data-testid=nav-menu-panel] a", text: "Contribute"
     assert_select "[data-testid=nav-sign-out]", count: 0
   end
 
