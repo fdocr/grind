@@ -100,6 +100,71 @@ class Admin::CoursesControllerTest < ActionDispatch::IntegrationTest
     assert_equal 5, hole.reload.par
   end
 
+  test "admin can add and remove tees" do
+    sign_in_as(users(:admin))
+
+    patch admin_course_path(@course), params: {
+      course: {
+        name: @course.name,
+        country: @course.country,
+        city: @course.city,
+        state_province: @course.state_province,
+        latitude: @course.latitude,
+        longitude: @course.longitude,
+        tees: {
+          "0" => {
+            name: "blue",
+            rating: "74.1",
+            slope: "142",
+            yardages: Array.new(18, 420)
+          },
+          "1" => {
+            name: "red",
+            rating: "69.2",
+            slope: "118",
+            yardages: Array.new(18, 310)
+          }
+        }
+      }
+    }
+
+    assert_redirected_to admin_course_path(@course)
+    @course.reload
+    assert_equal %w[blue red].sort, @course.tees.keys.sort
+    assert_equal "74.1", @course.tees["blue"]["rating"]
+    assert_equal 310, @course.tees["red"]["yardages"].first
+
+    patch admin_course_path(@course), params: {
+      course: {
+        name: @course.name,
+        country: @course.country,
+        city: @course.city,
+        state_province: @course.state_province,
+        tees: {
+          "0" => {
+            name: "red",
+            rating: "69.2",
+            slope: "118",
+            yardages: Array.new(18, 310)
+          }
+        }
+      }
+    }
+
+    assert_redirected_to admin_course_path(@course)
+    assert_equal [ "red" ], @course.reload.tees.keys
+  end
+
+  test "admin edit form shows add tee control" do
+    sign_in_as(users(:admin))
+    get edit_admin_course_path(@course)
+
+    assert_response :success
+    assert_select "[data-controller='tee-editor']"
+    assert_select "button[data-action='tee-editor#add']", text: /Add tee/
+    assert_select "input[name='course[tees][0][name]']"
+  end
+
   test "admin can queue osm sync" do
     sign_in_as(users(:admin))
 

@@ -59,10 +59,10 @@
                   <%= hole_fields.object.number %>
                 </td>
                 <td>
-                  <%= hole_fields.number_field :par, min: 3, max: 6, class: "ui-input w-16 text-center", required: true %>
+                  <%= hole_fields.number_field :par, min: 3, max: 6, class: "ui-input w-16 text-center mx-auto", required: true %>
                 </td>
                 <td>
-                  <%= hole_fields.number_field :handicap, min: 1, max: 18, class: "ui-input w-16 text-center", required: true %>
+                  <%= hole_fields.number_field :handicap, min: 1, max: 18, class: "ui-input w-16 text-center mx-auto", required: true %>
                 </td>
               </tr>
             <% end %>
@@ -72,54 +72,39 @@
     <% end %>
   </section>
 
-  <section>
-    <h2 class="text-lg font-semibold mb-3">Tees</h2>
-    <% course.tees.each do |tee_name, tee_data| %>
-      <%= render "ui/card", padding: :sm, extra_class: "space-y-4" do %>
-        <h3 class="font-semibold text-foreground"><%= tee_name.titleize %> tee</h3>
-        <div class="grid grid-cols-2 gap-4">
-          <div class="space-y-2">
-            <label class="ui-label" for="course_tees_<%= tee_name %>_rating">Rating</label>
-            <input type="text"
-                   name="course[tees][<%= tee_name %>][rating]"
-                   id="course_tees_<%= tee_name %>_rating"
-                   value="<%= tee_data["rating"] %>"
-                   class="ui-input">
-          </div>
-          <div class="space-y-2">
-            <label class="ui-label" for="course_tees_<%= tee_name %>_slope">Slope</label>
-            <input type="text"
-                   name="course[tees][<%= tee_name %>][slope]"
-                   id="course_tees_<%= tee_name %>_slope"
-                   value="<%= tee_data["slope"] %>"
-                   class="ui-input">
-          </div>
-        </div>
+  <section class="space-y-3" data-controller="tee-editor">
+    <div class="flex items-center justify-between gap-3">
+      <h2 class="text-lg font-semibold">Tees</h2>
+      <button type="button" class="ui-btn-secondary ui-btn-sm" data-action="tee-editor#add">
+        <%= icon "plus", class: "w-4 h-4" %>
+        Add tee
+      </button>
+    </div>
 
-        <% unit = course.metric? ? "m" : "yds" %>
-        <div class="ui-scorecard-scroll">
-          <table class="ui-scorecard-table">
-            <tr>
-              <th>Hole</th>
-              <% (1..18).each do |number| %><th><%= number %></th><% end %>
-            </tr>
-            <tr>
-              <td><%= unit.titleize %></td>
-              <% (1..18).each do |number| %>
-                <% yards = Array(tee_data["yardages"])[number - 1].to_i %>
-                <td>
-                  <input type="number"
-                         name="course[tees][<%= tee_name %>][yardages][]"
-                         value="<%= yards.positive? ? yards : nil %>"
-                         min="0"
-                         class="ui-input w-14 text-center px-1">
-                </td>
-              <% end %>
-            </tr>
-          </table>
-        </div>
+    <datalist id="tee-name-suggestions">
+      <% %w[black blue white gold red green silver championship forward].each do |name| %>
+        <option value="<%= name %>"></option>
       <% end %>
-    <% end %>
+    </datalist>
+
+    <% unit = course.metric? ? "m" : "yds" %>
+    <div class="space-y-4" data-tee-editor-target="list">
+      <% course.tees.each_with_index do |(tee_name, tee_data), index| %>
+        <%= render "admin/courses/tee_fields",
+              tee_name: tee_name,
+              tee_data: tee_data,
+              index: index,
+              unit: unit %>
+      <% end %>
+    </div>
+
+    <template data-tee-editor-target="template">
+      <%= render "admin/courses/tee_fields",
+            tee_name: "",
+            tee_data: { "rating" => "", "slope" => "", "yardages" => Array.new(18, 0) },
+            index: "NEW_INDEX",
+            unit: unit %>
+    </template>
   </section>
 
   <div class="flex gap-2">
