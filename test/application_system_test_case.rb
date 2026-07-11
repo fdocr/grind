@@ -17,10 +17,11 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     Capybara.reset_sessions!
   end
 
-  # System tests share cookies with integration-style posts via the app host.
+  # Opens the course preview and starts a round (Turnstile is skipped in test).
   def start_course_round!(course, tee: nil)
     visit course_path(course)
-    click_button "Start round"
+    assert_text course.name
+    click_on "Start round"
     assert_text "Round stats"
   end
 end

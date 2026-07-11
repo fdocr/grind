@@ -1,110 +1,21 @@
-<% unit = @course.metric? ? "m" : "yds" %>
-<% front = @holes.select { |hole| hole.number <= 9 } %>
-<% back = @holes.select { |hole| hole.number > 9 } %>
+<%# Sheet overlay only when loaded into the homepage Turbo Frame.
+    Hotwire Native and full-page visits get a normal document preview. %>
+<% use_sheet = !hotwire_native_app? && request.headers["Turbo-Frame"].present? %>
 
-<%= turbo_frame_tag "course_modal" do %>
-  <div data-controller="modal tee-select"
-       data-tee-select-tees-value="<%= @course.tees.to_json %>"
-       data-tee-select-active-value="<%= @active_tee %>">
-    <div class="fixed inset-0 z-40 bg-black/40" data-action="click->modal#close"></div>
-
-    <div class="fixed inset-x-4 bottom-4 z-50 max-h-[85vh] overflow-y-auto">
-      <%= render "ui/card", padding: :sm, extra_class: "overflow-hidden" do %>
-        <div class="flex items-start justify-between gap-3 mb-4">
-          <div class="min-w-0 flex-1">
-            <h3 class="font-semibold text-foreground truncate"><%= @course.name %></h3>
-            <p class="text-sm text-muted-foreground"><%= @course.location_label %></p>
-            <%= render "courses/distances_availability", course: @course, labeled: true %>
-          </div>
-          <button type="button" class="ui-btn-ghost ui-btn-sm shrink-0" data-action="modal#close">Close</button>
-        </div>
-
-        <% if @active_tee.present? %>
-          <div class="space-y-3 mb-4">
-            <% if @tee_names.size > 1 %>
-              <div>
-                <p class="ui-label mb-2">Select tee</p>
-                <div class="ui-segmented" role="group">
-                  <% @tee_names.each do |name| %>
-                    <button type="button"
-                            class="ui-segmented-option"
-                            data-tee-select-target="option"
-                            data-value="<%= name %>"
-                            data-state="<%= name == @active_tee ? "active" : "inactive" %>"
-                            data-action="tee-select#select">
-                      <%= name.titleize %>
-                    </button>
-                  <% end %>
-                </div>
-              </div>
-            <% else %>
-              <span class="ui-badge ui-badge-primary"><%= @active_tee.titleize %> tee</span>
-            <% end %>
-
-            <div class="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
-              <span>Rating <span class="font-medium text-foreground" data-tee-select-target="rating">—</span></span>
-              <span>Slope <span class="font-medium text-foreground" data-tee-select-target="slope">—</span></span>
-              <span>Par <span class="font-medium text-foreground"><%= @course.total_par %></span></span>
-            </div>
-          </div>
-        <% end %>
-
-        <div class="min-w-0 space-y-4">
-          <% [ [ "Front nine", front, 0 ], [ "Back nine", back, 9 ] ].each do |label, nine, offset| %>
-            <% next if nine.empty? %>
-            <div>
-              <h4 class="text-sm font-semibold mb-2 text-muted-foreground"><%= label %></h4>
-              <div class="ui-scorecard-scroll">
-                <table class="ui-scorecard-table">
-                  <tr>
-                    <th>Hole</th>
-                    <% nine.each do |hole| %><th><%= hole.number %></th><% end %>
-                    <th>Total</th>
-                  </tr>
-                  <tr>
-                    <td>Par</td>
-                    <% nine.each do |hole| %><td><%= hole.par %></td><% end %>
-                    <td><%= nine.sum(&:par) %></td>
-                  </tr>
-                  <tr>
-                    <td>Hcp</td>
-                    <% nine.each do |hole| %><td><%= hole.handicap %></td><% end %>
-                    <td></td>
-                  </tr>
-                  <tr>
-                    <td><%= unit.titleize %></td>
-                    <% nine.each do |hole| %>
-                      <td data-tee-select-target="yardage" data-hole="<%= hole.number %>">—</td>
-                    <% end %>
-                    <td data-tee-select-target="<%= offset.zero? ? "totalOut" : "totalIn" %>">—</td>
-                  </tr>
-                </table>
-              </div>
-            </div>
-          <% end %>
-        </div>
-
-        <div class="flex flex-col gap-2 mt-4 pt-4 border-t border-border">
-          <%= render "shared/contribute_link", course: @course, style: :link %>
-        </div>
-
-        <div class="flex flex-col gap-3 mt-4">
-          <%= form_with url: unlock_round_course_path(@course),
-                method: :post,
-                class: "space-y-3",
-                data: { turbo_frame: "_top" } do %>
-            <input type="hidden"
-                   name="tee"
-                   value="<%= @active_tee %>"
-                   data-tee-select-target="teeInput">
-            <%= render "shared/turnstile" %>
-            <div class="flex gap-2">
-              <button type="button" class="ui-btn-secondary ui-btn-md flex-1" data-action="modal#close">Cancel</button>
-              <%= submit_tag "Start round", class: "ui-btn-primary ui-btn-md flex-1 cursor-pointer" %>
-            </div>
-          <% end %>
-        </div>
-      <% end %>
-    </div>
-  </div>
+<% if use_sheet %>
+  <%= turbo_frame_tag "course_modal" do %>
+    <%= render "courses/preview",
+          course: @course,
+          holes: @holes,
+          tee_names: @tee_names,
+          active_tee: @active_tee,
+          sheet: true %>
+  <% end %>
+<% else %>
+  <%= render "courses/preview",
+        course: @course,
+        holes: @holes,
+        tee_names: @tee_names,
+        active_tee: @active_tee,
+        sheet: false %>
 <% end %>
