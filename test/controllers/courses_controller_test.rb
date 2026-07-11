@@ -31,6 +31,18 @@ class CoursesControllerTest < ActionDispatch::IntegrationTest
     assert_no_match courses(:one).name, response.body
   end
 
+  test "search results show distances availability icons" do
+    get courses_path, params: { q: "Cariari" }
+    assert_response :success
+    assert_match courses(:one).name, response.body
+    assert_select "[aria-label='Rangefinder data available']"
+
+    get courses_path, params: { q: "Pebble" }
+    assert_response :success
+    assert_match courses(:two).name, response.body
+    assert_select "[aria-label='Rangefinder data unavailable']"
+  end
+
   test "search returns at most ten courses" do
     11.times do |index|
       Course.create!(
@@ -56,6 +68,7 @@ class CoursesControllerTest < ActionDispatch::IntegrationTest
     assert_select "turbo-frame#course_modal"
     assert_match "data-tee-select-active-value=\"white\"", response.body
     assert_match "White tee", response.body
+    assert_match "Rangefinder data available", response.body
     assert_select "a[href*='round'][data-turbo-frame='_top'][data-action='click->modal#close']"
   end
 

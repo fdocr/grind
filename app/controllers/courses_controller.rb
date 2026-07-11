@@ -11,10 +11,10 @@ class CoursesController < ApplicationController
     if @query.present?
       matches = Course.search(@query)
       @more_results = matches.count > Course::RESULT_LIMIT
-      @courses = matches.order(:name).limit(Course::RESULT_LIMIT)
+      @courses = matches.includes(:holes).order(:name).limit(Course::RESULT_LIMIT)
       @featured = false
     else
-      @courses = Course.featured
+      @courses = Course.featured.includes(:holes)
       @more_results = false
       @featured = true
     end

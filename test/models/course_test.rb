@@ -40,4 +40,13 @@ class CourseTest < ActiveSupport::TestCase
     assert featured.size <= Course::RESULT_LIMIT
     assert featured.all? { |course| course.is_a?(Course) }
   end
+
+  test "greens_mapped reflects hole green geometry" do
+    course = courses(:one)
+    assert course.greens_mapped?
+
+    course.holes.update_all(green_geometry: nil)
+    course.holes.reset
+    assert_not course.greens_mapped?
+  end
 end

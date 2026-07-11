@@ -66,6 +66,10 @@ class Course < ApplicationRecord
     holes.count(&:green?)
   end
 
+  def greens_mapped?
+    holes.any?(&:green?)
+  end
+
   def osm_status_label
     case osm_status
     when "ok" then "Synced"
