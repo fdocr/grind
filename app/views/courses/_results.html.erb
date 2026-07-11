@@ -1,26 +1,55 @@
 <% if courses.any? %>
-  <% if featured %>
-    <p class="text-sm text-muted-foreground mt-4">Recently played courses</p>
-  <% elsif more_results %>
-    <p class="text-sm text-muted-foreground mt-4">Showing 10 results. Refine your search to find a specific course.</p>
+  <% if mode == :yours %>
+    <p class="text-sm text-muted-foreground mt-4">Your courses</p>
+  <% elsif mode == :near %>
+    <p class="text-sm text-muted-foreground mt-4">Near you</p>
+  <% elsif mode == :search && more_results %>
+    <p class="text-sm text-muted-foreground mt-4">Showing <%= Course::RESULT_LIMIT %> results. Refine your search to find a specific course.</p>
   <% end %>
 
   <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
     <% courses.each do |course| %>
       <%= link_to course_path(course), class: "block", data: { turbo_frame: "course_modal" } do %>
         <%= render "ui/card", padding: :sm, extra_class: "hover:border-primary-300 transition-colors" do %>
-          <h3 class="font-semibold text-foreground"><%= course.name %></h3>
+          <div class="flex items-start justify-between gap-2">
+            <h3 class="font-semibold text-foreground"><%= course.name %></h3>
+            <%= render "courses/distances_availability", course: course %>
+          </div>
           <p class="text-sm text-muted-foreground mt-1"><%= course.location_label %></p>
           <p class="text-xs text-muted-foreground mt-2">Par <%= course.total_par %></p>
         <% end %>
       <% end %>
     <% end %>
   </div>
-<% elsif query.present? %>
+<% elsif mode == :search %>
   <div class="mt-4">
     <%= render "ui/empty_state",
           title: "No courses found",
           message: "Try a different search term.",
+          icon: "search",
+          compact: true %>
+  </div>
+<% elsif mode == :near %>
+  <div class="mt-4">
+    <%= render "ui/empty_state",
+          title: "No courses nearby",
+          message: "We couldn't find mapped courses near your location. Try searching by name.",
+          icon: "location",
+          compact: true %>
+  </div>
+<% elsif mode == :yours %>
+  <div class="mt-4">
+    <%= render "ui/empty_state",
+          title: "No rounds yet",
+          message: "Search by name or find courses near you to start tracking.",
+          icon: "flag",
+          compact: true %>
+  </div>
+<% else %>
+  <div class="mt-4">
+    <%= render "ui/empty_state",
+          title: "Find a course to play",
+          message: "Search by name, city, or country — or find courses near you.",
           icon: "search",
           compact: true %>
   </div>

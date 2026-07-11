@@ -11,9 +11,10 @@
     <div class="fixed inset-x-4 bottom-4 z-50 max-h-[85vh] overflow-y-auto">
       <%= render "ui/card", padding: :sm, extra_class: "overflow-hidden" do %>
         <div class="flex items-start justify-between gap-3 mb-4">
-          <div class="min-w-0">
+          <div class="min-w-0 flex-1">
             <h3 class="font-semibold text-foreground truncate"><%= @course.name %></h3>
             <p class="text-sm text-muted-foreground"><%= @course.location_label %></p>
+            <%= render "courses/distances_availability", course: @course, labeled: true %>
           </div>
           <button type="button" class="ui-btn-ghost ui-btn-sm shrink-0" data-action="modal#close">Close</button>
         </div>
@@ -87,12 +88,21 @@
           <%= render "shared/contribute_link", course: @course, style: :link %>
         </div>
 
-        <div class="flex gap-2 mt-4">
-          <button type="button" class="ui-btn-secondary ui-btn-md flex-1" data-action="modal#close">Cancel</button>
-          <%= link_to "Start round",
-                round_course_path(@course, tee: @active_tee),
-                class: "ui-btn-primary ui-btn-md flex-1",
-                data: { turbo_frame: "_top", tee_select_target: "startLink", action: "click->modal#close" } %>
+        <div class="flex flex-col gap-3 mt-4">
+          <%= form_with url: unlock_round_course_path(@course),
+                method: :post,
+                class: "space-y-3",
+                data: { turbo_frame: "_top" } do %>
+            <input type="hidden"
+                   name="tee"
+                   value="<%= @active_tee %>"
+                   data-tee-select-target="teeInput">
+            <%= render "shared/turnstile" %>
+            <div class="flex gap-2">
+              <button type="button" class="ui-btn-secondary ui-btn-md flex-1" data-action="modal#close">Cancel</button>
+              <%= submit_tag "Start round", class: "ui-btn-primary ui-btn-md flex-1 cursor-pointer" %>
+            </div>
+          <% end %>
         </div>
       <% end %>
     </div>

@@ -44,7 +44,7 @@
     <h2 class="text-lg font-semibold mb-3">Find your golf course</h2>
     <%= turbo_frame_tag "course_results" do %>
       <%= render "search_form", query: @query %>
-      <%= render "results", courses: @courses, query: @query, featured: @featured, more_results: @more_results %>
+      <%= render "results", courses: @courses, query: @query, mode: @mode, more_results: @more_results %>
     <% end %>
   </section>
 

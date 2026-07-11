@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["option", "yardage", "rating", "slope", "totalOut", "totalIn", "startLink"]
+  static targets = ["option", "yardage", "rating", "slope", "totalOut", "totalIn", "startLink", "teeInput"]
   static values = { tees: Object, active: String }
 
   connect() {
@@ -42,6 +42,8 @@ export default class extends Controller {
       url.searchParams.set("tee", this.activeValue)
       this.startLinkTarget.href = url.pathname + url.search
     }
+
+    if (this.hasTeeInputTarget) this.teeInputTarget.value = this.activeValue
   }
 
   format(value) {

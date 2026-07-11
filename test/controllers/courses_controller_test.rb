@@ -3,11 +3,24 @@ require "test_helper"
 class CoursesControllerTest < ActionDispatch::IntegrationTest
   setup { Rails.cache.clear }
 
-  test "index lists featured courses without a search query" do
+  test "guest index shows empty state and near me button" do
     get root_path
     assert_response :success
     assert_match "Grind", response.body
+    assert_match "Find a course to play", response.body
+    assert_match "Find courses near me", response.body
+    assert_select "[data-controller='near-courses']"
+    assert_no_match "Recently played courses", response.body
+  end
+
+  test "signed in index shows the users courses" do
+    sign_in_as(users(:player))
+
+    get root_path
+    assert_response :success
+    assert_match "Your courses", response.body
     assert_match courses(:one).name, response.body
+    assert_no_match courses(:two).name, response.body
   end
 
   test "index includes features section" do
@@ -31,7 +44,35 @@ class CoursesControllerTest < ActionDispatch::IntegrationTest
     assert_no_match courses(:one).name, response.body
   end
 
-  test "search returns at most ten courses" do
+  test "search results show distances availability icons" do
+    get courses_path, params: { q: "Cariari" }
+    assert_response :success
+    assert_match courses(:one).name, response.body
+    assert_select "[aria-label='Rangefinder data available']"
+
+    get courses_path, params: { q: "Pebble" }
+    assert_response :success
+    assert_match courses(:two).name, response.body
+    assert_select "[aria-label='Rangefinder data unavailable']"
+  end
+
+  test "near me returns nearby courses" do
+    course = courses(:one)
+
+    get courses_path, params: { lat: course.latitude, lng: course.longitude }
+    assert_response :success
+    assert_match "Near you", response.body
+    assert_match course.name, response.body
+    assert_no_match courses(:two).name, response.body
+  end
+
+  test "near me with invalid coordinates shows empty nearby state" do
+    get courses_path, params: { lat: "nope", lng: "nope" }
+    assert_response :success
+    assert_match "No courses nearby", response.body
+  end
+
+  test "search returns at most the result limit" do
     11.times do |index|
       Course.create!(
         name: "Searchable Club #{index}",
@@ -56,7 +97,28 @@ class CoursesControllerTest < ActionDispatch::IntegrationTest
     assert_select "turbo-frame#course_modal"
     assert_match "data-tee-select-active-value=\"white\"", response.body
     assert_match "White tee", response.body
-    assert_select "a[href*='round'][data-turbo-frame='_top'][data-action='click->modal#close']"
+    assert_match "Rangefinder data available", response.body
+    assert_select "form[action=?]", unlock_round_course_path(course)
+    assert_select "input[type=submit][value='Start round']"
+  end
+
+  test "integer course ids are not found on public routes" do
+    course = courses(:one)
+
+    get "/courses/#{course.id}"
+    assert_response :not_found
+  end
+
+  test "course preview is rate limited with a visible modal banner" do
+    course = courses(:one)
+
+    60.times { get course_path(course), headers: { "Turbo-Frame" => "course_modal" } }
+    assert_response :success
+
+    get course_path(course), headers: { "Turbo-Frame" => "course_modal" }
+    assert_response :too_many_requests
+    assert_match "Too many course previews", response.body
+    assert_match "Rate limit reached: Try again in a minute and slow down a bit", response.body
   end
 
   test "show renders a segmented control for multi-tee courses" do
@@ -79,12 +141,6 @@ class CoursesControllerTest < ActionDispatch::IntegrationTest
     get course_path(course, tee: "purple")
     assert_response :success
     assert_match "White tee", response.body
-  end
-
-  test "blank search shows recently played label when rounds exist" do
-    get root_path
-    assert_response :success
-    assert_match "Recently played courses", response.body
   end
 
   test "index is rate limited after fifteen requests in a minute" do

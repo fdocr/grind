@@ -6,7 +6,7 @@ class DistancesTest < ApplicationSystemTestCase
   end
 
   test "shows live green distances and toggles units" do
-    visit round_course_path(@course)
+    start_course_round!(@course)
     page.execute_script("window.localStorage.clear()")
     visit round_course_path(@course)
     assert_text "Round stats"
@@ -26,7 +26,7 @@ class DistancesTest < ApplicationSystemTestCase
   end
 
   test "switches between numbers and map views" do
-    visit round_course_path(@course)
+    start_course_round!(@course)
     assert_text "Round stats"
 
     stub_geolocation(latitude: 9.981234, longitude: -84.156789, accuracy: 5)
@@ -65,7 +65,7 @@ class DistancesTest < ApplicationSystemTestCase
   end
 
   test "shows a too far message when away from the green" do
-    visit round_course_path(@course)
+    start_course_round!(@course)
     assert_text "Round stats"
 
     stub_geolocation(latitude: 9.5, longitude: -84.0, accuracy: 5)
@@ -77,7 +77,7 @@ class DistancesTest < ApplicationSystemTestCase
   end
 
   test "shows an empty state for a hole without map data" do
-    visit round_course_path(@course)
+    start_course_round!(@course)
     assert_text "Round stats"
 
     # Hole 2 has no green geometry in the fixtures.

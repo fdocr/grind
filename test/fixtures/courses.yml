@@ -1,5 +1,6 @@
 one:
   name: Cariari Country Club
+  public_id: cariaricoursepublicid0001
   country: CR
   address: ""
   city: Cariari
@@ -18,6 +19,7 @@ one:
 
 two:
   name: Pebble Beach
+  public_id: pebblebeachpublicid000002
   country: US
   address: ""
   city: Pebble Beach

@@ -12,32 +12,62 @@ class CourseTest < ActiveSupport::TestCase
     assert_equal course.holes.sum(:par), course.total_par
   end
 
-  test "featured returns courses ordered by most recent finished round" do
+  test "near returns closer courses first" do
+    nearby = courses(:one)
+    far = courses(:two)
+
+    results = Course.near(nearby.latitude, nearby.longitude, limit: 10)
+
+    assert_equal nearby, results.first
+    assert_includes results, nearby
+    assert_not_includes results, far
+  end
+
+  test "near returns none for invalid coordinates" do
+    assert_empty Course.near(999, 0)
+    assert_empty Course.near(0, 999)
+  end
+
+  test "played_by returns the users finished courses most recent first" do
+    player = users(:player)
     older = courses(:one)
     newer = courses(:two)
 
     Round.create!(
       course: older,
-      token: "olderround",
+      user: player,
+      token: "olderplayerround",
       hole_scores: rounds(:finished).hole_scores,
       finished_at: 2.days.ago
     )
     Round.create!(
       course: newer,
-      token: "newerround",
+      user: player,
+      token: "newerplayerround",
       hole_scores: rounds(:finished).hole_scores,
       finished_at: 1.hour.ago
     )
 
-    assert_equal [ newer, older ], Course.featured(10).first(2)
+    assert_equal [ newer, older ], Course.played_by(player, limit: 10).to_a
   end
 
-  test "featured returns random courses when no finished rounds exist" do
-    Round.update_all(finished_at: nil)
-    featured = Course.featured(10)
+  test "played_by ignores other users rounds" do
+    assert_includes Course.played_by(users(:player)), courses(:one)
+    assert_empty Course.played_by(users(:admin))
+  end
 
-    assert featured.any?
-    assert featured.size <= Course::RESULT_LIMIT
-    assert featured.all? { |course| course.is_a?(Course) }
+  test "greens_mapped reflects hole green geometry" do
+    course = courses(:one)
+    assert course.greens_mapped?
+
+    course.holes.update_all(green_geometry: nil)
+    course.holes.reset
+    assert_not course.greens_mapped?
+  end
+
+  test "to_param uses public_id" do
+    course = courses(:one)
+    assert_equal course.public_id, course.to_param
+    assert_equal course, Course.find_by_param!(course.public_id)
   end
 end

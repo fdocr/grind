@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_05_000000) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_11_060000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -72,6 +72,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_05_000000) do
     t.string "osm_status"
     t.datetime "osm_synced_at"
     t.string "phone"
+    t.string "public_id", null: false
     t.string "state_province"
     t.json "tees", default: {}, null: false
     t.datetime "updated_at", null: false
@@ -81,6 +82,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_05_000000) do
     t.index ["country"], name: "index_courses_on_country"
     t.index ["name", "city", "state_province"], name: "index_courses_on_identity", unique: true
     t.index ["name"], name: "index_courses_on_name"
+    t.index ["public_id"], name: "index_courses_on_public_id", unique: true
   end
 
   create_table "deliveries", force: :cascade do |t|

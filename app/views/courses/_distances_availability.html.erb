@@ -1,0 +1,17 @@
+<%# locals: (course:, size_class: "w-6 h-6", labeled: false) %>
+<%
+  available = course.greens_mapped?
+  label = available ? "Rangefinder data available" : "Rangefinder data unavailable"
+  tone_class = available ? "text-primary-700" : "text-muted-foreground"
+  icon_name = available ? "location" : "location_off"
+%>
+<% if labeled %>
+  <p class="mt-2 flex items-center gap-1.5 text-sm <%= tone_class %>">
+    <%= icon icon_name, class: size_class %>
+    <span><%= label %></span>
+  </p>
+<% else %>
+  <span class="shrink-0 <%= tone_class %>" title="<%= label %>" aria-label="<%= label %>">
+    <%= icon icon_name, class: size_class %>
+  </span>
+<% end %>
