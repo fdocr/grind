@@ -1,6 +1,18 @@
-<%= render "ui/search_field",
-      url: courses_path,
-      value: query,
-      placeholder: "Search by name, city, or country",
-      frame: "course_results",
-      submit_text: "Search" %>
+<div class="space-y-3" data-controller="near-courses" data-near-courses-url-value="<%= courses_path %>">
+  <%= render "ui/search_field",
+        url: courses_path,
+        value: query,
+        placeholder: "Search by name, city, or country",
+        frame: "course_results",
+        submit_text: "Search" %>
+
+  <button type="button"
+          class="ui-btn-secondary ui-btn-md w-full"
+          data-near-courses-target="button"
+          data-action="near-courses#find">
+    <%= icon "location", class: "w-5 h-5" %>
+    Find courses near me
+  </button>
+
+  <p class="hidden text-sm text-muted-foreground text-center" data-near-courses-target="status" role="status"></p>
+</div>

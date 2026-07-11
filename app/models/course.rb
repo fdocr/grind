@@ -2,6 +2,8 @@
 
 class Course < ApplicationRecord
   RESULT_LIMIT = 6
+  NEAR_RADIUS_KM = 80
+  EARTH_RADIUS_M = 6_371_000
 
   has_many :holes, -> { order(:number) }, dependent: :destroy, inverse_of: :course
   has_many :rounds, dependent: :destroy
@@ -19,20 +21,54 @@ class Course < ApplicationRecord
     where("name LIKE :term OR city LIKE :term OR country LIKE :term OR state_province LIKE :term", term: term)
   }
 
-  def self.featured(limit = RESULT_LIMIT)
-    recent_ids = joins(:rounds)
+  scope :with_coordinates, -> { where.not(latitude: nil).where.not(longitude: nil) }
+
+  # Courses nearest to lat/lng within a bounding box, ordered by great-circle distance.
+  def self.near(lat, lng, limit: RESULT_LIMIT, radius_km: NEAR_RADIUS_KM)
+    lat = lat.to_f
+    lng = lng.to_f
+    return none unless lat.between?(-90, 90) && lng.between?(-180, 180)
+
+    delta_lat = radius_km / 111.0
+    cos_lat = Math.cos(lat * Math::PI / 180).abs
+    delta_lng = radius_km / (111.0 * [ cos_lat, 0.01 ].max)
+
+    candidates = with_coordinates
+      .where(latitude: (lat - delta_lat)..(lat + delta_lat))
+      .where(longitude: (lng - delta_lng)..(lng + delta_lng))
+      .to_a
+
+    ids = candidates
+      .sort_by { |course| haversine_meters(lat, lng, course.latitude.to_f, course.longitude.to_f) }
+      .first(limit)
+      .map(&:id)
+
+    where(id: ids).in_order_of(:id, ids)
+  end
+
+  # Distinct courses from a user's finished rounds, most recently played first.
+  def self.played_by(user, limit: RESULT_LIMIT)
+    return none unless user
+
+    ids = joins(:rounds)
       .merge(Round.finished)
+      .where(rounds: { user_id: user.id })
       .group("courses.id")
       .order(Arel.sql("MAX(rounds.finished_at) DESC"))
       .limit(limit)
       .pluck("courses.id")
 
-    if recent_ids.any?
-      where(id: recent_ids).in_order_of(:id, recent_ids)
-    else
-      order(Arel.sql("RANDOM()")).limit(limit)
-    end
+    where(id: ids).in_order_of(:id, ids)
   end
+
+  def self.haversine_meters(lat1, lng1, lat2, lng2)
+    d_lat = (lat2 - lat1) * Math::PI / 180
+    d_lng = (lng2 - lng1) * Math::PI / 180
+    a = Math.sin(d_lat / 2)**2 +
+        Math.cos(lat1 * Math::PI / 180) * Math.cos(lat2 * Math::PI / 180) * Math.sin(d_lng / 2)**2
+    2 * EARTH_RADIUS_M * Math.asin(Math.sqrt(a))
+  end
+  private_class_method :haversine_meters
 
   def out_par
     holes.where(number: 1..9).sum(:par)
