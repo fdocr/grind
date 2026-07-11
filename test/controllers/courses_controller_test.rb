@@ -92,7 +92,7 @@ class CoursesControllerTest < ActionDispatch::IntegrationTest
     course = courses(:one)
     build_eighteen_holes!(course)
 
-    get course_path(course)
+    get course_path(course), headers: { "Turbo-Frame" => "course_modal" }
     assert_response :success
     assert_select "turbo-frame#course_modal"
     assert_match "data-tee-select-active-value=\"white\"", response.body
@@ -100,6 +100,27 @@ class CoursesControllerTest < ActionDispatch::IntegrationTest
     assert_match "Rangefinder data available", response.body
     assert_select "form[action=?]", unlock_round_course_path(course)
     assert_select "input[type=submit][value='Start round']"
+  end
+
+  test "full page course preview omits the modal frame wrapper" do
+    course = courses(:one)
+
+    get course_path(course)
+    assert_response :success
+    assert_select "turbo-frame#course_modal", count: 0
+    assert_match course.name, response.body
+    assert_select "form[action=?]", unlock_round_course_path(course)
+  end
+
+  test "native clients get a full page course preview" do
+    course = courses(:one)
+    headers = { "HTTP_USER_AGENT" => "Grind/1.0 Hotwire Native iOS; Turbo Native iOS;" }
+
+    get course_path(course), headers: headers
+    assert_response :success
+    assert_select "turbo-frame#course_modal", count: 0
+    assert_match course.name, response.body
+    assert_select "form[action=?]", unlock_round_course_path(course)
   end
 
   test "integer course ids are not found on public routes" do

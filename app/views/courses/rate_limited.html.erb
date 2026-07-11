@@ -1,13 +1,15 @@
 <%= turbo_frame_tag "course_modal" do %>
-  <div class="fixed inset-0 z-40 bg-black/40" data-controller="modal" data-action="click->modal#close"></div>
+  <div data-controller="modal">
+    <div class="fixed inset-0 z-[100] bg-black/40" data-action="click->modal#close"></div>
 
-  <div class="fixed inset-x-4 bottom-4 z-50">
-    <%= render "ui/card", padding: :sm do %>
-      <%= render "ui/banner",
-            tone: :danger,
-            title: "Too many course previews",
-            message: "Rate limit reached: Try again in a minute and slow down a bit." %>
-      <button type="button" class="ui-btn-secondary ui-btn-md w-full mt-4" data-action="modal#close">Close</button>
-    <% end %>
+    <div class="fixed inset-x-4 bottom-4 z-[110] overscroll-contain">
+      <%= render "ui/card", padding: :sm do %>
+        <%= render "ui/banner",
+              tone: :danger,
+              title: "Too many course previews",
+              message: "Rate limit reached: Try again in a minute and slow down a bit." %>
+        <button type="button" class="ui-btn-secondary ui-btn-md w-full mt-4" data-action="modal#close">Close</button>
+      <% end %>
+    </div>
   </div>
 <% end %>

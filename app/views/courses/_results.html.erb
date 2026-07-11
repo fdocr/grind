@@ -9,7 +9,9 @@
 
   <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
     <% courses.each do |course| %>
-      <%= link_to course_path(course), class: "block", data: { turbo_frame: "course_modal" } do %>
+      <%= link_to course_path(course),
+            class: "block",
+            data: { turbo_frame: (hotwire_native_app? ? "_top" : "course_modal") } do %>
         <%= render "ui/card", padding: :sm, extra_class: "hover:border-primary-300 transition-colors" do %>
           <div class="flex items-start justify-between gap-2">
             <h3 class="font-semibold text-foreground"><%= course.name %></h3>
