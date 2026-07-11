@@ -1,0 +1,73 @@
+<%# locals: (tee_name:, tee_data:, index:, unit:) %>
+<%
+  rating = tee_data["rating"] || tee_data[:rating]
+  slope = tee_data["slope"] || tee_data[:slope]
+  yardages = Array(tee_data["yardages"] || tee_data[:yardages])
+%>
+<div data-tee-editor-target="tee">
+  <%= render "ui/card", padding: :sm, extra_class: "space-y-4" do %>
+    <div class="flex items-start justify-between gap-3">
+      <div class="space-y-2 flex-1 min-w-0">
+        <label class="ui-label" for="course_tees_<%= index %>_name">Tee name</label>
+        <input type="text"
+               name="course[tees][<%= index %>][name]"
+               id="course_tees_<%= index %>_name"
+               value="<%= tee_name %>"
+               list="tee-name-suggestions"
+               required
+               autocomplete="off"
+               placeholder="e.g. blue, white, red"
+               class="ui-input"
+               data-tee-editor-target="nameInput">
+      </div>
+      <button type="button"
+              class="ui-icon-btn text-danger-700 mt-7"
+              data-action="tee-editor#remove"
+              data-tee-editor-target="removeButton"
+              aria-label="Remove tee">
+        <%= icon "trash", class: "w-5 h-5" %>
+      </button>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
+      <div class="space-y-2">
+        <label class="ui-label" for="course_tees_<%= index %>_rating">Rating</label>
+        <input type="text"
+               name="course[tees][<%= index %>][rating]"
+               id="course_tees_<%= index %>_rating"
+               value="<%= rating %>"
+               class="ui-input">
+      </div>
+      <div class="space-y-2">
+        <label class="ui-label" for="course_tees_<%= index %>_slope">Slope</label>
+        <input type="text"
+               name="course[tees][<%= index %>][slope]"
+               id="course_tees_<%= index %>_slope"
+               value="<%= slope %>"
+               class="ui-input">
+      </div>
+    </div>
+
+    <div class="ui-scorecard-scroll">
+      <table class="ui-scorecard-table">
+        <tr>
+          <th>Hole</th>
+          <% (1..18).each do |number| %><th><%= number %></th><% end %>
+        </tr>
+        <tr>
+          <td><%= unit.titleize %></td>
+          <% (1..18).each do |number| %>
+            <% yards = yardages[number - 1].to_i %>
+            <td>
+              <input type="number"
+                     name="course[tees][<%= index %>][yardages][]"
+                     value="<%= yards.positive? ? yards : nil %>"
+                     min="0"
+                     class="ui-input w-14 text-center px-1 mx-auto">
+            </td>
+          <% end %>
+        </tr>
+      </table>
+    </div>
+  <% end %>
+</div>

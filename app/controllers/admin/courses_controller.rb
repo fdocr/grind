@@ -91,13 +91,25 @@ module Admin
       end
 
       def normalize_tees(raw)
-        raw.to_unsafe_h.transform_values do |tee|
-          {
+        return default_tees if raw.blank?
+
+        normalized = raw.to_unsafe_h.each_with_object({}) do |(key, tee), hash|
+          tee = tee.to_h.with_indifferent_access
+          name = tee[:name].to_s.strip.downcase.presence
+          name ||= key.to_s.strip.downcase unless key.to_s.match?(/\A\d+\z/)
+          next if name.blank?
+
+          yardages = Array(tee[:yardages]).map { |yards| yards.to_i }.first(18)
+          yardages.fill(0, yardages.length...18)
+
+          hash[name] = {
             "rating" => tee[:rating].to_s,
             "slope" => tee[:slope].to_s,
-            "yardages" => Array(tee[:yardages]).map { |yards| yards.to_i }
+            "yardages" => yardages
           }
         end
+
+        normalized.presence || default_tees
       end
 
       def default_tees
