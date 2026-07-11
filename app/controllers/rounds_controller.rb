@@ -1,13 +1,35 @@
 # frozen_string_literal: true
 
 class RoundsController < ApplicationController
-  before_action :set_course, only: %i[new create]
+  ROUND_UNLOCK_TTL = 2.hours
+  RATE_LIMIT_ALERT = "Rate limit reached: Try again in a minute and slow down a bit"
+
+  before_action :set_course, only: %i[new create unlock]
   before_action :set_round, only: :show
+
+  rate_limit to: 60, within: 60.seconds, only: :new, name: "rounds.new",
+    with: -> { redirect_to root_path, alert: RATE_LIMIT_ALERT }
+
+  rate_limit to: 30, within: 60.seconds, only: :unlock, name: "rounds.unlock",
+    with: -> { redirect_to root_path, alert: RATE_LIMIT_ALERT }
 
   def new
     prevent_indexing
+    unless round_unlocked?(@course)
+      redirect_to root_path, alert: "Please start your round from the course page."
+      return
+    end
+
     @holes = @course.holes.order(:number)
     @tee = @course.tee?(params[:tee]) ? params[:tee].to_s : @course.default_tee
+  end
+
+  def unlock
+    return unless verify_turnstile!(root_path)
+
+    unlock_round!(@course)
+    tee = @course.tee?(params[:tee]) ? params[:tee].to_s : @course.default_tee
+    redirect_to round_course_path(@course, tee: tee)
   end
 
   def create
@@ -39,7 +61,7 @@ class RoundsController < ApplicationController
   private
 
   def set_course
-    @course = Course.find(params[:course_id] || params[:id])
+    @course = Course.find_by_param!(params[:course_id] || params[:id])
   end
 
   def set_round
@@ -73,5 +95,17 @@ class RoundsController < ApplicationController
       score_to_par: round.score_to_par
     )
     SendRoundStatsJob.perform_later(delivery.id)
+  end
+
+  def unlock_round!(course)
+    session[:round_unlocks] ||= {}
+    session[:round_unlocks][course.id.to_s] = Time.current.to_i
+  end
+
+  def round_unlocked?(course)
+    unlocked_at = session.dig(:round_unlocks, course.id.to_s)
+    return false if unlocked_at.blank?
+
+    Time.current.to_i - unlocked_at.to_i < ROUND_UNLOCK_TTL.to_i
   end
 end

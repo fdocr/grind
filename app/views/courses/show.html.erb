@@ -88,12 +88,21 @@
           <%= render "shared/contribute_link", course: @course, style: :link %>
         </div>
 
-        <div class="flex gap-2 mt-4">
-          <button type="button" class="ui-btn-secondary ui-btn-md flex-1" data-action="modal#close">Cancel</button>
-          <%= link_to "Start round",
-                round_course_path(@course, tee: @active_tee),
-                class: "ui-btn-primary ui-btn-md flex-1",
-                data: { turbo_frame: "_top", tee_select_target: "startLink", action: "click->modal#close" } %>
+        <div class="flex flex-col gap-3 mt-4">
+          <%= form_with url: unlock_round_course_path(@course),
+                method: :post,
+                class: "space-y-3",
+                data: { turbo_frame: "_top" } do %>
+            <input type="hidden"
+                   name="tee"
+                   value="<%= @active_tee %>"
+                   data-tee-select-target="teeInput">
+            <%= render "shared/turnstile" %>
+            <div class="flex gap-2">
+              <button type="button" class="ui-btn-secondary ui-btn-md flex-1" data-action="modal#close">Cancel</button>
+              <%= submit_tag "Start round", class: "ui-btn-primary ui-btn-md flex-1 cursor-pointer" %>
+            </div>
+          <% end %>
         </div>
       <% end %>
     </div>

@@ -64,4 +64,10 @@ class CourseTest < ActiveSupport::TestCase
     course.holes.reset
     assert_not course.greens_mapped?
   end
+
+  test "to_param uses public_id" do
+    course = courses(:one)
+    assert_equal course.public_id, course.to_param
+    assert_equal course, Course.find_by_param!(course.public_id)
+  end
 end

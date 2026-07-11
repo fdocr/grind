@@ -43,7 +43,7 @@ class RoundFlowTest < ApplicationSystemTestCase
   end
 
   test "reset round clears saved progress after confirmation" do
-    visit round_course_path(@course)
+    start_course_round!(@course)
 
     click_button "Post Score"
     find("[data-round-target='puttsPicker'] [data-value='3']").click
@@ -71,7 +71,7 @@ class RoundFlowTest < ApplicationSystemTestCase
   end
 
   test "hole picker shows a check icon for posted scores" do
-    visit round_course_path(@course)
+    start_course_round!(@course)
     page.execute_script("window.localStorage.clear()")
     visit round_course_path(@course)
 
@@ -91,7 +91,7 @@ class RoundFlowTest < ApplicationSystemTestCase
   end
 
   test "posting on the last hole wraps to hole 1 when it has no score" do
-    visit round_course_path(@course)
+    start_course_round!(@course)
 
     click_button "Holes"
     find("[data-hole-number='18']").click
@@ -103,7 +103,7 @@ class RoundFlowTest < ApplicationSystemTestCase
   end
 
   test "posting on the last hole stays put when hole 1 already has a score" do
-    visit round_course_path(@course)
+    start_course_round!(@course)
 
     click_button "Post Score"
     click_button "Save"

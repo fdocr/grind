@@ -5,11 +5,13 @@ class RoundsControllerTest < ActionDispatch::IntegrationTest
   include ScoreHelper
 
   setup do
+    Rails.cache.clear
     @course = courses(:one)
     build_eighteen_holes!(@course)
   end
 
-  test "new tracker page renders" do
+  test "new tracker page renders after unlock" do
+    unlock_course_round!(@course)
     get round_course_path(@course)
     assert_response :success
     assert_match @course.name, response.body
@@ -17,7 +19,14 @@ class RoundsControllerTest < ActionDispatch::IntegrationTest
     assert_select "meta[name='robots'][content='noindex, nofollow']"
   end
 
+  test "new tracker requires unlock from the course page" do
+    get round_course_path(@course)
+    assert_redirected_to root_path
+    assert_match "start your round from the course page", flash[:alert]
+  end
+
   test "new tracker uses the requested tee" do
+    unlock_course_round!(@course, tee: "white")
     get round_course_path(@course, tee: "white")
     assert_response :success
     assert_match "data-round-tee-value=\"white\"", response.body
@@ -25,9 +34,22 @@ class RoundsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "new tracker falls back to the default tee for an unknown tee" do
+    unlock_course_round!(@course, tee: "purple")
     get round_course_path(@course, tee: "purple")
     assert_response :success
     assert_match "data-round-tee-value=\"white\"", response.body
+  end
+
+  test "round start is rate limited with a visible flash alert" do
+    unlock_course_round!(@course)
+
+    60.times { get round_course_path(@course) }
+    assert_response :success
+
+    get round_course_path(@course)
+    assert_redirected_to root_path
+    follow_redirect!
+    assert_select ".ui-banner-danger", text: /Rate limit reached: Try again in a minute and slow down a bit/
   end
 
   test "create stores the selected tee" do

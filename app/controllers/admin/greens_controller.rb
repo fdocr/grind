@@ -96,7 +96,7 @@ module Admin
       end
 
       def set_course
-        @course = Course.find(params[:course_id])
+        @course = Course.find_by_param!(params[:course_id])
       end
 
       def parse_calibration

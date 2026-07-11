@@ -77,7 +77,7 @@ module Admin
     private
 
       def set_course
-        @course = Course.find(params[:id])
+        @course = Course.find_by_param!(params[:id])
       end
 
       def course_attributes

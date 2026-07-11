@@ -51,6 +51,7 @@ Rails.application.routes.draw do
   resources :courses, only: %i[index show] do
     member do
       get :round, to: "rounds#new"
+      post :unlock_round, to: "rounds#unlock"
     end
     resources :rounds, only: :create
   end

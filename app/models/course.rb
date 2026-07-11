@@ -5,6 +5,8 @@ class Course < ApplicationRecord
   NEAR_RADIUS_KM = 80
   EARTH_RADIUS_M = 6_371_000
 
+  has_secure_token :public_id
+
   has_many :holes, -> { order(:number) }, dependent: :destroy, inverse_of: :course
   has_many :rounds, dependent: :destroy
   has_many :contributions, dependent: :destroy
@@ -22,6 +24,14 @@ class Course < ApplicationRecord
   }
 
   scope :with_coordinates, -> { where.not(latitude: nil).where.not(longitude: nil) }
+
+  def self.find_by_param!(param)
+    find_by!(public_id: param)
+  end
+
+  def to_param
+    public_id
+  end
 
   # Courses nearest to lat/lng within a bounding box, ordered by great-circle distance.
   def self.near(lat, lng, limit: RESULT_LIMIT, radius_km: NEAR_RADIUS_KM)

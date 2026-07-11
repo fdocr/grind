@@ -98,7 +98,27 @@ class CoursesControllerTest < ActionDispatch::IntegrationTest
     assert_match "data-tee-select-active-value=\"white\"", response.body
     assert_match "White tee", response.body
     assert_match "Rangefinder data available", response.body
-    assert_select "a[href*='round'][data-turbo-frame='_top'][data-action='click->modal#close']"
+    assert_select "form[action=?]", unlock_round_course_path(course)
+    assert_select "input[type=submit][value='Start round']"
+  end
+
+  test "integer course ids are not found on public routes" do
+    course = courses(:one)
+
+    get "/courses/#{course.id}"
+    assert_response :not_found
+  end
+
+  test "course preview is rate limited with a visible modal banner" do
+    course = courses(:one)
+
+    60.times { get course_path(course), headers: { "Turbo-Frame" => "course_modal" } }
+    assert_response :success
+
+    get course_path(course), headers: { "Turbo-Frame" => "course_modal" }
+    assert_response :too_many_requests
+    assert_match "Too many course previews", response.body
+    assert_match "Rate limit reached: Try again in a minute and slow down a bit", response.body
   end
 
   test "show renders a segmented control for multi-tee courses" do
