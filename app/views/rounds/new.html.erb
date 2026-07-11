@@ -1,5 +1,8 @@
 <% content_for :seo_title, @course.name %>
 <% content_for :seo_description, "Track your round at #{@course.name} with Grind." %>
+<% content_for :head do %>
+  <%= stylesheet_link_tag "leaflet", "data-turbo-track": "reload" %>
+<% end %>
 <%
   holes_json = @holes.map { |hole| { number: hole.number, par: hole.par, handicap: hole.handicap, yardage: @course.tee_yardage(@tee, hole.number), green: hole.green_geometry.presence } }
   course_json = { id: @course.id, name: @course.name, unit: @course.metric? ? "m" : "yds", holes: holes_json }
@@ -149,9 +152,12 @@
     <% end %>
   </div>
 
-  <div class="fixed inset-x-4 bottom-4 z-50 hidden" data-round-target="distancesPanel"
+  <div class="fixed inset-x-4 bottom-4 z-50 hidden max-h-[90vh] overflow-y-auto"
+       data-round-target="distancesPanel"
        data-controller="distances"
-       data-distances-unit-value="<%= @course.metric? ? "m" : "yds" %>">
+       data-distances-unit-value="<%= @course.metric? ? "m" : "yds" %>"
+       data-distances-tile-url-value="<%= satellite_tile_url %>"
+       data-distances-tile-attribution-value="<%= satellite_tile_attribution %>">
     <%= render "ui/card", padding: :sm do %>
       <div class="flex items-center justify-between mb-4 gap-3">
         <div class="ui-segmented" role="group" aria-label="Distance unit">
@@ -162,22 +168,43 @@
       </div>
 
       <div class="hidden" data-distances-target="content">
-        <div class="flex items-stretch justify-center gap-5 my-8">
-          <div class="flex h-40 w-40 shrink-0 items-center justify-center rounded-full border-4 border-primary-500">
-            <span class="text-4xl font-bold leading-none text-primary-600" data-distances-target="center">—</span>
-          </div>
+        <div data-distances-target="numbers" data-state="active" class="distance-view-panel">
+          <div class="distance-view-panel-inner">
+            <div class="flex items-stretch justify-center gap-5 my-8">
+              <div class="flex h-40 w-40 shrink-0 items-center justify-center rounded-full border-4 border-primary-500">
+                <span class="text-4xl font-bold leading-none text-primary-600" data-distances-target="center">—</span>
+              </div>
 
-          <div class="flex flex-col justify-between">
-            <div class="-translate-y-2">
-              <p class="text-xs uppercase tracking-wide text-muted-foreground">Back</p>
-              <p class="text-xl font-semibold text-foreground" data-distances-target="back">—</p>
-            </div>
-            <div class="translate-y-2">
-              <p class="text-xs uppercase tracking-wide text-muted-foreground">Front</p>
-              <p class="text-xl font-semibold text-foreground" data-distances-target="front">—</p>
+              <div class="flex flex-col justify-between">
+                <div class="-translate-y-2">
+                  <p class="text-xs uppercase tracking-wide text-muted-foreground">Back</p>
+                  <p class="text-xl font-semibold text-foreground" data-distances-target="back">—</p>
+                </div>
+                <div class="translate-y-2">
+                  <p class="text-xs uppercase tracking-wide text-muted-foreground">Front</p>
+                  <p class="text-xl font-semibold text-foreground" data-distances-target="front">—</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
+
+        <div data-distances-target="map" data-state="inactive" class="distance-view-panel">
+          <div class="distance-view-panel-inner">
+            <div class="relative">
+              <div class="h-[50vh] min-h-[16rem] overflow-hidden rounded-md" data-distances-target="mapContainer"></div>
+              <button type="button"
+                      class="ui-btn-secondary ui-btn-xs absolute top-2 right-2 z-[1000] hidden shadow-md"
+                      data-distances-target="clearPivot"
+                      data-action="distances#clearPivot"
+                      aria-label="Clear pivot">
+                <%= icon "close", class: "w-3.5 h-3.5" %>
+                Clear
+              </button>
+            </div>
+          </div>
+        </div>
+
         <p class="text-xs text-muted-foreground mt-2 text-center" data-distances-target="accuracy"></p>
       </div>
 
@@ -198,7 +225,14 @@
               icon: "location" %>
       </div>
 
-      <p class="text-[11px] text-muted-foreground mt-4 text-center">Map data © OpenStreetMap contributors</p>
+      <div class="hidden mt-4" data-distances-target="viewToggle">
+        <div class="ui-segmented w-full" role="group" aria-label="Distance view">
+          <button type="button" class="ui-segmented-option flex-1" data-distances-target="viewOption" data-value="numbers" data-action="distances#setView">Numbers</button>
+          <button type="button" class="ui-segmented-option flex-1" data-distances-target="viewOption" data-value="map" data-action="distances#setView">Map</button>
+        </div>
+      </div>
+
+      <p class="text-[11px] text-muted-foreground mt-4 text-center">Map data © OpenStreetMap contributors · Tiles © Esri</p>
     <% end %>
   </div>
 
