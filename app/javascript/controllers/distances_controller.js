@@ -181,6 +181,7 @@ export default class extends BridgeComponent {
     if (this.view === "map") {
       this.ensureMap()
       this.updateMap({ fit: true })
+      this.scheduleMapResize()
     }
   }
 
@@ -261,6 +262,10 @@ export default class extends BridgeComponent {
   }
 
   destroyMap() {
+    if (this.mapResizeTimeout) {
+      clearTimeout(this.mapResizeTimeout)
+      this.mapResizeTimeout = null
+    }
     if (this.distanceMap) {
       this.distanceMap.destroy()
       this.distanceMap = null
@@ -317,8 +322,38 @@ export default class extends BridgeComponent {
   }
 
   syncViewVisibility() {
-    if (this.hasNumbersTarget) this.toggle(this.numbersTarget, this.view === "numbers")
-    if (this.hasMapTarget) this.toggle(this.mapTarget, this.view === "map")
+    if (this.hasNumbersTarget) {
+      this.numbersTarget.dataset.state = this.view === "numbers" ? "active" : "inactive"
+    }
+    if (this.hasMapTarget) {
+      this.mapTarget.dataset.state = this.view === "map" ? "active" : "inactive"
+    }
+  }
+
+  // Leaflet measures a near-zero height while the panel is still growing; refit
+  // after the grid-template-rows transition finishes (with a timeout fallback).
+  scheduleMapResize() {
+    if (this.mapResizeTimeout) clearTimeout(this.mapResizeTimeout)
+
+    const resize = () => {
+      if (!this.distanceMap || this.view !== "map") return
+      this.distanceMap.invalidateSize()
+      this.distanceMap.fitCourse()
+      this.didFitMap = true
+    }
+
+    if (this.hasMapTarget) {
+      const onEnd = (event) => {
+        if (event.target !== this.mapTarget) return
+        if (event.propertyName !== "grid-template-rows" && event.propertyName !== "opacity") return
+        this.mapTarget.removeEventListener("transitionend", onEnd)
+        if (this.mapResizeTimeout) clearTimeout(this.mapResizeTimeout)
+        resize()
+      }
+      this.mapTarget.addEventListener("transitionend", onEnd)
+    }
+
+    this.mapResizeTimeout = setTimeout(resize, 250)
   }
 
   syncClearButton() {

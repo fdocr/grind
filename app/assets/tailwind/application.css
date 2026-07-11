@@ -339,4 +339,28 @@
     border: 1px solid color-mix(in srgb, var(--color-danger-600) 35%, transparent);
     white-space: nowrap;
   }
+
+  /* Numbers ↔ Map view: fade + grow via grid-template-rows */
+  .distance-view-panel {
+    display: grid;
+    transition: grid-template-rows 200ms ease-out, opacity 200ms ease-out;
+  }
+  .distance-view-panel[data-state="active"] {
+    grid-template-rows: 1fr;
+    opacity: 1;
+  }
+  .distance-view-panel[data-state="inactive"] {
+    grid-template-rows: 0fr;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .distance-view-panel-inner {
+    overflow: hidden;
+    min-height: 0;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .distance-view-panel {
+      transition: none;
+    }
+  }
 }

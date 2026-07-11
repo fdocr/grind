@@ -33,14 +33,14 @@ class DistancesTest < ApplicationSystemTestCase
 
     click_button "Distances"
 
-    assert_selector "[data-distances-target='numbers']:not(.hidden)"
+    assert_selector "[data-distances-target='numbers'][data-state='active']"
     assert_selector "[data-distances-target='viewOption'][data-value='numbers'][data-state='active']"
 
     find("[data-distances-target='viewOption'][data-value='map']").click
 
     assert_selector "[data-distances-target='viewOption'][data-value='map'][data-state='active']"
-    assert_selector "[data-distances-target='map']:not(.hidden)"
-    assert_selector "[data-distances-target='numbers']", visible: :hidden
+    assert_selector "[data-distances-target='map'][data-state='active']"
+    assert_selector "[data-distances-target='numbers'][data-state='inactive']"
     assert_selector ".leaflet-container"
     assert_selector "[data-distances-target='clearPivot']", visible: :hidden
 

@@ -168,36 +168,40 @@
       </div>
 
       <div class="hidden" data-distances-target="content">
-        <div data-distances-target="numbers">
-          <div class="flex items-stretch justify-center gap-5 my-8">
-            <div class="flex h-40 w-40 shrink-0 items-center justify-center rounded-full border-4 border-primary-500">
-              <span class="text-4xl font-bold leading-none text-primary-600" data-distances-target="center">—</span>
-            </div>
-
-            <div class="flex flex-col justify-between">
-              <div class="-translate-y-2">
-                <p class="text-xs uppercase tracking-wide text-muted-foreground">Back</p>
-                <p class="text-xl font-semibold text-foreground" data-distances-target="back">—</p>
+        <div data-distances-target="numbers" data-state="active" class="distance-view-panel">
+          <div class="distance-view-panel-inner">
+            <div class="flex items-stretch justify-center gap-5 my-8">
+              <div class="flex h-40 w-40 shrink-0 items-center justify-center rounded-full border-4 border-primary-500">
+                <span class="text-4xl font-bold leading-none text-primary-600" data-distances-target="center">—</span>
               </div>
-              <div class="translate-y-2">
-                <p class="text-xs uppercase tracking-wide text-muted-foreground">Front</p>
-                <p class="text-xl font-semibold text-foreground" data-distances-target="front">—</p>
+
+              <div class="flex flex-col justify-between">
+                <div class="-translate-y-2">
+                  <p class="text-xs uppercase tracking-wide text-muted-foreground">Back</p>
+                  <p class="text-xl font-semibold text-foreground" data-distances-target="back">—</p>
+                </div>
+                <div class="translate-y-2">
+                  <p class="text-xs uppercase tracking-wide text-muted-foreground">Front</p>
+                  <p class="text-xl font-semibold text-foreground" data-distances-target="front">—</p>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div class="hidden" data-distances-target="map">
-          <div class="relative">
-            <div class="h-[50vh] min-h-[16rem] overflow-hidden rounded-md" data-distances-target="mapContainer"></div>
-            <button type="button"
-                    class="ui-btn-secondary ui-btn-xs absolute top-2 right-2 z-[1000] hidden shadow-md"
-                    data-distances-target="clearPivot"
-                    data-action="distances#clearPivot"
-                    aria-label="Clear pivot">
-              <%= icon "close", class: "w-3.5 h-3.5" %>
-              Clear
-            </button>
+        <div data-distances-target="map" data-state="inactive" class="distance-view-panel">
+          <div class="distance-view-panel-inner">
+            <div class="relative">
+              <div class="h-[50vh] min-h-[16rem] overflow-hidden rounded-md" data-distances-target="mapContainer"></div>
+              <button type="button"
+                      class="ui-btn-secondary ui-btn-xs absolute top-2 right-2 z-[1000] hidden shadow-md"
+                      data-distances-target="clearPivot"
+                      data-action="distances#clearPivot"
+                      aria-label="Clear pivot">
+                <%= icon "close", class: "w-3.5 h-3.5" %>
+                Clear
+              </button>
+            </div>
           </div>
         </div>
 
