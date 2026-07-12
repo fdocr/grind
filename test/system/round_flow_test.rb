@@ -90,7 +90,7 @@ class RoundFlowTest < ApplicationSystemTestCase
     assert_no_text "Open"
   end
 
-  test "resume ongoing round from homepage after refresh" do
+  test "resume ongoing round from homepage after unlock expires" do
     start_course_round!(@course)
 
     click_button "Post Score"
@@ -102,6 +102,8 @@ class RoundFlowTest < ApplicationSystemTestCase
     visit root_path
     assert_text @course.name
     assert_text "1 hole scored"
+
+    travel 3.hours
 
     visit root_path
     assert_text @course.name

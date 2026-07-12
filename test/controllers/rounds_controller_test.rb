@@ -25,6 +25,16 @@ class RoundsControllerTest < ActionDispatch::IntegrationTest
     assert_match "start your round from the course page", flash[:alert]
   end
 
+  test "resume re-grants unlock without turnstile and opens the tracker" do
+    post resume_round_course_path(@course), params: { tee: "white" }
+    assert_redirected_to round_course_path(@course, tee: "white")
+
+    follow_redirect!
+    assert_response :success
+    assert_match @course.name, response.body
+    assert_match "data-round-tee-value=\"white\"", response.body
+  end
+
   test "new tracker uses the requested tee" do
     unlock_course_round!(@course, tee: "white")
     get round_course_path(@course, tee: "white")
