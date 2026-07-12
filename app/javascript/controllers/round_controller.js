@@ -34,7 +34,26 @@ export default class extends Controller {
     const existing = localStorage.getItem(key)
     if (existing) return JSON.parse(existing)
 
+    const migrated = this.migrateLegacyState()
+    if (migrated) return migrated
+
     return this.defaultState()
+  }
+
+  // Older builds keyed rounds by the numeric course id. Move that payload under
+  // the public_id key so resume links and storage stay in sync.
+  migrateLegacyState() {
+    const legacyId = this.courseValue.legacyId
+    if (legacyId == null || legacyId === this.courseValue.id) return null
+
+    const legacyKey = `grind:round:${legacyId}`
+    const legacy = localStorage.getItem(legacyKey)
+    if (!legacy) return null
+
+    localStorage.removeItem(legacyKey)
+    const state = JSON.parse(legacy)
+    state.courseId = this.courseValue.id
+    return state
   }
 
   unit() {

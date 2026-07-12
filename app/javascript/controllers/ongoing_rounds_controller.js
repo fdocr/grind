@@ -75,7 +75,10 @@ export default class extends Controller {
 
     const teeParam = round.tee ? `?tee=${encodeURIComponent(round.tee)}` : ""
     const continueLink = document.createElement("a")
-    continueLink.href = `/courses/${round.courseId}/round${teeParam}`
+    continueLink.href = `/courses/${round.courseId}/resume_round${teeParam}`
+    continueLink.dataset.turboMethod = "post"
+    continueLink.dataset.turboFrame = "_top"
+    continueLink.dataset.turboAction = "replace"
     continueLink.className = "ui-icon-btn !text-primary-600 hover:!text-primary-700"
     continueLink.setAttribute("aria-label", `Continue round at ${round.courseName || "course"}`)
     continueLink.appendChild(this.iconNode(this.continueIconTarget))

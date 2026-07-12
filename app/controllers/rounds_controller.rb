@@ -4,13 +4,16 @@ class RoundsController < ApplicationController
   ROUND_UNLOCK_TTL = 2.hours
   RATE_LIMIT_ALERT = "Rate limit reached: Try again in a minute and slow down a bit"
 
-  before_action :set_course, only: %i[new create unlock]
+  before_action :set_course, only: %i[new create unlock resume]
   before_action :set_round, only: :show
 
   rate_limit to: 60, within: 60.seconds, only: :new, name: "rounds.new",
     with: -> { redirect_to root_path, alert: RATE_LIMIT_ALERT }
 
   rate_limit to: 30, within: 60.seconds, only: :unlock, name: "rounds.unlock",
+    with: -> { redirect_to root_path, alert: RATE_LIMIT_ALERT }
+
+  rate_limit to: 30, within: 60.seconds, only: :resume, name: "rounds.resume",
     with: -> { redirect_to root_path, alert: RATE_LIMIT_ALERT }
 
   def new
@@ -28,8 +31,15 @@ class RoundsController < ApplicationController
     return unless verify_turnstile!(root_path)
 
     unlock_round!(@course)
-    tee = @course.tee?(params[:tee]) ? params[:tee].to_s : @course.default_tee
-    redirect_to round_course_path(@course, tee: tee)
+    redirect_to_round!
+  end
+
+  # Homepage "Continue" for an in-progress round. Re-grants unlock without Turnstile
+  # so resume still works when the short-lived session unlock is gone (common in
+  # Hotwire Native after the app is backgrounded or relaunched).
+  def resume
+    unlock_round!(@course)
+    redirect_to_round!
   end
 
   def create
@@ -107,5 +117,10 @@ class RoundsController < ApplicationController
     return false if unlocked_at.blank?
 
     Time.current.to_i - unlocked_at.to_i < ROUND_UNLOCK_TTL.to_i
+  end
+
+  def redirect_to_round!
+    tee = @course.tee?(params[:tee]) ? params[:tee].to_s : @course.default_tee
+    redirect_to round_course_path(@course, tee: tee)
   end
 end

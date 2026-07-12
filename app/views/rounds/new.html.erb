@@ -1,11 +1,11 @@
 <% content_for :seo_title, @course.name %>
 <% content_for :seo_description, "Track your round at #{@course.name} with Grind." %>
 <% content_for :head do %>
-  <%= stylesheet_link_tag "leaflet", "data-turbo-track": "reload" %>
+  <%= stylesheet_link_tag "leaflet" %>
 <% end %>
 <%
   holes_json = @holes.map { |hole| { number: hole.number, par: hole.par, handicap: hole.handicap, yardage: @course.tee_yardage(@tee, hole.number), green: hole.green_geometry.presence } }
-  course_json = { id: @course.id, name: @course.name, unit: @course.metric? ? "m" : "yds", holes: holes_json }
+  course_json = { id: @course.public_id, legacyId: @course.id, name: @course.name, unit: @course.metric? ? "m" : "yds", holes: holes_json }
 %>
 
 <div class="space-y-6"

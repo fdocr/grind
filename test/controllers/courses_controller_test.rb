@@ -123,11 +123,16 @@ class CoursesControllerTest < ActionDispatch::IntegrationTest
     assert_select "form[action=?]", unlock_round_course_path(course)
   end
 
-  test "integer course ids are not found on public routes" do
+  test "legacy numeric course ids still resolve for old resume links" do
     course = courses(:one)
 
     get "/courses/#{course.id}"
-    assert_response :not_found
+    assert_response :success
+    assert_match course.name, response.body
+
+    get course_path(course)
+    assert_response :success
+    assert_equal "/courses/#{course.public_id}", course_path(course)
   end
 
   test "course preview is rate limited with a visible modal banner" do

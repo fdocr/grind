@@ -99,7 +99,7 @@
         <%= form_with url: unlock_round_course_path(course),
               method: :post,
               class: "space-y-3",
-              data: { turbo_frame: "_top" } do %>
+              data: { turbo_frame: "_top", turbo_action: "replace" } do %>
           <input type="hidden"
                  name="tee"
                  value="<%= active_tee %>"

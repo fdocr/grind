@@ -52,6 +52,7 @@ Rails.application.routes.draw do
     member do
       get :round, to: "rounds#new"
       post :unlock_round, to: "rounds#unlock"
+      post :resume_round, to: "rounds#resume"
     end
     resources :rounds, only: :create
   end
