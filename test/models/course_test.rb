@@ -70,4 +70,14 @@ class CourseTest < ActiveSupport::TestCase
     assert_equal course.public_id, course.to_param
     assert_equal course, Course.find_by_param!(course.public_id)
   end
+
+  test "find_by_param! falls back to numeric id for legacy resume links" do
+    course = courses(:one)
+    assert_equal course, Course.find_by_param!(course.id.to_s)
+  end
+
+  test "find_by_param! raises for unknown params" do
+    assert_raises(ActiveRecord::RecordNotFound) { Course.find_by_param!("missing-course") }
+    assert_raises(ActiveRecord::RecordNotFound) { Course.find_by_param!("999999999") }
+  end
 end

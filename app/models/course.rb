@@ -26,12 +26,21 @@ class Course < ApplicationRecord
   scope :with_coordinates, -> { where.not(latitude: nil).where.not(longitude: nil) }
 
   def self.find_by_param!(param)
-    find_by!(public_id: param)
+    find_by(public_id: param) || find_by_legacy_id!(param)
   end
 
   def to_param
     public_id
   end
+
+  # Numeric ids still appear in older localStorage resume links from before
+  # courses switched to public_id in URLs.
+  def self.find_by_legacy_id!(param)
+    raise ActiveRecord::RecordNotFound unless param.to_s.match?(/\A\d+\z/)
+
+    find(param)
+  end
+  private_class_method :find_by_legacy_id!
 
   # Courses nearest to lat/lng within a bounding box, ordered by great-circle distance.
   def self.near(lat, lng, limit: RESULT_LIMIT, radius_km: NEAR_RADIUS_KM)

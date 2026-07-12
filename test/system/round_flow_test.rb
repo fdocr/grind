@@ -90,6 +90,30 @@ class RoundFlowTest < ApplicationSystemTestCase
     assert_no_text "Open"
   end
 
+  test "resume ongoing round from homepage after refresh" do
+    start_course_round!(@course)
+
+    click_button "Post Score"
+    find("[data-round-target='puttsPicker'] [data-value='3']").click
+    click_button "Save"
+    assert_text "2nd hole"
+    assert_equal "1", find("[data-round-target='threePutts']").text
+
+    visit root_path
+    assert_text @course.name
+    assert_text "1 hole scored"
+
+    visit root_path
+    assert_text @course.name
+    assert_text "1 hole scored"
+
+    find("[aria-label^='Continue round']").click
+
+    assert_text "Round stats"
+    assert_text "2nd hole"
+    assert_equal "1", find("[data-round-target='threePutts']").text
+  end
+
   test "posting on the last hole wraps to hole 1 when it has no score" do
     start_course_round!(@course)
 
