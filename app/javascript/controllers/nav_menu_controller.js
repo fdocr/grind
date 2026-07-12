@@ -6,7 +6,9 @@ export default class extends Controller {
   connect() {
     this.boundClickOutside = this.clickOutside.bind(this)
     this.boundKeydown = this.keydown.bind(this)
-    this.syncAccessibility(false)
+    // Always start closed. Turbo/Native restores can revive an open panel from a
+    // snapshot or screenshot, which then blocks the page underneath.
+    this.close()
   }
 
   disconnect() {
