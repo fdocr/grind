@@ -1,0 +1,15 @@
+<% content_for :seo_title, "Distances" %>
+<% content_for :head do %>
+  <%= stylesheet_link_tag "leaflet" %>
+<% end %>
+
+<div class="distances-shell flex flex-col flex-1 min-h-0 h-full">
+  <% unless hotwire_native_app? %>
+    <header class="space-y-1 shrink-0 mb-3">
+      <h1 class="text-xl font-bold text-foreground">Distances</h1>
+      <p class="text-sm text-muted-foreground">Open Distances from an active round.</p>
+    </header>
+  <% end %>
+
+  <%= render "rounds/distances", standalone: true, unit: "yds" %>
+</div>

@@ -358,8 +358,24 @@
     overflow: hidden;
     min-height: 0;
   }
+  /* Standalone modal: both views share a fixed stage so the footer never jumps. */
+  .distance-view-panel--fill {
+    position: absolute;
+    inset: 0;
+    display: block;
+    transition: opacity 200ms ease-out;
+  }
+  .distance-view-panel--fill[data-state="active"] {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .distance-view-panel--fill[data-state="inactive"] {
+    opacity: 0;
+    pointer-events: none;
+  }
   @media (prefers-reduced-motion: reduce) {
-    .distance-view-panel {
+    .distance-view-panel,
+    .distance-view-panel--fill {
       transition: none;
     }
   }

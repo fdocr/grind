@@ -48,6 +48,10 @@ Rails.application.routes.draw do
   get "contribute", to: "contributions#new", as: :contribute
   post "contribute", to: "contributions#create"
 
+  # Offline-capable Hotwire Native distances shell. Green geometry is passed from
+  # the round page via localStorage (see round_controller / distances_controller).
+  get "distances", to: "rounds#distances", as: :distances
+
   resources :courses, only: %i[index show] do
     member do
       get :round, to: "rounds#new"

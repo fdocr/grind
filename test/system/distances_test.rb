@@ -90,6 +90,27 @@ class DistancesTest < ApplicationSystemTestCase
     assert_selector "[data-distances-target='viewToggle']", visible: :hidden
   end
 
+  test "standalone distances shell reads green payload from localStorage" do
+    # Autostart begins watching on connect, so grant location before the visit.
+    grant_geolocation(latitude: 9.981234, longitude: -84.156789, accuracy: 5)
+
+    visit root_path
+    hole = @course.holes.find_by!(number: 1)
+    page.execute_script(<<~JS)
+      localStorage.setItem("grind:distancesPayload", JSON.stringify({
+        green: #{hole.green_geometry.to_json},
+        holeNumber: 1,
+        holePar: #{hole.par},
+        courseName: #{@course.name.to_json}
+      }))
+    JS
+
+    visit distances_path
+    assert_text "Distances"
+    assert_selector "[data-distances-target='holeLabel']", text: "Hole 1 · Par #{hole.par}"
+    assert_selector "[data-distances-target='center']", text: /\d/, wait: 5
+  end
+
   private
 
   def stub_geolocation(latitude:, longitude:, accuracy:)
@@ -100,5 +121,22 @@ class DistancesTest < ApplicationSystemTestCase
       }
       navigator.geolocation.clearWatch = function () {}
     JS
+  end
+
+  def grant_geolocation(latitude:, longitude:, accuracy:)
+    visit root_path
+    origin = page.current_host
+    browser = page.driver.browser
+    browser.execute_cdp(
+      "Browser.grantPermissions",
+      origin: origin,
+      permissions: [ "geolocation" ]
+    )
+    browser.execute_cdp(
+      "Emulation.setGeolocationOverride",
+      latitude: latitude,
+      longitude: longitude,
+      accuracy: accuracy
+    )
   end
 end

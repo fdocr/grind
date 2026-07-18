@@ -1,9 +1,11 @@
 import { Controller } from "@hotwired/stimulus"
 
+const DISTANCES_PAYLOAD_KEY = "grind:distancesPayload"
+
 export default class extends Controller {
   static targets = [
     "scoreToPar", "holeNumber", "insidePw9i", "oopTeeShots", "threePutts", "botchedUpDowns",
-    "scorePanel", "holesPanel", "scorecardPanel", "resetPanel", "distancesPanel", "overlay",
+    "scorePanel", "holesPanel", "scorecardPanel", "resetPanel", "distancesPanel", "distancesLink", "overlay",
     "grossInput", "puttsInput", "grossPicker", "puttsPicker",
     "scorePanelHole", "scorePanelPar", "scorePanelHcp", "scorePanelYards", "holeMeta",
     "finishButton", "finishForm", "startedAt",
@@ -21,6 +23,7 @@ export default class extends Controller {
     this.state.courseName = this.courseValue.name
     this.state.tee = this.teeValue
     this.render()
+    this.prefetchDistancesShell()
     this.boundOnline = this.handleOnline.bind(this)
     window.addEventListener("online", this.boundOnline)
   }
@@ -165,6 +168,35 @@ export default class extends Controller {
     this.renderHolesList()
     this.renderStatsLastHole()
     this.saveState()
+  }
+
+  // Native Distances modal: stash the current hole's green in localStorage so
+  // the generic /distances shell can render offline without a course fetch.
+  // Must be localStorage (not sessionStorage): Hotwire Native modals use a
+  // separate WKWebView, and sessionStorage is not shared across web views.
+  persistDistancesPayload() {
+    const hole = this.currentHoleData() || {}
+    localStorage.setItem(DISTANCES_PAYLOAD_KEY, JSON.stringify({
+      green: hole.green || null,
+      holeNumber: hole.number || this.state.currentHole,
+      holePar: hole.par || null,
+      courseName: this.courseValue.name || null
+    }))
+  }
+
+  // Warm HTTP cache for the native Distances modal shell (one request only —
+  // a separate <link rel=prefetch> was redundant with this fetch).
+  prefetchDistancesShell() {
+    if (!this.hasDistancesLinkTarget) return
+    if (navigator.onLine === false) return
+
+    const href = this.distancesLinkTarget.getAttribute("href")
+    if (!href) return
+
+    fetch(href, {
+      credentials: "same-origin",
+      headers: { Accept: "text/html" }
+    }).catch(() => {})
   }
 
   renderStatsLastHole() {
@@ -476,12 +508,12 @@ export default class extends Controller {
 
   panelTargets() {
     return [
-      this.scorePanelTarget,
-      this.holesPanelTarget,
-      this.scorecardPanelTarget,
-      this.resetPanelTarget,
-      this.distancesPanelTarget
-    ]
+      this.hasScorePanelTarget && this.scorePanelTarget,
+      this.hasHolesPanelTarget && this.holesPanelTarget,
+      this.hasScorecardPanelTarget && this.scorecardPanelTarget,
+      this.hasResetPanelTarget && this.resetPanelTarget,
+      this.hasDistancesPanelTarget && this.distancesPanelTarget
+    ].filter(Boolean)
   }
 
   showPanel(panel) {

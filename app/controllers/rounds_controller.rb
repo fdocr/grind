@@ -10,6 +10,9 @@ class RoundsController < ApplicationController
   rate_limit to: 60, within: 60.seconds, only: :new, name: "rounds.new",
     with: -> { redirect_to root_path, alert: RATE_LIMIT_ALERT }
 
+  rate_limit to: 60, within: 60.seconds, only: :distances, name: "rounds.distances",
+    with: -> { redirect_to root_path, alert: RATE_LIMIT_ALERT }
+
   rate_limit to: 30, within: 60.seconds, only: :unlock, name: "rounds.unlock",
     with: -> { redirect_to root_path, alert: RATE_LIMIT_ALERT }
 
@@ -40,6 +43,15 @@ class RoundsController < ApplicationController
   def resume
     unlock_round!(@course)
     redirect_to_round!
+  end
+
+  # Generic distances shell for the Hotwire Native modal. Hole/green data is
+  # supplied by the round page through localStorage so opening the sheet does
+  # not require a course-specific network fetch (Plan A offline approach).
+  # localStorage is required because native modals use a separate WKWebView.
+  def distances
+    prevent_indexing
+    @native_modal = true
   end
 
   def create

@@ -18,6 +18,14 @@
       }
     },
     {
+      "patterns": ["/distances$"],
+      "properties": {
+        "context": "modal",
+        "uri": "hotwire://fragment/web",
+        "pull_to_refresh_enabled": false
+      }
+    },
+    {
       "patterns": ["^/?$"],
       "properties": {
         "context": "default",

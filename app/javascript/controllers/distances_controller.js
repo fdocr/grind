@@ -3,6 +3,7 @@ import { haversineMeters, nearestEdgeMeters, farthestVertexMeters, metersToYards
 import { DistanceMap } from "lib/leaflet_distance_map"
 
 const STORAGE_KEY = "grind:distanceUnit"
+const PAYLOAD_KEY = "grind:distancesPayload"
 const TOO_FAR_METERS = 800
 
 // Live GPS distances to the front, center and back of the current hole's green.
@@ -22,12 +23,14 @@ export default class extends BridgeComponent {
   static component = "geolocation"
   static targets = [
     "front", "center", "back", "accuracy", "status", "statusMessage", "empty", "tooFar", "content",
-    "unitOption", "numbers", "map", "mapContainer", "clearPivot", "viewOption", "viewToggle"
+    "unitOption", "numbers", "map", "mapContainer", "clearPivot", "viewOption", "viewToggle", "holeLabel"
   ]
   static values = {
     unit: String,
     tileUrl: String,
-    tileAttribution: String
+    tileAttribution: String,
+    green: Object,
+    autostart: Boolean
   }
 
   // BridgeComponent gates loading on native support by default; force it to
@@ -49,9 +52,72 @@ export default class extends BridgeComponent {
     this.didFitMap = false
     this.syncUnitButtons()
     this.syncViewButtons()
+
+    // Native modal shell: green/hole come from the round page via localStorage
+    // so opening Distances does not need a course-specific network fetch.
+    // localStorage is required because the modal session is a separate WKWebView.
+    // Do not remove the payload on read — Turbo/Native may reconnect the
+    // controller when reopening the sheet, and the round page overwrites it
+    // on each Distances tap.
+    if (this.autostartValue) {
+      this.autostartFromPayload()
+      this.boundPageshow = () => this.autostartFromPayload()
+      window.addEventListener("pageshow", this.boundPageshow)
+    }
+  }
+
+  autostartFromPayload() {
+    const payload = this.payloadFromStorage()
+    if (payload) {
+      this.applyHoleLabel(payload)
+      // Reuse a live session when the green hasn't changed (pageshow / reconnect).
+      if (!this.sameGreen(payload.green)) this.start({ green: payload.green })
+      else if (this.position) this.render()
+      return
+    }
+
+    // Only fall back to the Stimulus value on the first attempt; later
+    // pageshow/reconnects without a payload should not wipe a live session.
+    if (!this.green) {
+      this.start({ green: this.hasGreenValue ? this.greenValue : null })
+    }
+  }
+
+  sameGreen(green) {
+    if (!this.green || !green) return false
+    try {
+      return JSON.stringify(this.green) === JSON.stringify(green)
+    } catch {
+      return false
+    }
+  }
+
+  payloadFromStorage() {
+    try {
+      const raw = localStorage.getItem(PAYLOAD_KEY)
+      return raw ? JSON.parse(raw) : null
+    } catch {
+      return null
+    }
+  }
+
+  applyHoleLabel(payload) {
+    if (!this.hasHoleLabelTarget) return
+
+    if (payload.holeNumber != null && payload.holePar != null) {
+      this.holeLabelTarget.textContent = `Hole ${payload.holeNumber} · Par ${payload.holePar}`
+      this.holeLabelTarget.classList.remove("hidden")
+    } else {
+      this.holeLabelTarget.textContent = ""
+      this.holeLabelTarget.classList.add("hidden")
+    }
   }
 
   disconnect() {
+    if (this.boundPageshow) {
+      window.removeEventListener("pageshow", this.boundPageshow)
+      this.boundPageshow = null
+    }
     this.stop()
     super.disconnect()
   }
