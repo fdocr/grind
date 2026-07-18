@@ -59,47 +59,6 @@
     </button>
   </div>
 
-  <section>
-    <h2 class="text-sm font-semibold text-muted-foreground mb-3">Round stats</h2>
-    <%= render "ui/card", padding: :sm do %>
-      <div class="space-y-4">
-        <% [
-          ["OOP Tee Shots", "oopTeeShots", "oopTeeShots", false],
-          ["3 Putts", "threePutts", nil, true],
-          ["Botched Up/Down", "botchedUpDowns", "botchedUpDowns", false],
-          ["Inside PW/9i", "insidePw9i", "insidePw9i", false]
-        ].each do |label, target, stat, readonly| %>
-          <div class="flex items-center justify-between gap-3">
-            <span class="text-sm font-medium"><%= label %></span>
-            <% if readonly %>
-              <div class="flex items-center gap-2">
-                <span class="inline-flex h-11 w-11 shrink-0" aria-hidden="true"></span>
-                <span class="w-10 text-center text-lg font-semibold" data-round-target="<%= target %>">0</span>
-                <span class="inline-flex h-11 w-11 shrink-0" aria-hidden="true"></span>
-              </div>
-            <% else %>
-              <div class="flex items-center gap-2">
-                <button type="button" class="ui-icon-btn" data-action="round#decrement" data-stat="<%= stat %>" aria-label="Decrease <%= label %>">
-                  <%= icon "minus", class: "w-5 h-5" %>
-                </button>
-                <span class="w-10 text-center text-lg font-semibold" data-round-target="<%= target %>">0</span>
-                <button type="button" class="ui-icon-btn" data-action="round#increment" data-stat="<%= stat %>" aria-label="Increase <%= label %>">
-                  <%= icon "plus", class: "w-5 h-5" %>
-                </button>
-              </div>
-            <% end %>
-          </div>
-        <% end %>
-      </div>
-    <% end %>
-    <p class="hidden mt-2 flex items-center justify-center gap-1.5 text-xs text-muted-foreground"
-       data-round-target="statsLastHole"
-       aria-live="polite">
-      <%= icon "pencil", class: "w-3.5 h-3.5 shrink-0" %>
-      <span data-round-target="statsLastHoleLabel">1st hole</span>
-    </p>
-  </section>
-
   <div class="flex gap-3">
     <button type="button" class="ui-btn-secondary ui-btn-md flex-1" data-action="round#previousHole">
       <%= icon "chevron_left", class: "w-5 h-5" %>
@@ -110,6 +69,43 @@
       <%= icon "chevron_right", class: "w-5 h-5" %>
     </button>
   </div>
+
+  <section>
+    <h2 class="text-sm font-semibold text-muted-foreground mb-3">Round stats</h2>
+    <%= render "ui/card", padding: :sm do %>
+      <%= render "ui/stat_grid", columns: 2 do %>
+        <div class="ui-stat">
+          <div class="ui-stat-value text-primary-600" data-round-target="oopTeeShots">0</div>
+          <div class="ui-stat-label">OOP Tee Shots</div>
+        </div>
+        <div class="ui-stat">
+          <div class="ui-stat-value text-primary-600" data-round-target="threePutts">0</div>
+          <div class="ui-stat-label">3 Putts</div>
+        </div>
+        <div class="ui-stat">
+          <div class="ui-stat-value text-primary-600" data-round-target="botchedUpDowns">0</div>
+          <div class="ui-stat-label">Botched Up/Down</div>
+        </div>
+        <div class="ui-stat">
+          <div class="ui-stat-value text-primary-600" data-round-target="insidePw9i">E</div>
+          <div class="ui-stat-label">Inside PW/9i</div>
+        </div>
+      <% end %>
+      <div class="mt-2 pt-3 border-t border-border text-center">
+        <button type="button"
+                class="text-sm font-medium text-primary-600 hover:text-primary-700 touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md"
+                data-action="round#editStats">
+          Update stats
+        </button>
+      </div>
+    <% end %>
+    <p class="hidden mt-5 flex items-center justify-center gap-1.5 text-xs text-muted-foreground"
+       data-round-target="statsLastHole"
+       aria-live="polite">
+      <%= icon "pencil", class: "w-3.5 h-3.5 shrink-0" %>
+      <span data-round-target="statsLastHoleLabel">Stats updated in 1st hole</span>
+    </p>
+  </section>
 
   <button type="button"
           class="ui-btn-ghost ui-btn-md w-full text-destructive"
@@ -200,6 +196,39 @@
       <div class="flex gap-2">
         <button type="button" class="ui-btn-secondary ui-btn-md flex-1" data-action="round#closePanels">Cancel</button>
         <button type="button" class="ui-btn-danger ui-btn-md flex-1" data-action="round#confirmReset">Reset round</button>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="fixed inset-x-4 bottom-4 z-50 hidden" data-round-target="statsPanel">
+    <%= render "ui/card", padding: :sm do %>
+      <h3 class="font-semibold mb-3">Update stats</h3>
+      <div class="flex flex-wrap gap-2 mb-4">
+        <span class="ui-badge ui-badge-primary ui-badge-sm" data-round-target="statsPanelHole">Hole 1</span>
+      </div>
+      <div class="space-y-4">
+        <% [
+          ["OOP Tee Shots", "oopTeeShots"],
+          ["Botched Up/Down", "botchedUpDowns"],
+          ["Inside PW/9i", "insidePw9i"]
+        ].each do |label, stat| %>
+          <div class="flex items-center justify-between gap-3">
+            <span class="text-sm font-medium"><%= label %></span>
+            <div class="flex items-center gap-2">
+              <button type="button" class="ui-icon-btn" data-action="round#decrementStat" data-stat="<%= stat %>" aria-label="Decrease <%= label %>">
+                <%= icon "minus", class: "w-5 h-5" %>
+              </button>
+              <span class="w-10 text-center text-lg font-semibold" data-round-target="draftValue" data-stat="<%= stat %>">0</span>
+              <button type="button" class="ui-icon-btn" data-action="round#incrementStat" data-stat="<%= stat %>" aria-label="Increase <%= label %>">
+                <%= icon "plus", class: "w-5 h-5" %>
+              </button>
+            </div>
+          </div>
+        <% end %>
+        <div class="flex gap-2 pt-1">
+          <button type="button" class="ui-btn-secondary ui-btn-md flex-1" data-action="round#closePanels">Cancel</button>
+          <button type="button" class="ui-btn-primary ui-btn-md flex-1" data-action="round#saveStats">Save</button>
+        </div>
       </div>
     <% end %>
   </div>
