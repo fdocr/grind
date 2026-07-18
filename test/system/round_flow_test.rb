@@ -24,6 +24,8 @@ class RoundFlowTest < ApplicationSystemTestCase
         find("[data-round-target='puttsPicker'] [data-value='3']").click
       end
       click_button "Save"
+      assert_text "Update stats"
+      click_button "Cancel"
       break if index == 17
     end
 
@@ -48,13 +50,13 @@ class RoundFlowTest < ApplicationSystemTestCase
     click_button "Post Score"
     find("[data-round-target='puttsPicker'] [data-value='3']").click
     click_button "Save"
+    assert_text "Update stats"
+    find("[data-stat='oopTeeShots'][data-action*='incrementStat']").click
+    click_button "Save"
 
     assert_text "2nd hole"
-
     assert_equal "1", find("[data-round-target='threePutts']").text
-
-    find("[data-stat='oopTeeShots'][data-action*='increment']").click
-    assert_text "2nd hole"
+    assert_equal "1", find("[data-round-target='oopTeeShots']").text
 
     click_button "Reset round"
     assert_text "Reset round?"
@@ -67,6 +69,7 @@ class RoundFlowTest < ApplicationSystemTestCase
     assert_text "1st hole"
     assert_text "Even"
     assert_equal "0", find("[data-round-target='threePutts']").text
+    assert_equal "0", find("[data-round-target='oopTeeShots']").text
     assert_no_selector "[data-round-target='statsLastHole']", visible: :visible
   end
 
@@ -78,6 +81,8 @@ class RoundFlowTest < ApplicationSystemTestCase
     click_button "Post Score"
     assert_text "Post score"
     click_button "Save"
+    assert_text "Update stats"
+    click_button "Cancel"
 
     click_button "Holes"
 
@@ -96,6 +101,8 @@ class RoundFlowTest < ApplicationSystemTestCase
     click_button "Post Score"
     find("[data-round-target='puttsPicker'] [data-value='3']").click
     click_button "Save"
+    assert_text "Update stats"
+    click_button "Cancel"
     assert_text "2nd hole"
     assert_equal "1", find("[data-round-target='threePutts']").text
 
@@ -124,6 +131,8 @@ class RoundFlowTest < ApplicationSystemTestCase
 
     click_button "Post Score"
     click_button "Save"
+    assert_text "Update stats"
+    click_button "Cancel"
 
     assert_text "1st hole"
   end
@@ -133,6 +142,8 @@ class RoundFlowTest < ApplicationSystemTestCase
 
     click_button "Post Score"
     click_button "Save"
+    assert_text "Update stats"
+    click_button "Cancel"
     assert_text "2nd hole"
 
     click_button "Holes"
@@ -140,7 +151,30 @@ class RoundFlowTest < ApplicationSystemTestCase
 
     click_button "Post Score"
     click_button "Save"
+    assert_text "Update stats"
+    click_button "Cancel"
 
     assert_text "18th hole"
+  end
+
+  test "stats are edited through the post-score modal and attributed to the scored hole" do
+    start_course_round!(@course)
+
+    click_button "Post Score"
+    click_button "Save"
+
+    assert_text "Update stats"
+    assert_selector "[data-round-target='statsPanelHole']", text: "Hole 1"
+    assert_text "2nd hole"
+
+    find("[data-stat='oopTeeShots'][data-action*='incrementStat']").click
+    click_button "Save"
+
+    assert_no_selector "[data-round-target='statsPanel']:not(.hidden)"
+    assert_equal "1", find("[data-round-target='oopTeeShots']").text
+    assert_selector "[data-round-target='statsLastHole']", text: /1st hole/
+    within("section", text: "Round stats") do
+      assert_no_selector "button.ui-icon-btn"
+    end
   end
 end

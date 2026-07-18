@@ -5,9 +5,10 @@ const DISTANCES_PAYLOAD_KEY = "grind:distancesPayload"
 export default class extends Controller {
   static targets = [
     "scoreToPar", "holeNumber", "insidePw9i", "oopTeeShots", "threePutts", "botchedUpDowns",
-    "scorePanel", "holesPanel", "scorecardPanel", "resetPanel", "distancesPanel", "distancesLink", "overlay",
+    "scorePanel", "holesPanel", "scorecardPanel", "resetPanel", "statsPanel", "distancesPanel", "distancesLink", "overlay",
     "grossInput", "puttsInput", "grossPicker", "puttsPicker",
     "scorePanelHole", "scorePanelPar", "scorePanelHcp", "scorePanelYards", "holeMeta",
+    "statsPanelHole", "draftValue",
     "finishButton", "finishForm", "startedAt",
     "scorecardBody", "holesList", "statsLastHole", "statsLastHoleLabel", "holeScoredIcon"
   ]
@@ -379,35 +380,57 @@ export default class extends Controller {
     return button
   }
 
-  touchStatCounter() {
-    this.state.statsLastHole = this.state.currentHole
-  }
-
-  increment(event) {
-    const stat = event.currentTarget.dataset.stat
-    if (stat === "insidePw9i") {
-      this.state.insidePw9i += 1
-    } else {
-      this.state[stat] += 1
-    }
-    this.touchStatCounter()
-    this.render()
-  }
-
-  decrement(event) {
-    const stat = event.currentTarget.dataset.stat
-    if (stat === "insidePw9i") {
-      this.state.insidePw9i -= 1
-    } else if (this.state[stat] > 0) {
-      this.state[stat] -= 1
-    }
-    this.touchStatCounter()
-    this.render()
-  }
-
   openScorePanel() {
     this.populatePostScorePanel()
     this.showPanel(this.scorePanelTarget)
+  }
+
+  // Stats are only editable here, right after posting a score. Edits buffer in
+  // a draft and commit on Save; Cancel / overlay tap discards them.
+  openStatsPanel(holeNumber = this.state.currentHole) {
+    this.statsHole = holeNumber
+    this.statsDraft = {
+      oopTeeShots: this.state.oopTeeShots,
+      botchedUpDowns: this.state.botchedUpDowns,
+      insidePw9i: this.state.insidePw9i
+    }
+    if (this.hasStatsPanelHoleTarget) {
+      this.statsPanelHoleTarget.textContent = `Hole ${holeNumber}`
+    }
+    this.renderStatsDraft()
+    this.showPanel(this.statsPanelTarget)
+  }
+
+  renderStatsDraft() {
+    this.draftValueTargets.forEach((element) => {
+      const stat = element.dataset.stat
+      const value = this.statsDraft[stat]
+      element.textContent = stat === "insidePw9i" ? this.formatInside(value) : value
+    })
+  }
+
+  incrementStat(event) {
+    this.statsDraft[event.currentTarget.dataset.stat] += 1
+    this.renderStatsDraft()
+  }
+
+  decrementStat(event) {
+    const stat = event.currentTarget.dataset.stat
+    // insidePw9i is a +/- differential and may go negative; counters floor at 0.
+    if (stat === "insidePw9i" || this.statsDraft[stat] > 0) {
+      this.statsDraft[stat] -= 1
+      this.renderStatsDraft()
+    }
+  }
+
+  saveStats() {
+    const stats = ["oopTeeShots", "botchedUpDowns", "insidePw9i"]
+    const changed = stats.some((stat) => this.statsDraft[stat] !== this.state[stat])
+
+    stats.forEach((stat) => { this.state[stat] = this.statsDraft[stat] })
+    if (changed) this.state.statsLastHole = this.statsHole
+    this.closePanels()
+    this.render()
   }
 
   populatePostScorePanel() {
@@ -522,6 +545,7 @@ export default class extends Controller {
       this.hasHolesPanelTarget && this.holesPanelTarget,
       this.hasScorecardPanelTarget && this.scorecardPanelTarget,
       this.hasResetPanelTarget && this.resetPanelTarget,
+      this.hasStatsPanelTarget && this.statsPanelTarget,
       this.hasDistancesPanelTarget && this.distancesPanelTarget
     ].filter(Boolean)
   }
@@ -543,12 +567,12 @@ export default class extends Controller {
   saveHoleScore() {
     const gross = Number(this.grossInputTarget.value)
     const putts = Number(this.puttsInputTarget.value)
+    const scoredHole = this.state.currentHole
 
-    this.state.holes[this.state.currentHole] = { gross, putts }
+    this.state.holes[scoredHole] = { gross, putts }
     this.advanceAfterScore()
-
-    this.closePanels()
     this.render()
+    this.openStatsPanel(scoredHole)
   }
 
   // After posting, advance to the next hole. On the last hole, wrap to hole 1
