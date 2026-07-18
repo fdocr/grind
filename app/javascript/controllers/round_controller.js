@@ -221,7 +221,7 @@ export default class extends Controller {
 
     this.statsLastHoleTarget.classList.remove("hidden")
     if (this.hasStatsLastHoleLabelTarget) {
-      this.statsLastHoleLabelTarget.textContent = this.ordinalHole(hole)
+      this.statsLastHoleLabelTarget.textContent = `Stats updated in ${this.ordinalHole(hole)}`
     }
   }
 
@@ -385,17 +385,23 @@ export default class extends Controller {
     this.showPanel(this.scorePanelTarget)
   }
 
-  // Stats are only editable here, right after posting a score. Edits buffer in
-  // a draft and commit on Save; Cancel / overlay tap discards them.
+  // Shortcut from the Round stats header — same modal as after posting a score.
+  editStats() {
+    this.openStatsPanel(this.state.currentHole)
+  }
+
+  // Stats modal: edits buffer in a draft and commit on Save; Cancel / overlay
+  // tap discards them. holeNumber is the hole to attribute (scored hole after
+  // Post Score, or the current hole when opened via the pencil shortcut).
   openStatsPanel(holeNumber = this.state.currentHole) {
-    this.statsHole = holeNumber
+    this.statsHole = typeof holeNumber === "number" ? holeNumber : this.state.currentHole
     this.statsDraft = {
       oopTeeShots: this.state.oopTeeShots,
       botchedUpDowns: this.state.botchedUpDowns,
       insidePw9i: this.state.insidePw9i
     }
     if (this.hasStatsPanelHoleTarget) {
-      this.statsPanelHoleTarget.textContent = `Hole ${holeNumber}`
+      this.statsPanelHoleTarget.textContent = `Hole ${this.statsHole}`
     }
     this.renderStatsDraft()
     this.showPanel(this.statsPanelTarget)

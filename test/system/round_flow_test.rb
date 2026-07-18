@@ -172,9 +172,24 @@ class RoundFlowTest < ApplicationSystemTestCase
 
     assert_no_selector "[data-round-target='statsPanel']:not(.hidden)"
     assert_equal "1", find("[data-round-target='oopTeeShots']").text
-    assert_selector "[data-round-target='statsLastHole']", text: /1st hole/
+    assert_selector "[data-round-target='statsLastHole']", text: /Stats updated in 1st hole/
     within("section", text: "Round stats") do
       assert_no_selector "button.ui-icon-btn"
     end
+  end
+
+  test "stats pencil shortcut opens the update stats modal for the current hole" do
+    start_course_round!(@course)
+
+    within("section", text: "Round stats") { click_button "Update stats" }
+
+    assert_text "Update stats"
+    assert_selector "[data-round-target='statsPanelHole']", text: "Hole 1"
+
+    find("[data-stat='botchedUpDowns'][data-action*='incrementStat']").click
+    click_button "Save"
+
+    assert_equal "1", find("[data-round-target='botchedUpDowns']").text
+    assert_selector "[data-round-target='statsLastHole']", text: /Stats updated in 1st hole/
   end
 end

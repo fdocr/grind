@@ -91,12 +91,19 @@
           <div class="ui-stat-label">Inside PW/9i</div>
         </div>
       <% end %>
+      <div class="mt-2 pt-3 border-t border-border text-center">
+        <button type="button"
+                class="text-sm font-medium text-primary-600 hover:text-primary-700 touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md"
+                data-action="round#editStats">
+          Update stats
+        </button>
+      </div>
     <% end %>
-    <p class="hidden mt-2 flex items-center justify-center gap-1.5 text-xs text-muted-foreground"
+    <p class="hidden mt-5 flex items-center justify-center gap-1.5 text-xs text-muted-foreground"
        data-round-target="statsLastHole"
        aria-live="polite">
       <%= icon "pencil", class: "w-3.5 h-3.5 shrink-0" %>
-      <span data-round-target="statsLastHoleLabel">1st hole</span>
+      <span data-round-target="statsLastHoleLabel">Stats updated in 1st hole</span>
     </p>
   </section>
 
