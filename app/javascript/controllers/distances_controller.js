@@ -14,11 +14,10 @@ const TOO_FAR_METERS = 800
 // and an optional pivot that splits the shot into two segments.
 //
 // This is a Hotwire Native BridgeComponent named "geolocation". When running
-// inside the native apps (which register the matching component) it streams
-// high-accuracy coordinates from CoreLocation / FusedLocationProvider over the
-// bridge, avoiding the WKWebView double permission prompt. In every other
-// context (mobile/desktop browsers, PWA) it transparently falls back to
-// navigator.geolocation.watchPosition, exactly as before.
+// inside the native apps it always uses the bridge (CoreLocation /
+// FusedLocationProvider) — never navigator.geolocation — so WKWebView does not
+// also prompt for location. send("start") queues until the bridge adapter is
+// ready. Browsers / PWA fall back to watchPosition as before.
 export default class extends BridgeComponent {
   static component = "geolocation"
   static targets = [
@@ -37,6 +36,16 @@ export default class extends BridgeComponent {
   // always load so the browser fallback keeps working.
   static get shouldLoad() {
     return true
+  }
+
+  // True inside Hotwire Native even before the bridge adapter attaches
+  // (when this.enabled is still false). Prefer UA / dataset over this.enabled.
+  get nativeApp() {
+    const { bridgePlatform, bridgeComponents } = document.documentElement.dataset
+    if (bridgePlatform || (bridgeComponents && bridgeComponents.includes("geolocation"))) return true
+
+    const ua = navigator.userAgent || ""
+    return /\bHotwire Native\b/i.test(ua) || /bridge-components:\s*\[[^\]]*geolocation/.test(ua)
   }
 
   connect() {
@@ -144,12 +153,7 @@ export default class extends BridgeComponent {
   }
 
   stop() {
-    if (this.enabled) {
-      this.send("stop")
-    } else if (this.watchId !== null) {
-      navigator.geolocation.clearWatch(this.watchId)
-      this.watchId = null
-    }
+    this.stopWatchOnly()
     this.destroyMap()
   }
 
@@ -161,7 +165,9 @@ export default class extends BridgeComponent {
     this.stopWatchOnly()
     if (!this.position) this.showStatus("Finding your location…")
 
-    if (this.enabled) {
+    // Native apps: always bridge — never navigator.geolocation (avoids a second
+    // WKWebView permission prompt while CoreLocation is also requesting).
+    if (this.enabled || this.nativeApp) {
       this.beginNativeWatch()
     } else {
       this.beginWebWatch()
@@ -170,7 +176,9 @@ export default class extends BridgeComponent {
 
   // Stop GPS without tearing down the map (used when restarting the watch).
   stopWatchOnly() {
-    if (this.enabled) {
+    this.clearNativeWatchTimeout()
+
+    if (this.enabled || this.nativeApp) {
       this.send("stop")
     } else if (this.watchId !== null) {
       navigator.geolocation.clearWatch(this.watchId)
@@ -179,9 +187,16 @@ export default class extends BridgeComponent {
   }
 
   // Native path: ask the bridge to start streaming coordinates. The callback
-  // fires on every native reply, mirroring watchPosition semantics.
+  // fires on every native reply, mirroring watchPosition semantics. Messages
+  // queue if the adapter is not attached yet.
   beginNativeWatch() {
+    this.clearNativeWatchTimeout()
+    this.nativeWatchTimeout = window.setTimeout(() => {
+      if (!this.position) this.showStatus("We couldn't find your location. Try again.")
+    }, 15000)
+
     this.send("start", {}, (message) => {
+      this.clearNativeWatchTimeout()
       const data = this.dataFrom(message)
       if (data.error) {
         this.onNativeError(data.error)
@@ -189,6 +204,13 @@ export default class extends BridgeComponent {
         this.onPosition({ coords: { latitude: data.latitude, longitude: data.longitude, accuracy: data.accuracy } })
       }
     })
+  }
+
+  clearNativeWatchTimeout() {
+    if (this.nativeWatchTimeout) {
+      clearTimeout(this.nativeWatchTimeout)
+      this.nativeWatchTimeout = null
+    }
   }
 
   beginWebWatch() {

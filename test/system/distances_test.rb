@@ -115,7 +115,7 @@ class DistancesTest < ApplicationSystemTestCase
     browser = page.driver.browser
     browser.execute_cdp(
       "Network.setUserAgentOverride",
-      userAgent: "Grind/1.0 Hotwire Native iOS; Turbo Native iOS;"
+      userAgent: "Grind/1.0 Hotwire Native iOS; Turbo Native iOS; bridge-components: [geolocation menu]"
     )
 
     begin
@@ -124,7 +124,6 @@ class DistancesTest < ApplicationSystemTestCase
       assert_selector "a[href='#{distances_path}']", text: "Distances"
       assert_selector "[data-round-target='distancesPanel']", visible: :hidden
 
-      stub_geolocation(latitude: 9.981234, longitude: -84.156789, accuracy: 5)
       page.execute_script(<<~JS)
         Object.defineProperty(navigator, "onLine", { configurable: true, get: () => false })
       JS
@@ -133,7 +132,9 @@ class DistancesTest < ApplicationSystemTestCase
 
       assert_no_current_path distances_path
       assert_selector "[data-round-target='distancesPanel']:not(.hidden)"
-      assert_selector "[data-distances-target='center']", text: /\d/, wait: 5
+      # Native UA uses the geolocation bridge (no WKWebView GPS); without a real
+      # bridge, Distances stays on the locating/status UI rather than yardages.
+      assert_text(/Finding your location|couldn't find your location|Enable location/i)
     ensure
       browser.execute_cdp(
         "Network.setUserAgentOverride",
