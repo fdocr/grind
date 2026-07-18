@@ -170,10 +170,20 @@ export default class extends Controller {
     this.saveState()
   }
 
-  // Native Distances modal: stash the current hole's green in localStorage so
-  // the generic /distances shell can render offline without a course fetch.
-  // Must be localStorage (not sessionStorage): Hotwire Native modals use a
-  // separate WKWebView, and sessionStorage is not shared across web views.
+  // Native Distances: online → modal (/distances shell); offline → in-page
+  // overlay so green distances still work without a shell network fetch.
+  openDistances(event) {
+    this.persistDistancesPayload()
+
+    if (navigator.onLine === false) {
+      event.preventDefault()
+      this.openDistancesPanel()
+    }
+  }
+
+  // Stash the current hole's green in localStorage so the generic /distances
+  // shell can render without a course fetch. Must be localStorage (not
+  // sessionStorage): Hotwire Native modals use a separate WKWebView.
   persistDistancesPayload() {
     const hole = this.currentHoleData() || {}
     localStorage.setItem(DISTANCES_PAYLOAD_KEY, JSON.stringify({

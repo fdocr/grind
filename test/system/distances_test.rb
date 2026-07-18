@@ -111,6 +111,37 @@ class DistancesTest < ApplicationSystemTestCase
     assert_selector "[data-distances-target='center']", text: /\d/, wait: 5
   end
 
+  test "native offline distances opens the in-page overlay instead of navigating" do
+    browser = page.driver.browser
+    browser.execute_cdp(
+      "Network.setUserAgentOverride",
+      userAgent: "Grind/1.0 Hotwire Native iOS; Turbo Native iOS;"
+    )
+
+    begin
+      start_course_round!(@course)
+      assert_text "Round stats"
+      assert_selector "a[href='#{distances_path}']", text: "Distances"
+      assert_selector "[data-round-target='distancesPanel']", visible: :hidden
+
+      stub_geolocation(latitude: 9.981234, longitude: -84.156789, accuracy: 5)
+      page.execute_script(<<~JS)
+        Object.defineProperty(navigator, "onLine", { configurable: true, get: () => false })
+      JS
+
+      click_link "Distances"
+
+      assert_no_current_path distances_path
+      assert_selector "[data-round-target='distancesPanel']:not(.hidden)"
+      assert_selector "[data-distances-target='center']", text: /\d/, wait: 5
+    ensure
+      browser.execute_cdp(
+        "Network.setUserAgentOverride",
+        userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+      )
+    end
+  end
+
   private
 
   def stub_geolocation(latitude:, longitude:, accuracy:)

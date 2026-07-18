@@ -43,7 +43,7 @@
             data: {
               round_target: "distancesLink",
               turbo_frame: "_top",
-              action: "click->round#persistDistancesPayload"
+              action: "click->round#openDistances"
             } %>
     <% else %>
       <button type="button" class="ui-btn-secondary ui-btn-md w-full" data-action="round#openDistancesPanel">Distances</button>
@@ -163,9 +163,9 @@
     <% end %>
   </div>
 
-  <% unless hotwire_native_app? %>
-    <%= render "rounds/distances", course: @course, standalone: false %>
-  <% end %>
+  <%# Native also keeps the overlay as an offline fallback when /distances
+      cannot be fetched for the modal shell. %>
+  <%= render "rounds/distances", course: @course, standalone: false %>
 
   <div class="fixed inset-x-4 bottom-4 z-50 hidden max-h-[70vh] overflow-y-auto" data-round-target="holesPanel">
     <%= render "ui/card", padding: :sm do %>
