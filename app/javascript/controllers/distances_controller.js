@@ -6,6 +6,15 @@ const STORAGE_KEY = "grind:distanceUnit"
 const PAYLOAD_KEY = "grind:distancesPayload"
 const TOO_FAR_METERS = 800
 
+// First-paint GPS warm-up: avoid flashing a coarse fix before GPS settles.
+const GOOD_ACCURACY_M = 30
+const MIN_WARMUP_SAMPLES = 3
+const MIN_WARMUP_MS = 2000
+const MAX_WARMUP_MS = 4500
+// After lock: ignore jitter unless we moved or accuracy improved meaningfully.
+const MOVE_UPDATE_M = 2.5
+const ACCURACY_IMPROVE_M = 5
+
 // Live GPS distances to the front, center and back of the current hole's green.
 // Green geometry is passed in from the round controller (embedded in the page),
 // so this works offline. The math lives in lib/geo.js to stay testable.
@@ -21,7 +30,8 @@ const TOO_FAR_METERS = 800
 export default class extends BridgeComponent {
   static component = "geolocation"
   static targets = [
-    "front", "center", "back", "accuracy", "status", "statusMessage", "empty", "tooFar", "content",
+    "front", "center", "back", "accuracy", "status", "statusLoading", "statusLoadingMessage",
+    "statusError", "statusErrorTitle", "statusErrorMessage", "empty", "tooFar", "content",
     "unitOption", "numbers", "map", "mapContainer", "clearPivot", "viewOption", "viewToggle", "holeLabel"
   ]
   static values = {
@@ -52,13 +62,12 @@ export default class extends BridgeComponent {
     super.connect()
     this.unit = localStorage.getItem(STORAGE_KEY) || this.unitValue || "yds"
     this.green = null
-    this.position = null
-    this.accuracy = null
     this.watchId = null
     this.view = "numbers"
     this.pivot = null
     this.distanceMap = null
     this.didFitMap = false
+    this.resetGpsFix()
     this.syncUnitButtons()
     this.syncViewButtons()
 
@@ -137,6 +146,7 @@ export default class extends BridgeComponent {
     this.pivot = null
     this.view = "numbers"
     this.didFitMap = false
+    this.resetGpsFix()
     this.destroyMap()
     this.syncViewButtons()
     this.syncViewVisibility()
@@ -148,7 +158,6 @@ export default class extends BridgeComponent {
       return
     }
 
-    if (this.position) this.render()
     this.beginWatch()
   }
 
@@ -163,7 +172,8 @@ export default class extends BridgeComponent {
 
   beginWatch() {
     this.stopWatchOnly()
-    if (!this.position) this.showStatus("Finding your location…")
+    this.resetGpsFix()
+    this.showLoading("Finding your location…")
 
     // Native apps: always bridge — never navigator.geolocation (avoids a second
     // WKWebView permission prompt while CoreLocation is also requesting).
@@ -177,6 +187,7 @@ export default class extends BridgeComponent {
   // Stop GPS without tearing down the map (used when restarting the watch).
   stopWatchOnly() {
     this.clearNativeWatchTimeout()
+    this.clearWarmupTimeout()
 
     if (this.enabled || this.nativeApp) {
       this.send("stop")
@@ -186,13 +197,24 @@ export default class extends BridgeComponent {
     }
   }
 
+  resetGpsFix() {
+    this.clearWarmupTimeout()
+    this.position = null
+    this.accuracy = null
+    this.gpsLocked = false
+    this.gpsSamples = []
+    this.gpsWarmupStartedAt = null
+  }
+
   // Native path: ask the bridge to start streaming coordinates. The callback
   // fires on every native reply, mirroring watchPosition semantics. Messages
   // queue if the adapter is not attached yet.
   beginNativeWatch() {
     this.clearNativeWatchTimeout()
     this.nativeWatchTimeout = window.setTimeout(() => {
-      if (!this.position) this.showStatus("We couldn't find your location. Try again.")
+      if (!this.position) {
+        this.showError("We couldn't find your location", "Check that Location is on, then try again.")
+      }
     }, 15000)
 
     this.send("start", {}, (message) => {
@@ -215,7 +237,7 @@ export default class extends BridgeComponent {
 
   beginWebWatch() {
     if (!("geolocation" in navigator)) {
-      this.showStatus("Location is not available on this device.")
+      this.showError("Location is not available", "This device can't provide GPS for distances.")
       return
     }
 
@@ -227,24 +249,113 @@ export default class extends BridgeComponent {
   }
 
   onPosition(position) {
-    this.position = [position.coords.latitude, position.coords.longitude]
-    this.accuracy = position.coords.accuracy
+    const coords = position && position.coords
+    if (!coords || typeof coords.latitude !== "number" || typeof coords.longitude !== "number") return
+
+    const sample = {
+      position: [coords.latitude, coords.longitude],
+      accuracy: Number.isFinite(coords.accuracy) ? coords.accuracy : Infinity,
+      at: Date.now()
+    }
+
+    if (!this.gpsLocked) {
+      this.collectWarmupSample(sample)
+      return
+    }
+
+    if (!this.shouldAcceptLockedSample(sample)) return
+    this.applySample(sample)
+  }
+
+  collectWarmupSample(sample) {
+    if (!this.gpsWarmupStartedAt) {
+      this.gpsWarmupStartedAt = sample.at
+      this.gpsSamples.push(sample)
+      // Sharp first fix: paint immediately without a "warming up" flash.
+      if (this.warmupReady()) {
+        this.lockBestSample()
+        return
+      }
+      this.showLoading("Getting a better GPS fix…")
+      this.scheduleWarmupDeadline()
+      return
+    }
+
+    this.gpsSamples.push(sample)
+    if (this.warmupReady()) this.lockBestSample()
+  }
+
+  warmupReady() {
+    if (!this.gpsWarmupStartedAt || this.gpsSamples.length === 0) return false
+
+    const elapsed = Date.now() - this.gpsWarmupStartedAt
+    const best = this.bestSample()
+    if (best && best.accuracy <= GOOD_ACCURACY_M) return true
+    if (this.gpsSamples.length >= MIN_WARMUP_SAMPLES && elapsed >= MIN_WARMUP_MS) return true
+    if (elapsed >= MAX_WARMUP_MS) return true
+    return false
+  }
+
+  bestSample() {
+    if (!this.gpsSamples.length) return null
+
+    return this.gpsSamples.reduce((best, sample) => (
+      sample.accuracy < best.accuracy ? sample : best
+    ))
+  }
+
+  lockBestSample() {
+    const best = this.bestSample()
+    if (!best) return
+
+    this.clearWarmupTimeout()
+    this.gpsLocked = true
+    this.gpsSamples = []
+    this.applySample(best)
+  }
+
+  scheduleWarmupDeadline() {
+    this.clearWarmupTimeout()
+    this.warmupTimeout = window.setTimeout(() => {
+      if (!this.gpsLocked && this.gpsSamples.length > 0) this.lockBestSample()
+    }, MAX_WARMUP_MS)
+  }
+
+  clearWarmupTimeout() {
+    if (this.warmupTimeout) {
+      clearTimeout(this.warmupTimeout)
+      this.warmupTimeout = null
+    }
+  }
+
+  shouldAcceptLockedSample(sample) {
+    if (!this.position) return true
+
+    const moved = haversineMeters(this.position, sample.position)
+    if (moved >= MOVE_UPDATE_M) return true
+    if (sample.accuracy <= this.accuracy - ACCURACY_IMPROVE_M) return true
+    return false
+  }
+
+  applySample(sample) {
+    this.position = sample.position
+    this.accuracy = sample.accuracy
     this.render()
   }
 
   onError(error) {
     if (error && error.code === 1) {
-      this.showStatus("Enable location access to see distances.")
+      this.showError("Location access needed", "Enable location to see distances to the green.")
     } else {
-      this.showStatus("We couldn't find your location. Try again.")
+      this.showError("We couldn't find your location", "Check that Location is on, then try again.")
     }
   }
 
   onNativeError(code) {
     if (code === "denied") {
-      this.showStatus("Enable location access to see distances.")
+      this.showError("Location access needed", "Enable location to see distances to the green.")
     } else {
-      this.showStatus("We couldn't find your location. Try again.")
+      this.showError("We couldn't find your location", "Check that Location is on, then try again.")
     }
   }
 
@@ -449,8 +560,21 @@ export default class extends BridgeComponent {
     this.toggle(this.clearPivotTarget, Boolean(this.pivot))
   }
 
-  showStatus(message) {
-    if (this.hasStatusMessageTarget) this.statusMessageTarget.textContent = message
+  showLoading(message) {
+    if (this.hasStatusLoadingMessageTarget) this.statusLoadingMessageTarget.textContent = message
+    if (this.hasStatusLoadingTarget) this.toggle(this.statusLoadingTarget, true)
+    if (this.hasStatusErrorTarget) this.toggle(this.statusErrorTarget, false)
+    this.showState("status")
+  }
+
+  showError(title, message) {
+    if (this.hasStatusErrorTitleTarget) this.statusErrorTitleTarget.textContent = title
+    if (this.hasStatusErrorMessageTarget) {
+      this.statusErrorMessageTarget.textContent = message || ""
+      this.toggle(this.statusErrorMessageTarget, Boolean(message))
+    }
+    if (this.hasStatusLoadingTarget) this.toggle(this.statusLoadingTarget, false)
+    if (this.hasStatusErrorTarget) this.toggle(this.statusErrorTarget, true)
     this.showState("status")
   }
 

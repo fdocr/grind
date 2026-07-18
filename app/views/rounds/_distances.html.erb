@@ -69,12 +69,7 @@
           </div>
         </div>
 
-        <div class="hidden absolute inset-0 flex items-center justify-center text-center px-4" data-distances-target="status">
-          <div class="space-y-3">
-            <p class="text-sm text-muted-foreground" data-distances-target="statusMessage">Finding your location…</p>
-            <button type="button" class="ui-btn-secondary ui-btn-sm" data-action="distances#retry">Try again</button>
-          </div>
-        </div>
+        <%= render "rounds/distances_status", fill: true %>
 
         <div class="hidden absolute inset-0 flex items-center justify-center overflow-y-auto" data-distances-target="empty">
           <%= render "ui/empty_state",
@@ -160,10 +155,7 @@
         <p class="text-sm text-muted-foreground mt-1">Distances will appear here once you're closer</p>
       </div>
 
-      <div class="hidden py-2 text-center space-y-3" data-distances-target="status">
-        <p class="text-sm text-muted-foreground" data-distances-target="statusMessage">Finding your location…</p>
-        <button type="button" class="ui-btn-secondary ui-btn-sm" data-action="distances#retry">Try again</button>
-      </div>
+      <%= render "rounds/distances_status", fill: false %>
 
       <div class="hidden" data-distances-target="empty">
         <%= render "ui/empty_state",

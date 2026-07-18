@@ -134,7 +134,7 @@ class DistancesTest < ApplicationSystemTestCase
       assert_selector "[data-round-target='distancesPanel']:not(.hidden)"
       # Native UA uses the geolocation bridge (no WKWebView GPS); without a real
       # bridge, Distances stays on the locating/status UI rather than yardages.
-      assert_text(/Finding your location|couldn't find your location|Enable location/i)
+      assert_text(/Finding your location|Getting a better GPS|couldn't find your location|Location access needed/i)
     ensure
       browser.execute_cdp(
         "Network.setUserAgentOverride",
