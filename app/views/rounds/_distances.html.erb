@@ -1,0 +1,177 @@
+<%# locals: (course: nil, unit: nil, standalone: false) %>
+<%
+  unit ||= course&.metric? ? "m" : "yds"
+%>
+<% if standalone %>
+  <div class="distances-standalone flex flex-col flex-1 min-h-0"
+       data-controller="distances"
+       data-distances-unit-value="<%= unit %>"
+       data-distances-tile-url-value="<%= satellite_tile_url %>"
+       data-distances-tile-attribution-value="<%= satellite_tile_attribution %>"
+       data-distances-autostart-value="true">
+    <%= render "ui/card", padding: :sm, extra_class: "flex flex-col flex-1 min-h-0 overflow-hidden" do %>
+      <div class="flex items-center justify-between gap-3 shrink-0 mb-3">
+        <div class="ui-segmented" role="group" aria-label="Distance unit">
+          <button type="button" class="ui-segmented-option" data-distances-target="unitOption" data-value="yds" data-action="distances#setUnit">yds</button>
+          <button type="button" class="ui-segmented-option" data-distances-target="unitOption" data-value="m" data-action="distances#setUnit">m</button>
+        </div>
+        <span class="ui-badge ui-badge-neutral ui-badge-sm shrink-0 hidden" data-distances-target="holeLabel"></span>
+      </div>
+
+      <div class="distances-stage relative flex-1 min-h-0">
+        <div class="hidden absolute inset-0 flex flex-col min-h-0" data-distances-target="content">
+          <div class="relative flex-1 min-h-0">
+            <div data-distances-target="numbers" data-state="active" class="distance-view-panel distance-view-panel--fill">
+              <div class="distance-view-panel-inner h-full">
+                <div class="flex h-full items-center justify-center gap-5">
+                  <div class="flex h-40 w-40 shrink-0 items-center justify-center rounded-full border-4 border-primary-500">
+                    <span class="text-4xl font-bold leading-none text-primary-600" data-distances-target="center">—</span>
+                  </div>
+
+                  <div class="flex flex-col justify-between h-40 py-1">
+                    <div>
+                      <p class="text-xs uppercase tracking-wide text-muted-foreground">Back</p>
+                      <p class="text-xl font-semibold text-foreground" data-distances-target="back">—</p>
+                    </div>
+                    <div>
+                      <p class="text-xs uppercase tracking-wide text-muted-foreground">Front</p>
+                      <p class="text-xl font-semibold text-foreground" data-distances-target="front">—</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div data-distances-target="map" data-state="inactive" class="distance-view-panel distance-view-panel--fill">
+              <div class="distance-view-panel-inner h-full">
+                <div class="relative h-full min-h-0">
+                  <div class="h-full min-h-0 overflow-hidden rounded-md" data-distances-target="mapContainer"></div>
+                  <button type="button"
+                          class="ui-btn-secondary ui-btn-xs absolute top-2 right-2 z-[1000] hidden shadow-md"
+                          data-distances-target="clearPivot"
+                          data-action="distances#clearPivot"
+                          aria-label="Clear pivot">
+                    <%= icon "close", class: "w-3.5 h-3.5" %>
+                    Clear
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <p class="text-xs text-muted-foreground mt-2 text-center shrink-0" data-distances-target="accuracy"></p>
+        </div>
+
+        <div class="hidden absolute inset-0 flex items-center justify-center text-center px-4" data-distances-target="tooFar">
+          <div>
+            <p class="text-base font-medium text-foreground">You're too far away from the hole</p>
+            <p class="text-sm text-muted-foreground mt-1">Distances will appear here once you're closer</p>
+          </div>
+        </div>
+
+        <%= render "rounds/distances_status", fill: true %>
+
+        <div class="hidden absolute inset-0 flex items-center justify-center overflow-y-auto" data-distances-target="empty">
+          <%= render "ui/empty_state",
+                title: "No map data for this hole yet",
+                message: "We don't have OpenStreetMap green data for this hole.",
+                icon: "location" %>
+        </div>
+      </div>
+
+      <div class="shrink-0 pt-3 space-y-3">
+        <%# Fixed-height slot so Numbers/Map appearing doesn't resize the stage. %>
+        <div class="min-h-10">
+          <div class="hidden" data-distances-target="viewToggle">
+            <div class="ui-segmented w-full" role="group" aria-label="Distance view">
+              <button type="button" class="ui-segmented-option flex-1" data-distances-target="viewOption" data-value="numbers" data-action="distances#setView">Numbers</button>
+              <button type="button" class="ui-segmented-option flex-1" data-distances-target="viewOption" data-value="map" data-action="distances#setView">Map</button>
+            </div>
+          </div>
+        </div>
+        <p class="text-[11px] text-muted-foreground text-center">Map data © OpenStreetMap contributors · Tiles © Esri</p>
+      </div>
+    <% end %>
+  </div>
+<% else %>
+  <div class="fixed inset-x-4 bottom-4 z-50 hidden max-h-[90vh] overflow-y-auto"
+       data-round-target="distancesPanel"
+       data-controller="distances"
+       data-distances-unit-value="<%= unit %>"
+       data-distances-tile-url-value="<%= satellite_tile_url %>"
+       data-distances-tile-attribution-value="<%= satellite_tile_attribution %>">
+    <%= render "ui/card", padding: :sm do %>
+      <div class="flex items-center justify-between mb-4 gap-3">
+        <div class="ui-segmented" role="group" aria-label="Distance unit">
+          <button type="button" class="ui-segmented-option" data-distances-target="unitOption" data-value="yds" data-action="distances#setUnit">yds</button>
+          <button type="button" class="ui-segmented-option" data-distances-target="unitOption" data-value="m" data-action="distances#setUnit">m</button>
+        </div>
+        <button type="button" class="ui-btn-ghost ui-btn-sm" data-action="round#closePanels">Close</button>
+      </div>
+
+      <div class="hidden" data-distances-target="content">
+        <div data-distances-target="numbers" data-state="active" class="distance-view-panel">
+          <div class="distance-view-panel-inner">
+            <div class="flex items-stretch justify-center gap-5 my-8">
+              <div class="flex h-40 w-40 shrink-0 items-center justify-center rounded-full border-4 border-primary-500">
+                <span class="text-4xl font-bold leading-none text-primary-600" data-distances-target="center">—</span>
+              </div>
+
+              <div class="flex flex-col justify-between">
+                <div class="-translate-y-2">
+                  <p class="text-xs uppercase tracking-wide text-muted-foreground">Back</p>
+                  <p class="text-xl font-semibold text-foreground" data-distances-target="back">—</p>
+                </div>
+                <div class="translate-y-2">
+                  <p class="text-xs uppercase tracking-wide text-muted-foreground">Front</p>
+                  <p class="text-xl font-semibold text-foreground" data-distances-target="front">—</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div data-distances-target="map" data-state="inactive" class="distance-view-panel">
+          <div class="distance-view-panel-inner">
+            <div class="relative">
+              <div class="h-[50vh] min-h-[16rem] overflow-hidden rounded-md" data-distances-target="mapContainer"></div>
+              <button type="button"
+                      class="ui-btn-secondary ui-btn-xs absolute top-2 right-2 z-[1000] hidden shadow-md"
+                      data-distances-target="clearPivot"
+                      data-action="distances#clearPivot"
+                      aria-label="Clear pivot">
+                <%= icon "close", class: "w-3.5 h-3.5" %>
+                Clear
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <p class="text-xs text-muted-foreground mt-2 text-center" data-distances-target="accuracy"></p>
+      </div>
+
+      <div class="hidden py-6 text-center" data-distances-target="tooFar">
+        <p class="text-base font-medium text-foreground">You're too far away from the hole</p>
+        <p class="text-sm text-muted-foreground mt-1">Distances will appear here once you're closer</p>
+      </div>
+
+      <%= render "rounds/distances_status", fill: false %>
+
+      <div class="hidden" data-distances-target="empty">
+        <%= render "ui/empty_state",
+              title: "No map data for this hole yet",
+              message: "We don't have OpenStreetMap green data for this hole.",
+              icon: "location" %>
+      </div>
+
+      <div class="hidden mt-4" data-distances-target="viewToggle">
+        <div class="ui-segmented w-full" role="group" aria-label="Distance view">
+          <button type="button" class="ui-segmented-option flex-1" data-distances-target="viewOption" data-value="numbers" data-action="distances#setView">Numbers</button>
+          <button type="button" class="ui-segmented-option flex-1" data-distances-target="viewOption" data-value="map" data-action="distances#setView">Map</button>
+        </div>
+      </div>
+
+      <p class="text-[11px] text-muted-foreground mt-4 text-center">Map data © OpenStreetMap contributors · Tiles © Esri</p>
+    <% end %>
+  </div>
+<% end %>

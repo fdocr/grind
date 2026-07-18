@@ -35,6 +35,34 @@ class RoundsControllerTest < ActionDispatch::IntegrationTest
     assert_match "data-round-tee-value=\"white\"", response.body
   end
 
+  test "distances shell renders an offline-capable standalone page" do
+    get distances_path
+    assert_response :success
+    assert_select "meta[name='robots'][content='noindex, nofollow']"
+    assert_match "data-distances-autostart-value=\"true\"", response.body
+    assert_select "[data-distances-target=holeLabel]"
+    assert_match(/max-age=3600/, response.headers["Cache-Control"].to_s)
+    assert_match(/\bpublic\b/, response.headers["Cache-Control"].to_s)
+  end
+
+  test "distances shell omits the native menu bridge in hotwire native clients" do
+    headers = { "HTTP_USER_AGENT" => "Grind/1.0 Hotwire Native iOS; Turbo Native iOS;" }
+
+    get distances_path, headers: headers
+    assert_response :success
+    assert_select "[data-controller~=menu-bridge]", count: 0
+  end
+
+  test "native round tracker links to the distances shell and keeps an offline overlay" do
+    unlock_course_round!(@course)
+    headers = { "HTTP_USER_AGENT" => "Grind/1.0 Hotwire Native iOS; Turbo Native iOS;" }
+
+    get round_course_path(@course), headers: headers
+    assert_response :success
+    assert_select "a[href=?][data-action=?]", distances_path, "click->round#openDistances"
+    assert_select "[data-round-target=distancesPanel]", count: 1
+  end
+
   test "new tracker uses the requested tee" do
     unlock_course_round!(@course, tee: "white")
     get round_course_path(@course, tee: "white")

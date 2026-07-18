@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="<%= "h-full" if @native_modal %>">
   <head>
     <title><%= seo_page_title %></title>
     <%# viewport-fit=cover lets the PWA/browser draw into the safe areas, but inside
@@ -39,20 +39,25 @@
     <% end %>
   </head>
 
-  <body class="min-h-screen touch-manipulation">
+  <%# Native modals size to the WKWebView (already below the nav bar). Prefer
+      h-full over 100dvh so the card isn't clipped by an oversized viewport. %>
+  <body class="min-h-screen touch-manipulation<%= " overflow-hidden h-full" if @native_modal %>">
     <%# Native apps provide their own navigation bar. Instead of the web header
-        they get a bridge-driven menu opened from a native hamburger button. %>
+        they get a bridge-driven menu opened from a native hamburger button.
+        Native modal pages skip the menu so the sheet chrome stays clean. %>
     <% if hotwire_native_app? %>
-      <%= render "shared/native_menu" %>
+      <%= render "shared/native_menu" unless @native_modal %>
     <% else %>
       <%= render "shared/nav" %>
     <% end %>
 
-    <main class="max-w-lg mx-auto px-4 py-6 pb-24">
-      <%= render "shared/connection_banner" %>
-      <div id="flash" class="mb-4">
-        <%= render "shared/flash" %>
-      </div>
+    <main class="<%= @native_modal ? "max-w-lg mx-auto px-4 pt-3 pb-8 h-full flex flex-col overflow-hidden" : "max-w-lg mx-auto px-4 py-6 pb-24" %>">
+      <% unless @native_modal %>
+        <%= render "shared/connection_banner" %>
+        <div id="flash" class="mb-4">
+          <%= render "shared/flash" %>
+        </div>
+      <% end %>
       <%= yield %>
     </main>
   </body>
