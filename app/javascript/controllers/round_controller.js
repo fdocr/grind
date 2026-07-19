@@ -1,11 +1,14 @@
 import { Controller } from "@hotwired/stimulus"
 
+const DISTANCES_PAYLOAD_KEY = "grind:distancesPayload"
+
 export default class extends Controller {
   static targets = [
     "scoreToPar", "holeNumber", "insidePw9i", "oopTeeShots", "threePutts", "botchedUpDowns",
-    "scorePanel", "holesPanel", "scorecardPanel", "resetPanel", "distancesPanel", "overlay",
+    "scorePanel", "holesPanel", "scorecardPanel", "resetPanel", "statsPanel", "distancesPanel", "distancesLink", "overlay",
     "grossInput", "puttsInput", "grossPicker", "puttsPicker",
     "scorePanelHole", "scorePanelPar", "scorePanelHcp", "scorePanelYards", "holeMeta",
+    "statsPanelHole", "draftValue",
     "finishButton", "finishForm", "startedAt",
     "scorecardBody", "holesList", "statsLastHole", "statsLastHoleLabel", "holeScoredIcon"
   ]
@@ -21,6 +24,7 @@ export default class extends Controller {
     this.state.courseName = this.courseValue.name
     this.state.tee = this.teeValue
     this.render()
+    this.prefetchDistancesShell()
     this.boundOnline = this.handleOnline.bind(this)
     window.addEventListener("online", this.boundOnline)
   }
@@ -167,6 +171,45 @@ export default class extends Controller {
     this.saveState()
   }
 
+  // Native Distances: online → modal (/distances shell); offline → in-page
+  // overlay so green distances still work without a shell network fetch.
+  openDistances(event) {
+    this.persistDistancesPayload()
+
+    if (navigator.onLine === false) {
+      event.preventDefault()
+      this.openDistancesPanel()
+    }
+  }
+
+  // Stash the current hole's green in localStorage so the generic /distances
+  // shell can render without a course fetch. Must be localStorage (not
+  // sessionStorage): Hotwire Native modals use a separate WKWebView.
+  persistDistancesPayload() {
+    const hole = this.currentHoleData() || {}
+    localStorage.setItem(DISTANCES_PAYLOAD_KEY, JSON.stringify({
+      green: hole.green || null,
+      holeNumber: hole.number || this.state.currentHole,
+      holePar: hole.par || null,
+      courseName: this.courseValue.name || null
+    }))
+  }
+
+  // Warm HTTP cache for the native Distances modal shell (one request only —
+  // a separate <link rel=prefetch> was redundant with this fetch).
+  prefetchDistancesShell() {
+    if (!this.hasDistancesLinkTarget) return
+    if (navigator.onLine === false) return
+
+    const href = this.distancesLinkTarget.getAttribute("href")
+    if (!href) return
+
+    fetch(href, {
+      credentials: "same-origin",
+      headers: { Accept: "text/html" }
+    }).catch(() => {})
+  }
+
   renderStatsLastHole() {
     if (!this.hasStatsLastHoleTarget) return
 
@@ -178,7 +221,7 @@ export default class extends Controller {
 
     this.statsLastHoleTarget.classList.remove("hidden")
     if (this.hasStatsLastHoleLabelTarget) {
-      this.statsLastHoleLabelTarget.textContent = this.ordinalHole(hole)
+      this.statsLastHoleLabelTarget.textContent = `Stats updated in ${this.ordinalHole(hole)}`
     }
   }
 
@@ -337,35 +380,63 @@ export default class extends Controller {
     return button
   }
 
-  touchStatCounter() {
-    this.state.statsLastHole = this.state.currentHole
-  }
-
-  increment(event) {
-    const stat = event.currentTarget.dataset.stat
-    if (stat === "insidePw9i") {
-      this.state.insidePw9i += 1
-    } else {
-      this.state[stat] += 1
-    }
-    this.touchStatCounter()
-    this.render()
-  }
-
-  decrement(event) {
-    const stat = event.currentTarget.dataset.stat
-    if (stat === "insidePw9i") {
-      this.state.insidePw9i -= 1
-    } else if (this.state[stat] > 0) {
-      this.state[stat] -= 1
-    }
-    this.touchStatCounter()
-    this.render()
-  }
-
   openScorePanel() {
     this.populatePostScorePanel()
     this.showPanel(this.scorePanelTarget)
+  }
+
+  // Shortcut from the Round stats header — same modal as after posting a score.
+  editStats() {
+    this.openStatsPanel(this.state.currentHole)
+  }
+
+  // Stats modal: edits buffer in a draft and commit on Save; Cancel / overlay
+  // tap discards them. holeNumber is the hole to attribute (scored hole after
+  // Post Score, or the current hole when opened via the pencil shortcut).
+  openStatsPanel(holeNumber = this.state.currentHole) {
+    this.statsHole = typeof holeNumber === "number" ? holeNumber : this.state.currentHole
+    this.statsDraft = {
+      oopTeeShots: this.state.oopTeeShots,
+      botchedUpDowns: this.state.botchedUpDowns,
+      insidePw9i: this.state.insidePw9i
+    }
+    if (this.hasStatsPanelHoleTarget) {
+      this.statsPanelHoleTarget.textContent = `Hole ${this.statsHole}`
+    }
+    this.renderStatsDraft()
+    this.showPanel(this.statsPanelTarget)
+  }
+
+  renderStatsDraft() {
+    this.draftValueTargets.forEach((element) => {
+      const stat = element.dataset.stat
+      const value = this.statsDraft[stat]
+      element.textContent = stat === "insidePw9i" ? this.formatInside(value) : value
+    })
+  }
+
+  incrementStat(event) {
+    this.statsDraft[event.currentTarget.dataset.stat] += 1
+    this.renderStatsDraft()
+  }
+
+  decrementStat(event) {
+    const stat = event.currentTarget.dataset.stat
+    // insidePw9i is a +/- differential and may go negative; counters floor at 0.
+    if (stat === "insidePw9i" || this.statsDraft[stat] > 0) {
+      this.statsDraft[stat] -= 1
+      this.renderStatsDraft()
+    }
+  }
+
+  saveStats() {
+    const stats = ["oopTeeShots", "botchedUpDowns", "insidePw9i"]
+    const changed = stats.some((stat) => this.statsDraft[stat] !== this.state[stat])
+
+    stats.forEach((stat) => { this.state[stat] = this.statsDraft[stat] })
+    if (changed) this.state.statsLastHole = this.statsHole
+    this.closePanels()
+    this.render()
   }
 
   populatePostScorePanel() {
@@ -476,12 +547,13 @@ export default class extends Controller {
 
   panelTargets() {
     return [
-      this.scorePanelTarget,
-      this.holesPanelTarget,
-      this.scorecardPanelTarget,
-      this.resetPanelTarget,
-      this.distancesPanelTarget
-    ]
+      this.hasScorePanelTarget && this.scorePanelTarget,
+      this.hasHolesPanelTarget && this.holesPanelTarget,
+      this.hasScorecardPanelTarget && this.scorecardPanelTarget,
+      this.hasResetPanelTarget && this.resetPanelTarget,
+      this.hasStatsPanelTarget && this.statsPanelTarget,
+      this.hasDistancesPanelTarget && this.distancesPanelTarget
+    ].filter(Boolean)
   }
 
   showPanel(panel) {
@@ -501,12 +573,12 @@ export default class extends Controller {
   saveHoleScore() {
     const gross = Number(this.grossInputTarget.value)
     const putts = Number(this.puttsInputTarget.value)
+    const scoredHole = this.state.currentHole
 
-    this.state.holes[this.state.currentHole] = { gross, putts }
+    this.state.holes[scoredHole] = { gross, putts }
     this.advanceAfterScore()
-
-    this.closePanels()
     this.render()
+    this.openStatsPanel(scoredHole)
   }
 
   // After posting, advance to the next hole. On the last hole, wrap to hole 1

@@ -1,0 +1,21 @@
+<%# locals: (fill: false) %>
+<%# Loading matches ui/loading; errors match empty_state / tooFar typography. %>
+<div class="<%= fill ? "hidden absolute inset-0 flex items-center justify-center text-center px-4" : "hidden py-2 text-center" %>"
+     data-distances-target="status">
+  <div class="hidden w-full" data-distances-target="statusLoading">
+    <div class="text-center py-6">
+      <div class="text-muted-foreground/50 mb-3 inline-flex">
+        <%= render "shared/svg/spinner", class: "h-8 w-8 animate-spin" %>
+      </div>
+      <p class="text-sm text-muted-foreground" data-distances-target="statusLoadingMessage">Finding your location…</p>
+    </div>
+  </div>
+
+  <div class="hidden w-full space-y-3" data-distances-target="statusError">
+    <div>
+      <p class="text-base font-medium text-foreground" data-distances-target="statusErrorTitle">We couldn't find your location</p>
+      <p class="text-sm text-muted-foreground mt-1" data-distances-target="statusErrorMessage">Check that Location is on, then try again.</p>
+    </div>
+    <button type="button" class="ui-btn-secondary ui-btn-sm" data-action="distances#retry">Try again</button>
+  </div>
+</div>

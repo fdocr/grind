@@ -36,7 +36,18 @@
 
   <div class="grid grid-cols-1 gap-3">
     <button type="button" class="ui-btn-primary ui-btn-md w-full" data-action="round#openScorePanel">Post Score</button>
-    <button type="button" class="ui-btn-secondary ui-btn-md w-full" data-action="round#openDistancesPanel">Distances</button>
+    <% if hotwire_native_app? %>
+      <%= link_to "Distances",
+            distances_path,
+            class: "ui-btn-secondary ui-btn-md w-full text-center",
+            data: {
+              round_target: "distancesLink",
+              turbo_frame: "_top",
+              action: "click->round#openDistances"
+            } %>
+    <% else %>
+      <button type="button" class="ui-btn-secondary ui-btn-md w-full" data-action="round#openDistancesPanel">Distances</button>
+    <% end %>
     <button type="button" class="ui-btn-secondary ui-btn-md w-full" data-action="round#openHolesPanel">Holes</button>
     <button type="button" class="ui-btn-secondary ui-btn-md w-full" data-action="round#openScorecardPanel">Scorecard</button>
     <button type="button"
@@ -48,47 +59,6 @@
     </button>
   </div>
 
-  <section>
-    <h2 class="text-sm font-semibold text-muted-foreground mb-3">Round stats</h2>
-    <%= render "ui/card", padding: :sm do %>
-      <div class="space-y-4">
-        <% [
-          ["OOP Tee Shots", "oopTeeShots", "oopTeeShots", false],
-          ["3 Putts", "threePutts", nil, true],
-          ["Botched Up/Down", "botchedUpDowns", "botchedUpDowns", false],
-          ["Inside PW/9i", "insidePw9i", "insidePw9i", false]
-        ].each do |label, target, stat, readonly| %>
-          <div class="flex items-center justify-between gap-3">
-            <span class="text-sm font-medium"><%= label %></span>
-            <% if readonly %>
-              <div class="flex items-center gap-2">
-                <span class="inline-flex h-11 w-11 shrink-0" aria-hidden="true"></span>
-                <span class="w-10 text-center text-lg font-semibold" data-round-target="<%= target %>">0</span>
-                <span class="inline-flex h-11 w-11 shrink-0" aria-hidden="true"></span>
-              </div>
-            <% else %>
-              <div class="flex items-center gap-2">
-                <button type="button" class="ui-icon-btn" data-action="round#decrement" data-stat="<%= stat %>" aria-label="Decrease <%= label %>">
-                  <%= icon "minus", class: "w-5 h-5" %>
-                </button>
-                <span class="w-10 text-center text-lg font-semibold" data-round-target="<%= target %>">0</span>
-                <button type="button" class="ui-icon-btn" data-action="round#increment" data-stat="<%= stat %>" aria-label="Increase <%= label %>">
-                  <%= icon "plus", class: "w-5 h-5" %>
-                </button>
-              </div>
-            <% end %>
-          </div>
-        <% end %>
-      </div>
-    <% end %>
-    <p class="hidden mt-2 flex items-center justify-center gap-1.5 text-xs text-muted-foreground"
-       data-round-target="statsLastHole"
-       aria-live="polite">
-      <%= icon "pencil", class: "w-3.5 h-3.5 shrink-0" %>
-      <span data-round-target="statsLastHoleLabel">1st hole</span>
-    </p>
-  </section>
-
   <div class="flex gap-3">
     <button type="button" class="ui-btn-secondary ui-btn-md flex-1" data-action="round#previousHole">
       <%= icon "chevron_left", class: "w-5 h-5" %>
@@ -99,6 +69,43 @@
       <%= icon "chevron_right", class: "w-5 h-5" %>
     </button>
   </div>
+
+  <section>
+    <h2 class="text-sm font-semibold text-muted-foreground mb-3">Round stats</h2>
+    <%= render "ui/card", padding: :sm do %>
+      <%= render "ui/stat_grid", columns: 2 do %>
+        <div class="ui-stat">
+          <div class="ui-stat-value text-primary-600" data-round-target="oopTeeShots">0</div>
+          <div class="ui-stat-label">OOP Tee Shots</div>
+        </div>
+        <div class="ui-stat">
+          <div class="ui-stat-value text-primary-600" data-round-target="threePutts">0</div>
+          <div class="ui-stat-label">3 Putts</div>
+        </div>
+        <div class="ui-stat">
+          <div class="ui-stat-value text-primary-600" data-round-target="botchedUpDowns">0</div>
+          <div class="ui-stat-label">Botched Up/Down</div>
+        </div>
+        <div class="ui-stat">
+          <div class="ui-stat-value text-primary-600" data-round-target="insidePw9i">E</div>
+          <div class="ui-stat-label">Inside PW/9i</div>
+        </div>
+      <% end %>
+      <div class="mt-2 pt-3 border-t border-border text-center">
+        <button type="button"
+                class="text-sm font-medium text-primary-600 hover:text-primary-700 touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md"
+                data-action="round#editStats">
+          Update stats
+        </button>
+      </div>
+    <% end %>
+    <p class="hidden mt-5 flex items-center justify-center gap-1.5 text-xs text-muted-foreground"
+       data-round-target="statsLastHole"
+       aria-live="polite">
+      <%= icon "pencil", class: "w-3.5 h-3.5 shrink-0" %>
+      <span data-round-target="statsLastHoleLabel">Stats updated in 1st hole</span>
+    </p>
+  </section>
 
   <button type="button"
           class="ui-btn-ghost ui-btn-md w-full text-destructive"
@@ -152,89 +159,9 @@
     <% end %>
   </div>
 
-  <div class="fixed inset-x-4 bottom-4 z-50 hidden max-h-[90vh] overflow-y-auto"
-       data-round-target="distancesPanel"
-       data-controller="distances"
-       data-distances-unit-value="<%= @course.metric? ? "m" : "yds" %>"
-       data-distances-tile-url-value="<%= satellite_tile_url %>"
-       data-distances-tile-attribution-value="<%= satellite_tile_attribution %>">
-    <%= render "ui/card", padding: :sm do %>
-      <div class="flex items-center justify-between mb-4 gap-3">
-        <div class="ui-segmented" role="group" aria-label="Distance unit">
-          <button type="button" class="ui-segmented-option" data-distances-target="unitOption" data-value="yds" data-action="distances#setUnit">yds</button>
-          <button type="button" class="ui-segmented-option" data-distances-target="unitOption" data-value="m" data-action="distances#setUnit">m</button>
-        </div>
-        <button type="button" class="ui-btn-ghost ui-btn-sm" data-action="round#closePanels">Close</button>
-      </div>
-
-      <div class="hidden" data-distances-target="content">
-        <div data-distances-target="numbers" data-state="active" class="distance-view-panel">
-          <div class="distance-view-panel-inner">
-            <div class="flex items-stretch justify-center gap-5 my-8">
-              <div class="flex h-40 w-40 shrink-0 items-center justify-center rounded-full border-4 border-primary-500">
-                <span class="text-4xl font-bold leading-none text-primary-600" data-distances-target="center">—</span>
-              </div>
-
-              <div class="flex flex-col justify-between">
-                <div class="-translate-y-2">
-                  <p class="text-xs uppercase tracking-wide text-muted-foreground">Back</p>
-                  <p class="text-xl font-semibold text-foreground" data-distances-target="back">—</p>
-                </div>
-                <div class="translate-y-2">
-                  <p class="text-xs uppercase tracking-wide text-muted-foreground">Front</p>
-                  <p class="text-xl font-semibold text-foreground" data-distances-target="front">—</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div data-distances-target="map" data-state="inactive" class="distance-view-panel">
-          <div class="distance-view-panel-inner">
-            <div class="relative">
-              <div class="h-[50vh] min-h-[16rem] overflow-hidden rounded-md" data-distances-target="mapContainer"></div>
-              <button type="button"
-                      class="ui-btn-secondary ui-btn-xs absolute top-2 right-2 z-[1000] hidden shadow-md"
-                      data-distances-target="clearPivot"
-                      data-action="distances#clearPivot"
-                      aria-label="Clear pivot">
-                <%= icon "close", class: "w-3.5 h-3.5" %>
-                Clear
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <p class="text-xs text-muted-foreground mt-2 text-center" data-distances-target="accuracy"></p>
-      </div>
-
-      <div class="hidden py-6 text-center" data-distances-target="tooFar">
-        <p class="text-base font-medium text-foreground">You're too far away from the hole</p>
-        <p class="text-sm text-muted-foreground mt-1">Distances will appear here once you're closer</p>
-      </div>
-
-      <div class="hidden py-2 text-center space-y-3" data-distances-target="status">
-        <p class="text-sm text-muted-foreground" data-distances-target="statusMessage">Finding your location…</p>
-        <button type="button" class="ui-btn-secondary ui-btn-sm" data-action="distances#retry">Try again</button>
-      </div>
-
-      <div class="hidden" data-distances-target="empty">
-        <%= render "ui/empty_state",
-              title: "No map data for this hole yet",
-              message: "We don't have OpenStreetMap green data for this hole.",
-              icon: "location" %>
-      </div>
-
-      <div class="hidden mt-4" data-distances-target="viewToggle">
-        <div class="ui-segmented w-full" role="group" aria-label="Distance view">
-          <button type="button" class="ui-segmented-option flex-1" data-distances-target="viewOption" data-value="numbers" data-action="distances#setView">Numbers</button>
-          <button type="button" class="ui-segmented-option flex-1" data-distances-target="viewOption" data-value="map" data-action="distances#setView">Map</button>
-        </div>
-      </div>
-
-      <p class="text-[11px] text-muted-foreground mt-4 text-center">Map data © OpenStreetMap contributors · Tiles © Esri</p>
-    <% end %>
-  </div>
+  <%# Native also keeps the overlay as an offline fallback when /distances
+      cannot be fetched for the modal shell. %>
+  <%= render "rounds/distances", course: @course, standalone: false %>
 
   <div class="fixed inset-x-4 bottom-4 z-50 hidden max-h-[70vh] overflow-y-auto" data-round-target="holesPanel">
     <%= render "ui/card", padding: :sm do %>
@@ -269,6 +196,39 @@
       <div class="flex gap-2">
         <button type="button" class="ui-btn-secondary ui-btn-md flex-1" data-action="round#closePanels">Cancel</button>
         <button type="button" class="ui-btn-danger ui-btn-md flex-1" data-action="round#confirmReset">Reset round</button>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="fixed inset-x-4 bottom-4 z-50 hidden" data-round-target="statsPanel">
+    <%= render "ui/card", padding: :sm do %>
+      <h3 class="font-semibold mb-3">Update stats</h3>
+      <div class="flex flex-wrap gap-2 mb-4">
+        <span class="ui-badge ui-badge-primary ui-badge-sm" data-round-target="statsPanelHole">Hole 1</span>
+      </div>
+      <div class="space-y-4">
+        <% [
+          ["OOP Tee Shots", "oopTeeShots"],
+          ["Botched Up/Down", "botchedUpDowns"],
+          ["Inside PW/9i", "insidePw9i"]
+        ].each do |label, stat| %>
+          <div class="flex items-center justify-between gap-3">
+            <span class="text-sm font-medium"><%= label %></span>
+            <div class="flex items-center gap-2">
+              <button type="button" class="ui-icon-btn" data-action="round#decrementStat" data-stat="<%= stat %>" aria-label="Decrease <%= label %>">
+                <%= icon "minus", class: "w-5 h-5" %>
+              </button>
+              <span class="w-10 text-center text-lg font-semibold" data-round-target="draftValue" data-stat="<%= stat %>">0</span>
+              <button type="button" class="ui-icon-btn" data-action="round#incrementStat" data-stat="<%= stat %>" aria-label="Increase <%= label %>">
+                <%= icon "plus", class: "w-5 h-5" %>
+              </button>
+            </div>
+          </div>
+        <% end %>
+        <div class="flex gap-2 pt-1">
+          <button type="button" class="ui-btn-secondary ui-btn-md flex-1" data-action="round#closePanels">Cancel</button>
+          <button type="button" class="ui-btn-primary ui-btn-md flex-1" data-action="round#saveStats">Save</button>
+        </div>
       </div>
     <% end %>
   </div>

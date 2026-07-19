@@ -1,5 +1,5 @@
-const CACHE_NAME = "grind-v3"
-const OFFLINE_URLS = ["/icon.png", "/icon.svg", "/manifest.json"]
+const CACHE_NAME = "grind-v4"
+const OFFLINE_URLS = ["/icon.png", "/icon.svg", "/manifest.json", "/distances"]
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -27,7 +27,7 @@ self.addEventListener("fetch", (event) => {
     return
   }
 
-  if (OFFLINE_URLS.includes(url.pathname) || url.pathname === "/manifest.json") {
+  if (OFFLINE_URLS.includes(url.pathname) || url.pathname === "/manifest.json" || url.pathname === "/distances") {
     event.respondWith(cacheFirst(event.request))
     return
   }
