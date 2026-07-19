@@ -12,10 +12,7 @@ Hosted at [grind.fdo.cr](https://grind.fdo.cr). Anyone can self host with the [O
 - Email round stats with Cloudflare Turnstile protection
 - SQLite, Solid Queue, Solid Cache, and Solid Cable in production
 
-<p>
-  <img src="app/assets/images/sample_tracking.png" alt="Round tracker on your phone" width="49%" />
-  <img src="app/assets/images/sample_email.png" alt="Free stats email when you finish" width="49%" />
-</p>
+[View in AppStore](https://apps.apple.com/us/app/grind-golf/id6787446479)
 
 ## Documentation
 
