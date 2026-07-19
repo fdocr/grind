@@ -29,6 +29,12 @@
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
 
+    <%# Load once for the whole session. Widgets are rendered explicitly via
+        the turnstile Stimulus controller (Turbo Frame / modal-safe). %>
+    <% if ENV["CLOUDFLARE_TURNSTILE_SITE_KEY"].present? %>
+      <%= tag.script src: "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit", async: true, defer: true %>
+    <% end %>
+
     <!-- Privacy-friendly analytics by Plausible -->
     <% if ENV["PLAUSIBLE_URL"].present? %>
       <script async src="<%= ENV["PLAUSIBLE_URL"] %>"></script>

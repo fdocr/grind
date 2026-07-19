@@ -231,7 +231,7 @@
   }
 
   .ui-turnstile,
-  .ui-turnstile .cf-turnstile,
+  .ui-turnstile > div,
   .ui-turnstile iframe {
     @apply w-full max-w-full;
   }

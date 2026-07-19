@@ -1,9 +1,9 @@
 <% if ENV["CLOUDFLARE_TURNSTILE_SITE_KEY"].present? %>
-  <div class="ui-turnstile w-full">
-    <div class="cf-turnstile w-full"
-         data-sitekey="<%= ENV["CLOUDFLARE_TURNSTILE_SITE_KEY"] %>"
-         data-size="flexible"
-         data-theme="auto"></div>
+  <div class="ui-turnstile w-full"
+       data-controller="turnstile"
+       data-turnstile-sitekey-value="<%= ENV["CLOUDFLARE_TURNSTILE_SITE_KEY"] %>"
+       data-turnstile-size-value="flexible"
+       data-turnstile-theme-value="auto">
+    <div data-turnstile-target="widget" class="w-full"></div>
   </div>
-  <%= tag.script src: "https://challenges.cloudflare.com/turnstile/v0/api.js", async: true, defer: true %>
 <% end %>
