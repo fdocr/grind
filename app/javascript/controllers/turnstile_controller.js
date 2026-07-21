@@ -43,22 +43,16 @@ export default class extends Controller {
     return new Promise((resolve) => {
       const timeoutAt = Date.now() + 15000
 
-      const finish = (api) => {
-        if (typeof api.ready === "function") {
-          api.ready(() => resolve(api))
-        } else {
-          resolve(api)
-        }
-      }
-
       const check = () => {
         if (this.cancelled) {
           resolve(null)
           return
         }
 
+        // Do not call turnstile.ready() — it throws when api.js is loaded with
+        // async/defer (see Cloudflare Turnstile docs / community reports).
         if (window.turnstile?.render) {
-          finish(window.turnstile)
+          resolve(window.turnstile)
           return
         }
 
