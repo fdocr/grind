@@ -12,7 +12,10 @@ const LINE_COLOR = "#dc2626"
 const PIVOT_COLOR = "#ffffff"
 const FIT_PADDING_PX = 36
 const MAX_FIT_ZOOM = 19
-const CLICK_ARM_DELAY_MS = 700
+// Wait out the mobile delayed-click after Numbers→Map finishes expanding.
+const CLICK_ARM_AFTER_RESIZE_MS = 400
+// If the host never reports a resize (already-visible map), still arm taps.
+const CLICK_ARM_FALLBACK_MS = 1000
 // Smallest square that still covers the clip after any heading (45° is worst).
 const ROTATOR_SIZE = `${Math.SQRT2 * 100}%`
 
@@ -28,14 +31,14 @@ export class DistanceMap {
     this.suppressClick = false
     this.headingDegrees = 0
     this.pivotDrag = null
+    this.fitted = false
 
     this.clip = element
     this.clip.classList.add("distance-map-clip")
     this.clip.style.clipPath = "inset(0)"
     this.clip.dataset.hasPivot = "false"
-    // Numbers→Map expands the panel under a mobile delayed click; wait it out.
     this.clicksArmed = false
-    this.armClicksTimeout = window.setTimeout(() => this.armClicks(), CLICK_ARM_DELAY_MS)
+    this.armClicksAfter(CLICK_ARM_FALLBACK_MS)
 
     this.rotator = document.createElement("div")
     this.rotator.className = "distance-map-rotator"
@@ -64,7 +67,7 @@ export class DistanceMap {
     this.map.mouseEventToContainerPoint = (event) => this.pointerToRotatorPoint(event)
 
     // Keep zoom/attribution upright; they would otherwise spin with the tiles.
-    this.controlContainer = this.map._controlContainer
+    this.controlContainer = this.map.getContainer().querySelector(".leaflet-control-container")
     if (this.controlContainer) this.clip.appendChild(this.controlContainer)
 
     L.tileLayer(tileUrl, { attribution, maxZoom: 20 }).addTo(this.map)
@@ -123,6 +126,7 @@ export class DistanceMap {
     this.syncHeading()
     this.ensureLoaded()
     this.renderLines()
+    this.keepHoleUpFrame()
   }
 
   setGreen(latlng) {
@@ -136,6 +140,7 @@ export class DistanceMap {
     this.syncHeading()
     this.ensureLoaded()
     this.renderLines()
+    this.keepHoleUpFrame()
   }
 
   setPivot(latlng, { notify = false, skipMarker = false } = {}) {
@@ -191,6 +196,11 @@ export class DistanceMap {
       this.armClicksTimeout = null
     }
     this.clicksArmed = true
+  }
+
+  armClicksAfter(delayMs = CLICK_ARM_AFTER_RESIZE_MS) {
+    if (this.armClicksTimeout) clearTimeout(this.armClicksTimeout)
+    this.armClicksTimeout = window.setTimeout(() => this.armClicks(), delayMs)
   }
 
   renderLines() {
@@ -275,11 +285,29 @@ export class DistanceMap {
     this.rotator.style.transform = `translate(-50%, -50%) rotate(${this.headingDegrees}deg)`
   }
 
-  fitHeadingAligned(points) {
+  // After the first fit, GPS updates keep the player at the bottom and the
+  // green at the top without changing zoom (pinch stays put).
+  keepHoleUpFrame() {
+    if (!this.fitted) return
+    const points = this.fitPoints()
+    if (points.length < 2) return
+    this.fitHeadingAligned(points, { changeZoom: false })
+  }
+
+  fitHeadingAligned(points, { changeZoom = true } = {}) {
+    const view = this.headingAlignedView(points)
+    if (!view) return false
+
+    const zoom = changeZoom ? view.suggestedZoom : this.map.getZoom()
+    this.map.setView(view.center, zoom, { animate: false })
+    return true
+  }
+
+  headingAlignedView(points) {
     const L = this.L
     const clipW = this.clip.clientWidth
     const clipH = this.clip.clientHeight
-    if (clipW < 8 || clipH < 8) return false
+    if (clipW < 8 || clipH < 8) return null
 
     const availW = Math.max(clipW - FIT_PADDING_PX * 2, 1)
     const availH = Math.max(clipH - FIT_PADDING_PX * 2, 1)
@@ -300,19 +328,20 @@ export class DistanceMap {
     })
 
     const [centerX, centerY] = rotatePoint((minX + maxX) / 2, (minY + maxY) / 2, -theta)
-    const center = this.map.unproject(L.point(centerX, centerY), refZoom)
     const spanX = Math.max(maxX - minX, 1)
     const spanY = Math.max(maxY - minY, 1)
     const zoomX = refZoom + Math.log2(availW / spanX)
     const zoomY = refZoom + Math.log2(availH / spanY)
     const zoomSnap = this.map.options.zoomSnap || 1
-    const zoom = Math.min(MAX_FIT_ZOOM, Math.max(0, Math.floor(Math.min(zoomX, zoomY) / zoomSnap) * zoomSnap))
 
-    this.map.setView(center, zoom, { animate: false })
-    return true
+    return {
+      center: this.map.unproject(L.point(centerX, centerY), refZoom),
+      suggestedZoom: Math.min(MAX_FIT_ZOOM, Math.max(0, Math.floor(Math.min(zoomX, zoomY) / zoomSnap) * zoomSnap))
+    }
   }
 
   markFitted() {
+    this.fitted = true
     if (this.rotator) this.rotator.dataset.fitted = "true"
   }
 

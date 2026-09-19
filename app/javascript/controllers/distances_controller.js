@@ -540,6 +540,7 @@ export default class extends BridgeComponent {
       this.distanceMap.invalidateSize()
       this.distanceMap.fitCourse()
       this.didFitMap = true
+      this.distanceMap.armClicksAfter()
     }
 
     if (this.hasMapTarget) {

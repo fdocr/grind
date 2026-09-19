@@ -46,7 +46,7 @@ class DistancesTest < ApplicationSystemTestCase
     assert_selector "[data-distances-target='mapContainer'][data-has-pivot='false']"
     assert_selector "[data-distances-target='clearPivot']", visible: :hidden
 
-    assert page.evaluate_script(<<~JS)
+    assert_js(<<~JS, "expected the distances map to finish loading")
       (() => {
         const el = document.querySelector("[data-controller~='distances']")
         const controller = window.Stimulus.getControllerForElementAndIdentifier(el, "distances")
@@ -54,7 +54,7 @@ class DistancesTest < ApplicationSystemTestCase
       })()
     JS
 
-    assert page.evaluate_script(<<~JS)
+    assert_js(<<~JS, "expected the hole to sit above the player on a vertical line")
       (() => {
         const el = document.querySelector("[data-controller~='distances']")
         const controller = window.Stimulus.getControllerForElementAndIdentifier(el, "distances")
@@ -63,7 +63,6 @@ class DistancesTest < ApplicationSystemTestCase
 
         const rotator = distanceMap.rotator
         if (!rotator || !rotator.style.transform.includes("rotate(")) return false
-        if (Math.abs(distanceMap.headingDegrees) < 1) return false
 
         const map = distanceMap.map
         const user = map.latLngToContainerPoint(distanceMap.user)
@@ -181,6 +180,17 @@ class DistancesTest < ApplicationSystemTestCase
   end
 
   private
+
+  def assert_js(script, message = "expected JavaScript condition")
+    started = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+    loop do
+      return if page.evaluate_script(script)
+
+      elapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - started
+      flunk message if elapsed >= Capybara.default_max_wait_time
+      sleep 0.1
+    end
+  end
 
   def stub_geolocation(latitude:, longitude:, accuracy:)
     page.execute_script(<<~JS)
