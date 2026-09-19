@@ -49,6 +49,18 @@ export function metersToYards(meters) {
   return meters * YARDS_PER_METER
 }
 
+// Compass heading from `from` to `to`, clockwise from true north (0–360).
+export function initialBearingDegrees(from, to) {
+  const lat1 = (from[0] * Math.PI) / 180
+  const lat2 = (to[0] * Math.PI) / 180
+  const dLng = ((to[1] - from[1]) * Math.PI) / 180
+  const y = Math.sin(dLng) * Math.cos(lat2)
+  const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLng)
+  if (x === 0 && y === 0) return 0
+
+  return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360
+}
+
 // Equirectangular projection to local meters, relative to origin [lat, lng].
 function toLocalXY(origin, point) {
   const lat0 = (origin[0] * Math.PI) / 180

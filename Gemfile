@@ -36,6 +36,9 @@ gem "tailwindcss-rails", "~> 4.4"
 # Reduces boot times through caching; required in config/boot.rb
 gem "bootsnap", require: false
 
+# Transitive; take the CVE-2026-71847 fix without jumping to json 3.
+gem "json", ">= 2.21.2", "< 3"
+
 # Add HTTP asset caching/compression and X-Sendfile acceleration to Puma [https://github.com/basecamp/thruster/]
 gem "thruster", require: false
 

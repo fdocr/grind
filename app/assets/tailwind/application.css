@@ -340,6 +340,20 @@
     white-space: nowrap;
   }
 
+  /* Hole-up map: clip is the visible viewport; rotator is √2 larger so a
+     heading rotation never shows empty tile corners. */
+  .distance-map-clip {
+    position: relative;
+    overflow: hidden;
+    clip-path: inset(0);
+  }
+  .distance-map-rotator {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform-origin: center center;
+  }
+
   /* Numbers ↔ Map view: fade + grow via grid-template-rows */
   .distance-view-panel {
     display: grid;

@@ -42,13 +42,47 @@ class DistancesTest < ApplicationSystemTestCase
     assert_selector "[data-distances-target='map'][data-state='active']"
     assert_selector "[data-distances-target='numbers'][data-state='inactive']"
     assert_selector ".leaflet-container"
+    assert_selector ".distance-map-rotator[data-fitted='true']"
+    assert_selector "[data-distances-target='mapContainer'][data-has-pivot='false']"
     assert_selector "[data-distances-target='clearPivot']", visible: :hidden
 
-    assert page.evaluate_script(<<~JS)
+    assert_js(<<~JS, "expected the distances map to finish loading")
       (() => {
         const el = document.querySelector("[data-controller~='distances']")
         const controller = window.Stimulus.getControllerForElementAndIdentifier(el, "distances")
         return Boolean(controller && controller.distanceMap && controller.distanceMap.map && controller.distanceMap.map._loaded)
+      })()
+    JS
+
+    assert_js(<<~JS, "expected the hole to sit above the player on a vertical line")
+      (() => {
+        const el = document.querySelector("[data-controller~='distances']")
+        const controller = window.Stimulus.getControllerForElementAndIdentifier(el, "distances")
+        const distanceMap = controller && controller.distanceMap
+        if (!distanceMap || !distanceMap.user || !distanceMap.green) return false
+
+        const rotator = distanceMap.rotator
+        if (!rotator || !rotator.style.transform.includes("rotate(")) return false
+
+        const map = distanceMap.map
+        const user = map.latLngToContainerPoint(distanceMap.user)
+        const green = map.latLngToContainerPoint(distanceMap.green)
+        if (user.distanceTo(green) < 30) return false
+        const center = map.getSize().divideBy(2)
+        const radians = distanceMap.headingDegrees * Math.PI / 180
+        const rotate = (point) => {
+          const x = point.x - center.x
+          const y = point.y - center.y
+          return {
+            x: x * Math.cos(radians) - y * Math.sin(radians),
+            y: x * Math.sin(radians) + y * Math.cos(radians)
+          }
+        }
+        const screenUser = rotate(user)
+        const screenGreen = rotate(green)
+        const horizontal = Math.abs(screenGreen.x - screenUser.x)
+        const vertical = screenUser.y - screenGreen.y
+        return vertical > 0 && horizontal < vertical * 0.15
       })()
     JS
 
@@ -58,9 +92,11 @@ class DistancesTest < ApplicationSystemTestCase
       controller.distanceMap.setPivot([9.9814, -84.1566], { notify: true })
     JS
 
+    assert_selector "[data-distances-target='mapContainer'][data-has-pivot='true']"
     assert_selector "[data-distances-target='clearPivot']:not(.hidden)"
 
     find("[data-distances-target='clearPivot']").click
+    assert_selector "[data-distances-target='mapContainer'][data-has-pivot='false']"
     assert_selector "[data-distances-target='clearPivot']", visible: :hidden
   end
 
@@ -144,6 +180,17 @@ class DistancesTest < ApplicationSystemTestCase
   end
 
   private
+
+  def assert_js(script, message = "expected JavaScript condition")
+    started = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+    loop do
+      return if page.evaluate_script(script)
+
+      elapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - started
+      flunk message if elapsed >= Capybara.default_max_wait_time
+      sleep 0.1
+    end
+  end
 
   def stub_geolocation(latitude:, longitude:, accuracy:)
     page.execute_script(<<~JS)

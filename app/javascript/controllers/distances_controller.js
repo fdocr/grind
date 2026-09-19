@@ -20,7 +20,8 @@ const ACCURACY_IMPROVE_M = 5
 // so this works offline. The math lives in lib/geo.js to stay testable.
 //
 // Map view (Numbers | Map) uses Leaflet satellite tiles with a red yardage line
-// and an optional pivot that splits the shot into two segments.
+// and an optional pivot that splits the shot into two segments. The map is
+// rotated hole-up (player at the bottom, green at the top) rather than north-up.
 //
 // This is a Hotwire Native BridgeComponent named "geolocation". When running
 // inside the native apps it always uses the bridge (CoreLocation /
@@ -539,6 +540,7 @@ export default class extends BridgeComponent {
       this.distanceMap.invalidateSize()
       this.distanceMap.fitCourse()
       this.didFitMap = true
+      this.distanceMap.armClicksAfter()
     }
 
     if (this.hasMapTarget) {
