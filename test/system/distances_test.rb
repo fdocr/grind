@@ -42,6 +42,8 @@ class DistancesTest < ApplicationSystemTestCase
     assert_selector "[data-distances-target='map'][data-state='active']"
     assert_selector "[data-distances-target='numbers'][data-state='inactive']"
     assert_selector ".leaflet-container"
+    assert_selector ".distance-map-rotator[data-fitted='true']"
+    assert_selector "[data-distances-target='mapContainer'][data-has-pivot='false']"
     assert_selector "[data-distances-target='clearPivot']", visible: :hidden
 
     assert page.evaluate_script(<<~JS)
@@ -52,15 +54,50 @@ class DistancesTest < ApplicationSystemTestCase
       })()
     JS
 
+    assert page.evaluate_script(<<~JS)
+      (() => {
+        const el = document.querySelector("[data-controller~='distances']")
+        const controller = window.Stimulus.getControllerForElementAndIdentifier(el, "distances")
+        const distanceMap = controller && controller.distanceMap
+        if (!distanceMap || !distanceMap.user || !distanceMap.green) return false
+
+        const rotator = distanceMap.rotator
+        if (!rotator || !rotator.style.transform.includes("rotate(")) return false
+        if (Math.abs(distanceMap.headingDegrees) < 1) return false
+
+        const map = distanceMap.map
+        const user = map.latLngToContainerPoint(distanceMap.user)
+        const green = map.latLngToContainerPoint(distanceMap.green)
+        if (user.distanceTo(green) < 30) return false
+        const center = map.getSize().divideBy(2)
+        const radians = distanceMap.headingDegrees * Math.PI / 180
+        const rotate = (point) => {
+          const x = point.x - center.x
+          const y = point.y - center.y
+          return {
+            x: x * Math.cos(radians) - y * Math.sin(radians),
+            y: x * Math.sin(radians) + y * Math.cos(radians)
+          }
+        }
+        const screenUser = rotate(user)
+        const screenGreen = rotate(green)
+        const horizontal = Math.abs(screenGreen.x - screenUser.x)
+        const vertical = screenUser.y - screenGreen.y
+        return vertical > 0 && horizontal < vertical * 0.15
+      })()
+    JS
+
     page.execute_script(<<~JS)
       const el = document.querySelector("[data-controller~='distances']")
       const controller = window.Stimulus.getControllerForElementAndIdentifier(el, "distances")
       controller.distanceMap.setPivot([9.9814, -84.1566], { notify: true })
     JS
 
+    assert_selector "[data-distances-target='mapContainer'][data-has-pivot='true']"
     assert_selector "[data-distances-target='clearPivot']:not(.hidden)"
 
     find("[data-distances-target='clearPivot']").click
+    assert_selector "[data-distances-target='mapContainer'][data-has-pivot='false']"
     assert_selector "[data-distances-target='clearPivot']", visible: :hidden
   end
 
