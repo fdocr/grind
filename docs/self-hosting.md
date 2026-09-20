@@ -69,6 +69,7 @@ Round stats emails require SMTP. Turnstile is strongly recommended to reduce spa
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `GLITCHTIP_DSN` | _(unset)_ | [GlitchTip](https://glitchtip.com/) project DSN. Reporting is disabled when unset |
+| `GLITCHTIP_SAMPLE_RATE` | `0.01` | Transaction sample rate (`0.0`–`1.0`). Default is 1%. Change this in Once Environment without shipping a new image |
 
 ### Analytics (optional)
 
@@ -259,18 +260,19 @@ docker exec <container_id> printenv WEB_CONCURRENCY RAILS_MAX_THREADS JOB_CONCUR
 
 ## Error tracking (GlitchTip)
 
-Error tracking via [GlitchTip](https://glitchtip.com/) is optional and disabled when `GLITCHTIP_DSN` is unset. The Sentry Rails SDK sends uncaught exceptions (and 1% of transactions) to the hosted project.
+Error tracking via [GlitchTip](https://glitchtip.com/) is optional and disabled when `GLITCHTIP_DSN` is unset. The Sentry Rails SDK sends uncaught exceptions (and a sample of transactions) to the hosted project.
 
-Add the variable in Once: **`s`** (Settings) → **`v`** (Environment) → **Done** (Once redeploys). Copy the DSN from the GlitchTip project, not from this repo.
+Add the variables in Once: **`s`** (Settings) → **`v`** (Environment) → **Done** (Once redeploys). Copy the DSN from the GlitchTip project, not from this repo.
 
 | Key | Value |
 |---|---|
 | `GLITCHTIP_DSN` | Project DSN (`https://<key>@app.glitchtip.com/<id>`) |
+| `GLITCHTIP_SAMPLE_RATE` | Transaction sample rate (`0.0`–`1.0`). Defaults to `0.01` (1%) when unset |
 
-Verify it landed:
+Verify they landed:
 
 ```bash
-docker exec <container_id> printenv GLITCHTIP_DSN
+docker exec <container_id> printenv GLITCHTIP_DSN GLITCHTIP_SAMPLE_RATE
 ```
 
 There is no public test route in production. After deploy, `docker exec` into the container and run:
