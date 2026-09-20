@@ -37,6 +37,11 @@ Rails.application.routes.draw do
     get "styleguide", to: "styleguide#show"
   end
 
+  if Rails.env.development?
+    # One-shot check that GLITCHTIP_DSN is reaching the hosted project.
+    get "debug-glitchtip" => proc { raise "Test GlitchTip error!" }
+  end
+
   get "robots.txt", to: "seo#robots"
   get "sitemap.xml", to: "seo#sitemap", defaults: { format: :xml }, as: :sitemap
 

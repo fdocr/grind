@@ -71,7 +71,7 @@ class RoundsController < ApplicationController
       render :new, status: :unprocessable_entity
     end
   rescue StandardError => e
-    Honeybadger.notify(e) if defined?(Honeybadger)
+    Sentry.capture_exception(e) if Sentry.initialized?
     @holes = @course.holes.order(:number)
     flash.now[:alert] = "Something went wrong on our end. Your round is still saved on this device — please try finishing it again."
     render :new, status: :unprocessable_entity

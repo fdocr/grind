@@ -68,7 +68,7 @@ Round stats emails require SMTP. Turnstile is strongly recommended to reduce spa
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `HONEYBADGER_API_KEY` | _(unset)_ | [Honeybadger](https://www.honeybadger.io/) API key. Reporting is disabled when unset |
+| `GLITCHTIP_DSN` | _(unset)_ | [GlitchTip](https://glitchtip.com/) project DSN. Reporting is disabled when unset |
 
 ### Analytics (optional)
 
@@ -257,15 +257,29 @@ Active Record's `pool` is **per Ruby process**, not shared across the machine. E
 docker exec <container_id> printenv WEB_CONCURRENCY RAILS_MAX_THREADS JOB_CONCURRENCY SOLID_QUEUE_THREADS DB_POOL
 ```
 
-## Error tracking (Honeybadger)
+## Error tracking (GlitchTip)
 
-Honeybadger is optional and disabled when `HONEYBADGER_API_KEY` is unset. Errors are only reported in production.
+Error tracking via [GlitchTip](https://glitchtip.com/) is optional and disabled when `GLITCHTIP_DSN` is unset. The Sentry Rails SDK sends uncaught exceptions (and 1% of transactions) to the hosted project.
 
-Add the key in Once → Settings → Environment, then verify:
+Add the variable in Once: **`s`** (Settings) → **`v`** (Environment) → **Done** (Once redeploys). Copy the DSN from the GlitchTip project, not from this repo.
+
+| Key | Value |
+|---|---|
+| `GLITCHTIP_DSN` | Project DSN (`https://<key>@app.glitchtip.com/<id>`) |
+
+Verify it landed:
 
 ```bash
-docker exec <container_id> printenv HONEYBADGER_API_KEY
+docker exec <container_id> printenv GLITCHTIP_DSN
 ```
+
+There is no public test route in production. After deploy, `docker exec` into the container and run:
+
+```bash
+bin/rails runner 'Sentry.capture_message("GlitchTip ping from grind")'
+```
+
+Locally, with the DSN in `.env`, open `/debug-glitchtip` instead.
 
 ## Mission Control (`/jobs`)
 

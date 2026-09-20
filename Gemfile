@@ -30,7 +30,8 @@ gem "solid_cable"
 
 gem "mission_control-jobs", "~> 1.0", ">= 1.0.2"
 gem "dotenv-rails", "~> 3.1"
-gem "honeybadger", "~> 6.9"
+gem "sentry-ruby", "~> 7.0"
+gem "sentry-rails", "~> 7.0"
 gem "tailwindcss-rails", "~> 4.4"
 
 # Reduces boot times through caching; required in config/boot.rb

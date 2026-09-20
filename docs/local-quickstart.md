@@ -45,7 +45,7 @@ CI runs Brakeman, Bundler Audit, Importmap audit, RuboCop, unit tests, and syste
 
 ## Environment variables
 
-See `.env.sample` for SMTP, Honeybadger, Cloudflare Turnstile, Mission Control basic auth, and concurrency settings.
+See `.env.sample` for SMTP, GlitchTip, Cloudflare Turnstile, Mission Control basic auth, and concurrency settings.
 
 ## Email previews
 
