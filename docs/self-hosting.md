@@ -281,7 +281,7 @@ There is no public test route in production. After deploy, `docker exec` into th
 bin/rails runner 'Sentry.capture_message("GlitchTip ping from grind")'
 ```
 
-Locally, with the DSN in `.env`, open `/debug-glitchtip` instead.
+Locally, with the DSN in `.env`, run the same `bin/rails runner` command.
 
 ## Mission Control (`/jobs`)
 
