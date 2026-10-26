@@ -1,0 +1,48 @@
+<%# Records the document's first URL and whether this is an iPhone or iPad.
+    The homepage app banner opens only on a fresh landing there. Turbo visits
+    reuse this document: dismissing, or leaving the homepage, keeps it closed
+    until the next full page load. %>
+<script data-native-app-banner-boot>
+  (function () {
+    var root = document.documentElement
+
+    function isIosBrowser() {
+      var ua = navigator.userAgent || ""
+      if (/Android/i.test(ua)) return false
+      if (/iPhone|iPad|iPod/.test(ua)) return true
+      // iPadOS 13+ can report a desktop Mac user agent. A real Mac has no touch.
+      return navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1
+    }
+
+    if (!root.dataset.landingPath) root.dataset.landingPath = location.pathname
+    if (isIosBrowser()) root.dataset.iosBrowser = "true"
+    if (root.dataset.nativeAppBannerBoot) return
+    root.dataset.nativeAppBannerBoot = "true"
+
+    function hideBanner() {
+      root.dataset.nativeAppBanner = "done"
+      var banner = document.getElementById("native-app-banner")
+      if (banner) banner.classList.add("hidden")
+    }
+
+    document.addEventListener("click", function (event) {
+      if (!event.target.closest("[data-native-app-banner-dismiss]")) return
+      hideBanner()
+    })
+
+    document.addEventListener("turbo:before-visit", function (event) {
+      if (location.pathname !== "/") return
+      var raw = event.detail && event.detail.url
+      if (!raw) return
+
+      var next
+      try {
+        next = new URL(raw, location.origin).pathname
+      } catch (error) {
+        return
+      }
+
+      if (next !== "/") hideBanner()
+    })
+  })()
+</script>

@@ -1,0 +1,41 @@
+<div id="native-app-banner"
+     class="ui-app-banner hidden mb-4"
+     data-testid="native-app-banner"
+     data-turbo-temporary
+     role="region"
+     aria-label="iPhone app">
+  <div class="flex items-center gap-3 p-3 pr-11">
+    <%= image_tag "/icon.svg", alt: "", width: 56, height: 56, class: "h-14 w-14 shrink-0 rounded-2xl shadow-card ring-2 ring-white" %>
+    <div class="min-w-0 flex-1">
+      <p class="font-semibold leading-snug text-foreground">Best experience is in the iPhone app</p>
+      <p class="mt-0.5 text-sm text-muted-foreground">Browsers work too.</p>
+    </div>
+  </div>
+  <div class="flex justify-center px-3 pb-3">
+    <%= link_to "Get the app",
+          "https://apps.apple.com/us/app/grind-golf/id6787446479",
+          class: "ui-btn-primary ui-btn-sm",
+          data: { turbo: false } %>
+  </div>
+  <button type="button"
+          class="ui-app-banner-dismiss"
+          aria-label="Dismiss"
+          data-native-app-banner-dismiss
+          data-testid="native-app-banner-dismiss">
+    <%= icon "close", class: "w-4 h-4" %>
+  </button>
+</div>
+<%# Runs as the banner is parsed so a fresh iPhone or iPad landing can show it
+    before first paint. Other browsers, including Android, keep it closed. %>
+<script data-native-app-banner-reveal>
+  (function () {
+    var root = document.documentElement
+    var banner = document.getElementById("native-app-banner")
+    if (!banner) return
+
+    var freshHome = root.dataset.landingPath === "/" &&
+      root.dataset.nativeAppBanner !== "done" &&
+      root.dataset.iosBrowser === "true"
+    banner.classList.toggle("hidden", !freshHome)
+  })()
+</script>
