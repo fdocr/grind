@@ -258,6 +258,16 @@
   }
 
   .ui-banner-info    { @apply rounded-lg border p-4 text-sm border-primary-100 bg-primary-50/60 text-primary-900; }
+  .ui-app-banner {
+    @apply relative rounded-lg border border-primary-200 bg-linear-to-b from-primary-50 to-card
+           text-card-foreground shadow-card;
+  }
+  .ui-app-banner-dismiss {
+    @apply absolute top-1 right-1 inline-flex items-center justify-center rounded-md
+           h-11 w-11 text-muted-foreground cursor-pointer transition-colors
+           hover:text-foreground hover:bg-primary-100/80
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
+  }
   .ui-banner-warning { @apply rounded-lg border p-4 text-sm border-warning-200 bg-warning-50/80 text-warning-900; }
   .ui-banner-success { @apply rounded-lg border p-4 text-sm border-success-100 bg-success-50/80 text-success-700; }
   .ui-banner-danger  { @apply rounded-lg border p-4 text-sm border-danger-200 bg-danger-50/60 text-danger-900; }
