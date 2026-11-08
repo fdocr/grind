@@ -86,6 +86,20 @@ class DistancesTest < ApplicationSystemTestCase
       })()
     JS
 
+    assert_labels_upright!
+
+    # Hole due south of the player: the map flips ~180° and an uncorrected
+    # label reads upside down. Hole due west: the label would be sideways.
+    [ [ 0.002, 0.0 ], [ 0.0, 0.002 ] ].each do |dlat, dlng|
+      page.execute_script(<<~JS)
+        const el = document.querySelector("[data-controller~='distances']")
+        const controller = window.Stimulus.getControllerForElementAndIdentifier(el, "distances")
+        const green = controller.distanceMap.green
+        controller.distanceMap.setUser([green[0] + #{dlat}, green[1] + #{dlng}])
+      JS
+      assert_labels_upright!
+    end
+
     page.execute_script(<<~JS)
       const el = document.querySelector("[data-controller~='distances']")
       const controller = window.Stimulus.getControllerForElementAndIdentifier(el, "distances")
@@ -94,6 +108,7 @@ class DistancesTest < ApplicationSystemTestCase
 
     assert_selector "[data-distances-target='mapContainer'][data-has-pivot='true']"
     assert_selector "[data-distances-target='clearPivot']:not(.hidden)"
+    assert_labels_upright!
 
     find("[data-distances-target='clearPivot']").click
     assert_selector "[data-distances-target='mapContainer'][data-has-pivot='false']"
@@ -180,6 +195,42 @@ class DistancesTest < ApplicationSystemTestCase
   end
 
   private
+
+  def assert_labels_upright!(message = "expected distance labels to stay upright")
+    assert_js(<<~JS, message)
+      (() => {
+        const el = document.querySelector("[data-controller~='distances']")
+        const controller = window.Stimulus.getControllerForElementAndIdentifier(el, "distances")
+        const distanceMap = controller && controller.distanceMap
+        if (!distanceMap) return false
+
+        const labels = [...distanceMap.clip.querySelectorAll(".distance-map-label")]
+        if (labels.length === 0) return false
+
+        const rotationOf = (node) => {
+          let angle = 0
+          let current = node
+          while (current) {
+            const transform = getComputedStyle(current).transform
+            if (transform && transform !== "none") {
+              const matrix = new DOMMatrix(transform)
+              angle += Math.atan2(matrix.b, matrix.a) * 180 / Math.PI
+            }
+            if (current === distanceMap.clip) break
+            current = current.parentElement
+          }
+          let norm = ((angle % 360) + 360) % 360
+          if (norm > 180) norm -= 360
+          return norm
+        }
+
+        return labels.every((label) => {
+          if (getComputedStyle(label).display !== "inline-block") return false
+          return Math.abs(rotationOf(label)) < 8
+        })
+      })()
+    JS
+  end
 
   def assert_js(script, message = "expected JavaScript condition")
     started = Process.clock_gettime(Process::CLOCK_MONOTONIC)

@@ -343,11 +343,19 @@
   .distance-map-div-icon {
     background: transparent;
     border: none;
+    /* Drop the strut so the inline-block label's anchor is the marker point. */
+    line-height: 0;
   }
   .distance-map-label {
     @apply rounded-md bg-white/95 px-1.5 py-0.5 text-xs font-semibold text-danger-700 shadow-sm;
+    /* inline-block: WebKit does not transform inline boxes, so a span would
+       rotate with the hole-up map and read upside down. */
+    display: inline-block;
+    transform-origin: center center;
+    vertical-align: top;
     border: 1px solid color-mix(in srgb, var(--color-danger-600) 35%, transparent);
     white-space: nowrap;
+    line-height: 1.25;
   }
 
   /* Hole-up map: clip is the visible viewport; rotator is √2 larger so a
