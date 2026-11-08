@@ -228,13 +228,16 @@ export class DistanceMap {
 
     const meters = haversineMeters(from, to)
     const mid = [(from[0] + to[0]) / 2, (from[1] + to[1]) / 2]
+    // Cancel the hole-up rotation so yardage stays screen-upright. WebKit
+    // ignores transform on inline boxes, which left this pill spun with the
+    // tiles — sideways or upside down unless the hole was already due north.
     const upright = -this.headingDegrees
     L.marker(mid, {
       interactive: false,
       keyboard: false,
       icon: L.divIcon({
         className: "distance-map-div-icon",
-        html: `<span class="distance-map-label" style="transform:translate(-50%,-50%) rotate(${upright}deg)">${this.formatDistance(meters)}</span>`,
+        html: `<span class="distance-map-label" style="display:inline-block;transform-origin:center center;transform:translate(-50%,-50%) rotate(${upright}deg)">${this.formatDistance(meters)}</span>`,
         iconSize: [0, 0],
         iconAnchor: [0, 0]
       })
