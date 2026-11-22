@@ -28,7 +28,7 @@ this one.
   applies to prose copy, code comments and markdown docs, not to numeric notation.
 
 ## Stack (matches ugo where possible)
-- Rails ~> 8.1, Ruby 3.4.13, Propshaft, importmap, Turbo, Stimulus, minitest.
+- Rails ~> 8.1, Ruby 3.4.5, Propshaft, importmap, Turbo, Stimulus, minitest.
 - `tailwindcss-rails` v4 with all tokens in `@theme` and component classes in `@layer components`.
 - SQLite primary, cache, queue and cable; `solid_queue` run inside Puma via a plugin;
   `solid_cache`; `solid_cable`.

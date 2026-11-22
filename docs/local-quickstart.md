@@ -2,7 +2,7 @@
 
 ## Requirements
 
-- Ruby 3.4.13 (see `.ruby-version`)
+- Ruby 3.4.5 (see `.ruby-version`)
 - SQLite 3
 - Chrome (for system tests)
 

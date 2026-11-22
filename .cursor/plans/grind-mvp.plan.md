@@ -23,7 +23,7 @@ A free, no login golf score tracker hosted at `https://grind.fdo.cr`. A user fin
 - Inside PW/9i: score relative to par on approaches inside pitching wedge or 9 iron. Starts at 0 shown as `E`, may go positive or negative.
 
 ## Stack (matches ugo where possible)
-- Rails ~> 8.1, Ruby 3.4.13, Propshaft, importmap, Turbo, Stimulus, minitest.
+- Rails ~> 8.1, Ruby 3.4.5, Propshaft, importmap, Turbo, Stimulus, minitest.
 - `tailwindcss-rails` v4 with all tokens in `@theme`; component classes in `@layer components`.
 - SQLite primary, cache, queue and cable; `solid_queue` run inside Puma via plugin; `solid_cache`; `solid_cable`.
 - `mission_control-jobs` mounted at `/jobs`, secured with HTTP basic auth from ENV.
