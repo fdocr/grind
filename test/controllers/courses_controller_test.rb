@@ -99,7 +99,7 @@ class CoursesControllerTest < ActionDispatch::IntegrationTest
     assert_match "White tee", response.body
     assert_match "Rangefinder data available", response.body
     assert_select "form[action=?]", unlock_round_course_path(course)
-    assert_select "input[type=submit][value='Start round']"
+    assert_select "button[type=submit]", text: "Start round"
   end
 
   test "full page course preview omits the modal frame wrapper" do
