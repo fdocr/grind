@@ -3,9 +3,26 @@ require "test_helper"
 class SessionsControllerTest < ActionDispatch::IntegrationTest
   setup { @user = users(:player) }
 
-  test "new" do
-    get new_session_path
-    assert_response :success
+  test "new omits turnstile when it is not configured" do
+    with_turnstile_site_key(nil) do
+      get new_session_path
+
+      assert_response :success
+      assert_select "[data-controller=turnstile]", count: 0
+      assert_select "script[src*='challenges.cloudflare.com/turnstile']", count: 0
+    end
+  end
+
+  test "new keeps sign in locked until turnstile is ready" do
+    with_turnstile_site_key do
+      get new_session_path
+
+      assert_response :success
+      assert_select "[data-controller=turnstile][data-turnstile-state=pending]"
+      assert_select "[data-turnstile-target=statusText]", text: "Unlocks when the check is ready."
+      assert_select "script[src*='challenges.cloudflare.com/turnstile/v0/api.js']"
+      assert_select "form button[type=submit][disabled]", count: 0
+    end
   end
 
   test "create with valid credentials" do

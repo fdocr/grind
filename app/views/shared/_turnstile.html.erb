@@ -1,9 +1,63 @@
 <% if ENV["CLOUDFLARE_TURNSTILE_SITE_KEY"].present? %>
-  <div class="ui-turnstile w-full"
+  <div class="ui-turnstile w-full space-y-2"
        data-controller="turnstile"
+       data-turnstile-state="pending"
        data-turnstile-sitekey-value="<%= ENV["CLOUDFLARE_TURNSTILE_SITE_KEY"] %>"
        data-turnstile-size-value="flexible"
        data-turnstile-theme-value="auto">
+    <%# Runs during HTML parse, before the deferred Stimulus bundle. Blocks
+        Enter / form.submit() and disables submit controls prior to first paint.
+        The controller takes over once it connects (including Turbo restores). %>
+    <script>
+      (() => {
+        const root = document.currentScript?.closest("[data-controller~='turnstile']")
+        const form = root?.closest("form")
+        if (!form) return
+
+        const pending = () => Array.from(form.querySelectorAll("[data-controller~='turnstile']"))
+          .some((widget) => widget.dataset.turnstileState !== "ready")
+
+        if (!form.__turnstileSubmitGuarded) {
+          form.__turnstileSubmitGuarded = true
+          form.addEventListener("submit", (event) => {
+            if (!pending()) return
+            event.preventDefault()
+            event.stopPropagation()
+          }, true)
+
+          const nativeSubmit = form.submit.bind(form)
+          form.submit = () => {
+            if (pending()) return
+            nativeSubmit()
+          }
+        }
+
+        const lock = () => {
+          if (!pending()) return
+
+          const state = root.dataset.turnstileState || "pending"
+          form.querySelectorAll("button[type='submit'], input[type='submit']").forEach((control) => {
+            if (control.dataset.turnstileWasDisabled == null) {
+              const alreadyGated = control.dataset.turnstileGate != null
+              control.dataset.turnstileWasDisabled = !alreadyGated && control.disabled ? "true" : "false"
+            }
+
+            control.disabled = true
+            control.dataset.turnstileGate = state
+            if (state === "pending") control.setAttribute("aria-busy", "true")
+          })
+        }
+
+        lock()
+        requestAnimationFrame(lock)
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", lock, { once: true })
+        }
+      })()
+    </script>
     <div data-turnstile-target="widget" class="w-full"></div>
+    <p class="ui-hint" data-turnstile-target="status" role="status">
+      <span data-turnstile-target="statusText">Unlocks when the check is ready.</span>
+    </p>
   </div>
 <% end %>
