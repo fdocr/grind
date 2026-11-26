@@ -21,6 +21,22 @@ module ActiveSupport
       end
     end
 
+    def with_turnstile_site_key(key = "test-site-key")
+      previous = ENV["CLOUDFLARE_TURNSTILE_SITE_KEY"]
+      if key.nil?
+        ENV.delete("CLOUDFLARE_TURNSTILE_SITE_KEY")
+      else
+        ENV["CLOUDFLARE_TURNSTILE_SITE_KEY"] = key
+      end
+      yield
+    ensure
+      if previous.nil?
+        ENV.delete("CLOUDFLARE_TURNSTILE_SITE_KEY")
+      else
+        ENV["CLOUDFLARE_TURNSTILE_SITE_KEY"] = previous
+      end
+    end
+
     def build_nine_holes!(course)
       course.holes.where(number: 10..18).delete_all
       (1..9).each do |number|
