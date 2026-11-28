@@ -38,7 +38,7 @@ gem "tailwindcss-rails", "~> 4.4"
 gem "bootsnap", require: false
 
 # Transitive; take the CVE-2026-71847 fix without jumping to json 3.
-gem "json", ">= 2.21.2", "< 3"
+gem "json", ">= 2.21.2", "< 4"
 
 # Add HTTP asset caching/compression and X-Sendfile acceleration to Puma [https://github.com/basecamp/thruster/]
 gem "thruster", require: false
@@ -73,4 +73,4 @@ group :test do
   gem "selenium-webdriver"
 end
 
-gem "pagy", "~> 43.6"
+gem "pagy", "~> 43.8"
